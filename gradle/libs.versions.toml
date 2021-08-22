@@ -1,5 +1,8 @@
 [versions]
-
+androidx-fragment = "1.4.0-alpha07"
+androidx-navigation = "2.4.0-alpha07"
+kotlin = "1.5.21"
+coroutines = "1.5.1"
 
 [libraries]
 android-gradlePlugin = "com.android.tools.build:gradle:7.0.0"
@@ -8,6 +11,17 @@ androidx-coreKtx = "androidx.core:core-ktx:1.6.0"
 androidx-appcompat = "androidx.appcompat:appcompat:1.3.1"
 android-material = "com.google.android.material:material:1.4.0"
 android-constraintlayout = "androidx.constraintlayout:constraintlayout:2.1.0"
+timber = "com.jakewharton.timber:timber:4.7.1"
 junit = "junit:junit:4.13.2"
 
 androidx-test-junit = "androidx.test.ext:junit:1.1.3"
+
+androidx-fragment-fragment = { module = "androidx.fragment:fragment-ktx", version.ref = "androidx-fragment" }
+androidx-fragment-fragmentKtx = { module = "androidx.fragment:fragment-ktx", version.ref = "androidx-fragment" }
+
+androidx-navigation-navigationFragmentKtx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "androidx-navigation" }
+androidx-navigation-navigationUiKtx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "androidx-navigation" }
+androidx-navigation-safeArgs-GradlePlugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "androidx-navigation" }
+
+kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }

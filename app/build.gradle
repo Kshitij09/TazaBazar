@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'androidx.navigation.safeargs.kotlin'
 }
 
 android {
@@ -22,6 +23,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    buildFeatures {
+        viewBinding true
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -29,11 +33,16 @@ android {
 }
 
 dependencies {
-
+    implementation libs.kotlin.stdlib
+    implementation libs.kotlin.coroutines.core
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
     implementation libs.android.material
     implementation libs.android.constraintlayout
+    implementation libs.androidx.fragment.fragment
+    implementation libs.androidx.fragment.fragmentKtx
+    implementation libs.androidx.navigation.navigationFragmentKtx
+    implementation libs.androidx.navigation.navigationUiKtx
     testImplementation libs.junit
     androidTestImplementation libs.androidx.test.junit
 }

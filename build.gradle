@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext.buildConfig = [
-            'compileSdk': 30,
+            'compileSdk': 31,
             'minSdk'    : 21,
             'targetSdk' : 30,
     ]
@@ -12,10 +12,15 @@ buildscript {
     dependencies {
         classpath libs.android.gradlePlugin
         classpath libs.kotlin.gradlePlugin
+        classpath libs.androidx.navigation.safeArgs.gradlePlugin
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
+}
+
+plugins {
+    id 'com.github.ben-manes.versions' version '0.39.0'
 }
 
 task clean(type: Delete) {
