@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><!--why?: https://stackoverflow.com/a/53121061/6738702 -->
+<resources>
+    <!-- Fragments -->
+    <id name="fragment_splash" />
+    <id name="fragment_main" />
+
+    <!-- Navbar fragments -->
+    <id name="navigation_home" />
+    <id name="navigation_favorite" />
+    <id name="navigation_cart" />
+    <id name="navigation_orders" />
+    <id name="navigation_profile" />
+</resources>
