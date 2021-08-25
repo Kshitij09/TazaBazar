@@ -1,15 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="false">
+    android:fitsSystemWindows="true">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/bottom_nav_bar"
+        android:layout_alignParentTop="true"
         app:defaultNavHost="true"
-        app:navGraph="@navigation/navigation_main" />
-</FrameLayout>
+        app:navGraph="@navigation/navigation_main"
+        tools:layout="@layout/fragment_home" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_nav_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bottom_bar_height"
+        android:layout_alignParentBottom="true"
+        android:elevation="12dp"
+        app:menu="@menu/main_nav_menu" />
+
+</RelativeLayout>
