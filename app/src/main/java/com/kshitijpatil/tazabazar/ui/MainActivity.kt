@@ -1,9 +1,10 @@
-package com.kshitijpatil.tazabazar
+package com.kshitijpatil.tazabazar.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {

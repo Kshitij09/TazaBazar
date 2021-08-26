@@ -33,10 +33,12 @@ android {
 }
 
 dependencies {
+    implementation project(':api-client')
     implementation libs.kotlin.stdlib
     implementation libs.kotlin.coroutines.core
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
+    implementation libs.androidx.recyclerview
     implementation libs.android.material
     implementation libs.android.constraintlayout
     implementation libs.androidx.fragment.fragment

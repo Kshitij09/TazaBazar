@@ -6,27 +6,27 @@
 
     <fragment
         android:id="@id/navigation_home"
-        android:name="com.kshitijpatil.tazabazar.home.HomeFragment"
+        android:name="com.kshitijpatil.tazabazar.ui.home.HomeFragment"
         android:label="HomeFragment" />
 
     <fragment
         android:id="@id/navigation_favorite"
-        android:name="com.kshitijpatil.tazabazar.favorite.FavoriteFragment"
+        android:name="com.kshitijpatil.tazabazar.ui.favorite.FavoriteFragment"
         android:label="FavoriteFragment" />
 
     <fragment
         android:id="@id/navigation_cart"
-        android:name="com.kshitijpatil.tazabazar.cart.CartFragment"
+        android:name="com.kshitijpatil.tazabazar.ui.cart.CartFragment"
         android:label="CartFragment" />
 
     <fragment
         android:id="@id/navigation_orders"
-        android:name="com.kshitijpatil.tazabazar.orders.OrdersFragment"
+        android:name="com.kshitijpatil.tazabazar.ui.orders.OrdersFragment"
         android:label="OrdersFragment" />
 
     <fragment
         android:id="@id/navigation_profile"
-        android:name="com.kshitijpatil.tazabazar.profile.ProfileFragment"
+        android:name="com.kshitijpatil.tazabazar.ui.profile.ProfileFragment"
         android:label="ProfileFragment" />
 
 </navigation>

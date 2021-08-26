@@ -1,4 +1,4 @@
-package com.kshitijpatil.tazabazar.orders
+package com.kshitijpatil.tazabazar.ui.orders
 
 import androidx.fragment.app.Fragment
 import com.kshitijpatil.tazabazar.R

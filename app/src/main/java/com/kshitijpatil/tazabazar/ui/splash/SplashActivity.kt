@@ -1,11 +1,11 @@
-package com.kshitijpatil.tazabazar.splash
+package com.kshitijpatil.tazabazar.ui.splash
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.kshitijpatil.tazabazar.MainActivity
 import com.kshitijpatil.tazabazar.R
+import com.kshitijpatil.tazabazar.ui.MainActivity
 import kotlinx.coroutines.delay
 
 class SplashActivity : AppCompatActivity() {
