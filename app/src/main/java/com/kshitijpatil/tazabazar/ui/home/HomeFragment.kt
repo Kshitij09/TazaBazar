@@ -8,12 +8,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.kshitijpatil.tazabazar.databinding.FragmentHomeBinding
+import com.kshitijpatil.tazabazar.di.ViewModelFactory
 import kotlinx.coroutines.flow.collect
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
+    private val viewModel: HomeViewModel by viewModels { ViewModelFactory(requireContext().applicationContext) }
     private val productListAdapter = ProductListAdapter()
 
     override fun onCreateView(

@@ -13,6 +13,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipDrawable
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentProductFilterBinding
+import com.kshitijpatil.tazabazar.di.ViewModelFactory
 import kotlinx.coroutines.flow.collect
 
 class ProductFilterFragment : Fragment() {
@@ -20,7 +21,7 @@ class ProductFilterFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by viewModels(
         ownerProducer = { requireParentFragment() },
-        factoryProducer = { HomeViewModelFactory() }
+        factoryProducer = { ViewModelFactory(requireContext().applicationContext) }
     )
 
     override fun onCreateView(

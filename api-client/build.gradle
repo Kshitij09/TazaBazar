@@ -10,11 +10,12 @@ java {
 }
 
 dependencies {
-    implementation libs.kotlin.stdlib
-    implementation libs.kotlin.coroutines.core
+    implementation project(":base")
     implementation libs.retrofit.retrofit
     implementation libs.retrofit.converterMoshi
     implementation libs.moshi.moshi
+    implementation libs.okhttp.okhttp
+    implementation libs.okhttp.loggingInterceptor
     kapt libs.moshi.kotlinCodegen
     testImplementation libs.junit
     testImplementation libs.truth
