@@ -14,6 +14,7 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
+    private val productListAdapter = ProductListAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -21,24 +22,15 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        observeProductList()
-        populateProductNames()
+        binding.rvProducts.adapter = productListAdapter
+        observeProductList(productListAdapter)
+        viewModel.getAllProducts()
         return binding.root
     }
 
-    private fun populateProductNames() {
-        viewModel.refreshProductList()
-    }
-
-    private fun observeProductList() {
+    private fun observeProductList(productListAdapter: ProductListAdapter) {
         lifecycleScope.launchWhenCreated {
-            viewModel.productList.collect { products ->
-                val productString = StringBuilder()
-                products.forEach {
-                    productString.appendLine(it.name)
-                }
-                binding.txtNames.text = productString.toString()
-            }
+            viewModel.productList.collect(productListAdapter::submitList)
         }
     }
 

@@ -8,4 +8,5 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="tzb_light_gray">#E6E6E6</color>
+    <color name="tzb_orange">#FBA308</color>
 </resources>

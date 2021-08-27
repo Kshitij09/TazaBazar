@@ -12,9 +12,32 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <!-- Customize your theme here. -->
-        <item name="android:background">@color/tzb_light_gray</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="Widget.App.Button.OutlinedButton.IconOnly" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="iconPadding">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:paddingRight">12dp</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <style name="Widget.App.Chip.Filter" parent="Widget.MaterialComponents.Chip.Filter">
+        <item name="chipBackgroundColor">@color/white</item>
+    </style>
+
+    <style name="Widget.App.Chip.Action" parent="Widget.MaterialComponents.Chip.Action">
+        <item name="chipBackgroundColor">@color/white</item>
+    </style>
+
+    <style name="ShapeAppearance.App.CartButton" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">@dimen/product_item_card_radius</item>
+        <item name="cornerSizeBottomRight">@dimen/product_item_card_radius</item>
     </style>
 </resources>

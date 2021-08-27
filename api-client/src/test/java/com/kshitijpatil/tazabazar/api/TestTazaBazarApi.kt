@@ -14,6 +14,12 @@ class TestTazaBazarApi {
     }
 
     @Test
+    fun test_getProductsByCategory() = runBlocking {
+        val products = api.getAllProducts(2)
+        assertThat(products).isNotEmpty()
+    }
+
+    @Test
     fun getProduct_works() = runBlocking {
         val productResponse = api.getProduct(1)
         if (productResponse.isSuccessful) {

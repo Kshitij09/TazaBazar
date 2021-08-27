@@ -39,12 +39,17 @@ dependencies {
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
     implementation libs.androidx.recyclerview
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.cardview
     implementation libs.android.material
-    implementation libs.android.constraintlayout
     implementation libs.androidx.fragment.fragment
     implementation libs.androidx.fragment.fragmentKtx
     implementation libs.androidx.navigation.navigationFragmentKtx
     implementation libs.androidx.navigation.navigationUiKtx
+
+    // third-party
+    implementation libs.coil
+
     testImplementation libs.junit
     androidTestImplementation libs.androidx.test.junit
 }

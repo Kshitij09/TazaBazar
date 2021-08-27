@@ -14,11 +14,45 @@ class HomeViewModel(private val productRepository: ProductRepository) : ViewMode
     private val _productList = MutableStateFlow<List<ProductResponse>>(emptyList())
     val productList: StateFlow<List<ProductResponse>>
         get() = _productList
+    private val selectedCategories = mutableSetOf<Int>()
 
-    /** Fetches Product list from remote source */
-    fun refreshProductList() {
+    private val _productCategories = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val productCategories: StateFlow<Map<String, Int>>
+        get() = _productCategories
+
+    /** Fetch Product list from the remote source */
+    fun getAllProducts() {
         viewModelScope.launch {
             _productList.emit(productRepository.getAllProducts())
+        }
+    }
+
+    fun updateProductCategories() {
+        viewModelScope.launch {
+            _productCategories.emit(productRepository.getProductCategoryMap())
+        }
+    }
+
+    fun addCategoryFilter(categoryId: Int) {
+        selectedCategories.add(categoryId)
+        filterProductListByCategories()
+    }
+
+    fun removeCategoryFilter(categoryId: Int) {
+        selectedCategories.remove(categoryId)
+        filterProductListByCategories()
+    }
+
+    fun clearAllCategoryFilters() {
+        selectedCategories.clear()
+        getAllProducts()
+    }
+
+    private fun filterProductListByCategories() {
+        viewModelScope.launch {
+            val productList =
+                productRepository.getProductListByCategories(selectedCategories.toList())
+            _productList.emit(productList)
         }
     }
 }

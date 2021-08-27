@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/tzb_light_gray">
 
-    <!--<androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/txt_names"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/filter_fragment"
+        android:name="com.kshitijpatil.tazabazar.ui.home.ProductFilterFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:layout="@layout/fragment_product_filter" />
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_products"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/filter_fragment"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="2"
-        android:layout_gravity="center" />-->
-    <TextView
-        android:id="@+id/txt_names"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|start"
-        android:layout_margin="2dp" />
-
-</FrameLayout>
+        tools:listitem="@layout/product_item_view" />
+</RelativeLayout>
