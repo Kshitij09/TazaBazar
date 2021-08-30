@@ -1,4 +1,4 @@
-package com.kshitijpatil.tazabazar.data.network
+package com.kshitijpatil.tazabazar.api
 
 import okhttp3.CacheControl
 import okhttp3.Interceptor
@@ -7,7 +7,7 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 // credits: https://stackoverflow.com/a/49455438/6738702
-internal class CacheInterceptor(private val cacheDurationInMinutes: Int) : Interceptor {
+class CacheInterceptor(private val cacheDurationInMinutes: Int) : Interceptor {
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {
         val response: Response = chain.proceed(chain.request())
