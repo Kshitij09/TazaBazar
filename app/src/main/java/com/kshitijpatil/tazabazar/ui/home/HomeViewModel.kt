@@ -7,6 +7,7 @@ import com.kshitijpatil.tazabazar.data.ProductRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class HomeViewModel(private val productRepository: ProductRepository) : ViewModel() {
     private val _productList = MutableStateFlow<List<ProductResponse>>(emptyList())
@@ -27,11 +28,13 @@ class HomeViewModel(private val productRepository: ProductRepository) : ViewMode
     }
 
     fun addCategoryFilter(categoryId: Int) {
+        Timber.i("Adding categoryId='$categoryId' filter")
         _selectedCategories.add(categoryId)
         getFilteredProductList()
     }
 
     fun removeCategoryFilter(categoryId: Int) {
+        Timber.i("Removing categoryId='$categoryId' filter")
         _selectedCategories.remove(categoryId)
         getFilteredProductList()
     }

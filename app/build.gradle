@@ -51,6 +51,7 @@ dependencies {
     implementation libs.okhttp.okhttp
     implementation libs.okhttp.loggingInterceptor
     implementation libs.threeTenAbp
+    implementation libs.timber
 
     testImplementation libs.junit
     // Needed for Tzdb

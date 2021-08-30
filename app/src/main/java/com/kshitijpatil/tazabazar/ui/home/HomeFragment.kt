@@ -26,9 +26,13 @@ class HomeFragment : Fragment() {
     ): View? {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         binding.rvProducts.adapter = productListAdapter
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         observeProductList(productListAdapter)
         viewModel.getFilteredProductList()
-        return binding.root
     }
 
     private fun observeProductList(productListAdapter: ProductListAdapter) {

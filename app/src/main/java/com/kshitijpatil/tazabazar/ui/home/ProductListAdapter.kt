@@ -11,6 +11,7 @@ import coil.request.CachePolicy
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.api.dto.ProductResponse
 import com.kshitijpatil.tazabazar.databinding.ProductItemViewBinding
+import timber.log.Timber
 import java.lang.ref.WeakReference
 
 class ProductListAdapter :
@@ -25,6 +26,14 @@ class ProductListAdapter :
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         val item = getItem(position)
         holder.bind(item)
+    }
+
+    override fun onCurrentListChanged(
+        previousList: MutableList<ProductResponse>,
+        currentList: MutableList<ProductResponse>
+    ) {
+        super.onCurrentListChanged(previousList, currentList)
+        Timber.i("Product List changed")
     }
 
     class ProductResponseDiffCallback : DiffUtil.ItemCallback<ProductResponse>() {
