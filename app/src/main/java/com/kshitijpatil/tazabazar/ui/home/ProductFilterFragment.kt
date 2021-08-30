@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipDrawable
@@ -19,10 +19,9 @@ import kotlinx.coroutines.flow.collect
 class ProductFilterFragment : Fragment() {
     private var _binding: FragmentProductFilterBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: HomeViewModel by viewModels(
-        ownerProducer = { requireParentFragment() },
-        factoryProducer = { ViewModelFactory(requireContext().applicationContext) }
-    )
+    private val viewModel: HomeViewModel by activityViewModels {
+        ViewModelFactory(requireContext().applicationContext)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,12 +30,13 @@ class ProductFilterFragment : Fragment() {
     ): View? {
         _binding = FragmentProductFilterBinding.inflate(inflater, container, false)
         observeCategoryFilters()
-        viewModel.updateProductCategories()
+        viewModel.getProductCategories()
         return binding.root
     }
 
     private fun observeCategoryFilters() {
         val context = binding.root.context
+        val selectedCategories = viewModel.selectedCategories
         lifecycleScope.launchWhenCreated {
             viewModel.productCategories.collect { categoryMap ->
                 if (categoryMap.isNotEmpty()) {
@@ -55,6 +55,7 @@ class ProductFilterFragment : Fragment() {
                         val chip = createFilterChipFrom(context)
                         chip.text = categoryLabel
                         chip.tag = categoryId
+                        chip.isChecked = selectedCategories.contains(categoryId)
                         chip.setOnCheckedChangeListener { chipView, checked ->
                             if (checked)
                                 viewModel.addCategoryFilter(chipView.tag as Int)
