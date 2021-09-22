@@ -30,13 +30,12 @@ class ProductFilterFragment : Fragment() {
     ): View? {
         _binding = FragmentProductFilterBinding.inflate(inflater, container, false)
         observeCategoryFilters()
-        viewModel.getProductCategories()
+        viewModel.fetchProductCategories()
         return binding.root
     }
 
     private fun observeCategoryFilters() {
         val context = binding.root.context
-        val selectedCategories = viewModel.selectedCategories
         lifecycleScope.launchWhenCreated {
             viewModel.productCategories.collect { categories ->
                 if (categories.isNotEmpty()) {
@@ -47,7 +46,7 @@ class ProductFilterFragment : Fragment() {
                     allChip.text = context.getString(R.string.label_all)
                     allChip.setOnClickListener {
                         binding.cgProductCategories.clearCheck()
-                        viewModel.clearAllCategoryFilters()
+                        viewModel.clearCategoryFilter()
                     }
                     binding.cgProductCategories.addView(allChip)
 
@@ -55,12 +54,12 @@ class ProductFilterFragment : Fragment() {
                         val chip = createFilterChipFrom(context)
                         chip.text = category.name
                         chip.tag = category.label
-                        chip.isChecked = selectedCategories.contains(category.label)
+                        chip.isChecked = viewModel.categoryFilter.value == category.label
                         chip.setOnCheckedChangeListener { chipView, checked ->
                             if (checked)
-                                viewModel.addCategoryFilter(chipView.tag as String)
+                                viewModel.setCategoryFilter(chipView.tag as String)
                             else
-                                viewModel.removeCategoryFilter(chipView.tag as String)
+                                viewModel.clearCategoryFilter()
                         }
                         binding.cgProductCategories.addView(chip)
                     }
@@ -75,7 +74,7 @@ class ProductFilterFragment : Fragment() {
             context,
             null,
             0,
-            R.style.Widget_App_Chip_Filter
+            R.style.Widget_App_Chip_Choice
         )
         return Chip(context).apply { setChipDrawable(drawable) }
     }

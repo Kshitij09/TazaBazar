@@ -32,7 +32,7 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeProductList(productListAdapter)
-        viewModel.getFilteredProductList()
+        viewModel.refreshProductList()
     }
 
     private fun observeProductList(productListAdapter: ProductListAdapter) {

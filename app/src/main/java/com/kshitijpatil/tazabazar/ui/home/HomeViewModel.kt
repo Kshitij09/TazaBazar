@@ -14,41 +14,35 @@ class HomeViewModel(private val productRepository: ProductRepository) : ViewMode
     private val _productList = MutableStateFlow<List<ProductResponse>>(emptyList())
     val productList: StateFlow<List<ProductResponse>>
         get() = _productList
-    private val _selectedCategories = mutableSetOf<String>()
-    val selectedCategories: Set<String>
-        get() = _selectedCategories
+    private val _categoryFilter = MutableStateFlow<String?>(null)
+    val categoryFilter: StateFlow<String?>
+        get() = _categoryFilter
 
     private val _productCategories = MutableStateFlow<List<ProductCategoryDto>>(emptyList())
     val productCategories: StateFlow<List<ProductCategoryDto>>
         get() = _productCategories
 
-    fun getProductCategories() {
+    fun fetchProductCategories() {
         viewModelScope.launch {
             _productCategories.emit(productRepository.getProductCategoryMap())
         }
     }
 
-    fun addCategoryFilter(category: String) {
-        Timber.i("Adding categoryId='$category' filter")
-        _selectedCategories.add(category)
-        getFilteredProductList()
+    fun setCategoryFilter(category: String) {
+        Timber.i("Category filter changed to $category")
+        _categoryFilter.value = category
+        refreshProductList()
     }
 
-    fun removeCategoryFilter(categories: String) {
-        Timber.i("Removing categoryId='$categories' filter")
-        _selectedCategories.remove(categories)
-        getFilteredProductList()
+    fun clearCategoryFilter() {
+        _categoryFilter.value = null
+        refreshProductList()
     }
 
-    fun clearAllCategoryFilters() {
-        _selectedCategories.clear()
-        getFilteredProductList()
-    }
-
-    fun getFilteredProductList() {
+    fun refreshProductList() {
         viewModelScope.launch {
             val productList =
-                productRepository.getProductListByCategories(_selectedCategories.toList())
+                productRepository.getProductListByCategories(_categoryFilter.value)
             _productList.emit(productList)
         }
     }

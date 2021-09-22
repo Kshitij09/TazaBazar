@@ -27,7 +27,7 @@
         <item name="android:minHeight">48dp</item>
     </style>
 
-    <style name="Widget.App.Chip.Filter" parent="Widget.MaterialComponents.Chip.Filter">
+    <style name="Widget.App.Chip.Choice" parent="Widget.MaterialComponents.Chip.Choice">
         <item name="chipBackgroundColor">@color/white</item>
     </style>
 
