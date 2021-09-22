@@ -2,6 +2,7 @@ package com.kshitijpatil.tazabazar.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kshitijpatil.tazabazar.api.dto.ProductCategoryDto
 import com.kshitijpatil.tazabazar.api.dto.ProductResponse
 import com.kshitijpatil.tazabazar.data.ProductRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,12 +14,12 @@ class HomeViewModel(private val productRepository: ProductRepository) : ViewMode
     private val _productList = MutableStateFlow<List<ProductResponse>>(emptyList())
     val productList: StateFlow<List<ProductResponse>>
         get() = _productList
-    private val _selectedCategories = mutableSetOf<Int>()
-    val selectedCategories: Set<Int>
+    private val _selectedCategories = mutableSetOf<String>()
+    val selectedCategories: Set<String>
         get() = _selectedCategories
 
-    private val _productCategories = MutableStateFlow<Map<String, Int>>(emptyMap())
-    val productCategories: StateFlow<Map<String, Int>>
+    private val _productCategories = MutableStateFlow<List<ProductCategoryDto>>(emptyList())
+    val productCategories: StateFlow<List<ProductCategoryDto>>
         get() = _productCategories
 
     fun getProductCategories() {
@@ -27,15 +28,15 @@ class HomeViewModel(private val productRepository: ProductRepository) : ViewMode
         }
     }
 
-    fun addCategoryFilter(categoryId: Int) {
-        Timber.i("Adding categoryId='$categoryId' filter")
-        _selectedCategories.add(categoryId)
+    fun addCategoryFilter(category: String) {
+        Timber.i("Adding categoryId='$category' filter")
+        _selectedCategories.add(category)
         getFilteredProductList()
     }
 
-    fun removeCategoryFilter(categoryId: Int) {
-        Timber.i("Removing categoryId='$categoryId' filter")
-        _selectedCategories.remove(categoryId)
+    fun removeCategoryFilter(categories: String) {
+        Timber.i("Removing categoryId='$categories' filter")
+        _selectedCategories.remove(categories)
         getFilteredProductList()
     }
 

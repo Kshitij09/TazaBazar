@@ -38,7 +38,7 @@ class ProductListAdapter :
 
     class ProductResponseDiffCallback : DiffUtil.ItemCallback<ProductResponse>() {
         override fun areItemsTheSame(oldItem: ProductResponse, newItem: ProductResponse): Boolean {
-            return oldItem.id == newItem.id
+            return oldItem.sku == newItem.sku
         }
 
         override fun areContentsTheSame(
@@ -60,9 +60,12 @@ class ProductListAdapter :
 
         fun bind(item: ProductResponse) {
             binding.tvName.text = item.name
-            binding.tvQuantityLabel.text = item.quantityLabel
+            // TODO: Make it list menu
+            val inventory = item.inventories[0]
+            binding.tvQuantityLabel.text = inventory.quantityLabel
             contextRef.get()?.let {
-                binding.tvPrice.text = it.getString(R.string.info_price_rupee_template, item.price)
+                binding.tvPrice.text =
+                    it.getString(R.string.info_price_rupee_template, inventory.price)
             }
             loadImage(binding.ivImage, item.imageUri)
         }

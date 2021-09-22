@@ -38,8 +38,8 @@ class ProductFilterFragment : Fragment() {
         val context = binding.root.context
         val selectedCategories = viewModel.selectedCategories
         lifecycleScope.launchWhenCreated {
-            viewModel.productCategories.collect { categoryMap ->
-                if (categoryMap.isNotEmpty()) {
+            viewModel.productCategories.collect { categories ->
+                if (categories.isNotEmpty()) {
                     binding.cgProductCategories.removeAllViews()
                     binding.progressCategories.isVisible = true
 
@@ -51,16 +51,16 @@ class ProductFilterFragment : Fragment() {
                     }
                     binding.cgProductCategories.addView(allChip)
 
-                    categoryMap.forEach { (categoryLabel, categoryId) ->
+                    categories.forEach { category ->
                         val chip = createFilterChipFrom(context)
-                        chip.text = categoryLabel
-                        chip.tag = categoryId
-                        chip.isChecked = selectedCategories.contains(categoryId)
+                        chip.text = category.name
+                        chip.tag = category.label
+                        chip.isChecked = selectedCategories.contains(category.label)
                         chip.setOnCheckedChangeListener { chipView, checked ->
                             if (checked)
-                                viewModel.addCategoryFilter(chipView.tag as Int)
+                                viewModel.addCategoryFilter(chipView.tag as String)
                             else
-                                viewModel.removeCategoryFilter(chipView.tag as Int)
+                                viewModel.removeCategoryFilter(chipView.tag as String)
                         }
                         binding.cgProductCategories.addView(chip)
                     }
