@@ -6,7 +6,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.create
 
 object ApiModule {
-    private const val baseUrl = "http://tazabazar.ddns.net:8080"
+    private const val baseUrl = "http://tazabazaar.ddns.net:8080"
     private val moshiConverterFactory = MoshiConverterFactory.create()
 
     // defer calling `build` to share the same okHttpClient
