@@ -5,11 +5,13 @@ import com.kshitijpatil.tazabazar.api.dto.ProductCategoryDto
 import com.kshitijpatil.tazabazar.api.dto.ProductResponse
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 interface ProductRepository {
+    /** Get product categories, if something goes wrong, return an empty list */
     suspend fun getProductCategories(): List<ProductCategoryDto>
 
-    /** Get productList, optionally filter by [category] */
+    /** Get all products, optionally filter by [category] */
     suspend fun getProductListBy(category: String?): List<ProductResponse>
 }
 
@@ -25,6 +27,7 @@ class ProductRepositoryImpl(
 
     override suspend fun getProductListBy(category: String?): List<ProductResponse> {
         return withContext(dispatchers.io) {
+            Timber.d("fetching products for category: $category ")
             productApi.getAllProducts(category)
         }
     }

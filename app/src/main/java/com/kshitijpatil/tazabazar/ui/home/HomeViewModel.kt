@@ -7,7 +7,6 @@ import com.kshitijpatil.tazabazar.api.dto.ProductResponse
 import com.kshitijpatil.tazabazar.data.ProductRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class HomeViewModel(private val productRepository: ProductRepository) : ViewModel() {
     private val _productList = MutableStateFlow<List<ProductResponse>>(emptyList())
@@ -35,7 +34,6 @@ class HomeViewModel(private val productRepository: ProductRepository) : ViewMode
     }
 
     fun setCategoryFilter(category: String) {
-        Timber.i("Category filter changed to $category")
         _categoryFilter.value = category
         refreshProductList()
     }
