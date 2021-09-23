@@ -30,7 +30,6 @@ class ProductFilterFragment : Fragment() {
     ): View? {
         _binding = FragmentProductFilterBinding.inflate(inflater, container, false)
         observeCategoryFilters()
-        viewModel.fetchProductCategories()
         return binding.root
     }
 

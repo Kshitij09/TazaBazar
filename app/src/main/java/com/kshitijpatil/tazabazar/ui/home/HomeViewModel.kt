@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.kshitijpatil.tazabazar.api.dto.ProductCategoryDto
 import com.kshitijpatil.tazabazar.api.dto.ProductResponse
 import com.kshitijpatil.tazabazar.data.ProductRepository
-import com.kshitijpatil.tazabazar.domain.Result
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -18,13 +17,20 @@ class HomeViewModel(private val productRepository: ProductRepository) : ViewMode
     val categoryFilter: StateFlow<String?>
         get() = _categoryFilter
 
-    private val _productCategories = MutableStateFlow<List<ProductCategoryDto>>(emptyList())
-    val productCategories: StateFlow<List<ProductCategoryDto>>
-        get() = _productCategories
+    /** Start with empty default state, fetch from repository in background */
+    val productCategories: StateFlow<List<ProductCategoryDto>> = flow {
+        emit(productRepository.getProductCategories())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    fun fetchProductCategories() {
+
+    init {
+        refreshProductList()
+    }
+
+    private fun refreshProductList() {
         viewModelScope.launch {
-            _productCategories.emit(productRepository.getProductCategoryMap())
+            val productList = productRepository.getProductListBy(_categoryFilter.value)
+            _productList.emit(productList)
         }
     }
 
@@ -37,12 +43,5 @@ class HomeViewModel(private val productRepository: ProductRepository) : ViewMode
     fun clearCategoryFilter() {
         _categoryFilter.value = null
         refreshProductList()
-    }
-
-    fun refreshProductList() {
-        viewModelScope.launch {
-            val productList = productRepository.getProductListBy(_categoryFilter.value)
-            _productList.emit(productList)
-        }
     }
 }
