@@ -15,6 +15,7 @@
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="CategoryChipChoiceStyle">@style/Widget.App.Chip.Choice</item>
     </style>
 
     <style name="Widget.App.Button.OutlinedButton.IconOnly" parent="Widget.MaterialComponents.Button.OutlinedButton">
@@ -28,11 +29,11 @@
     </style>
 
     <style name="Widget.App.Chip.Choice" parent="Widget.MaterialComponents.Chip.Choice">
-        <item name="chipBackgroundColor">@color/white</item>
+        <item name="chipBackgroundColor">@color/product_category_chip_background</item>
     </style>
 
     <style name="Widget.App.Chip.Action" parent="Widget.MaterialComponents.Chip.Action">
-        <item name="chipBackgroundColor">@color/white</item>
+        <item name="chipBackgroundColor">@color/product_category_chip_background</item>
     </style>
 
     <style name="ShapeAppearance.App.CartButton" parent="ShapeAppearance.MaterialComponents.SmallComponent">

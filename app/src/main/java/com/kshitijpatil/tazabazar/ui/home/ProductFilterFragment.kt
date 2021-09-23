@@ -50,15 +50,12 @@ class ProductFilterFragment : Fragment() {
                     binding.cgProductCategories.addView(allChip)
 
                     categories.forEach { category ->
-                        val chip = createFilterChipFrom(context)
+                        val chip = createChoiceChipFrom(context)
                         chip.text = category.name
                         chip.tag = category.label
-                        chip.isChecked = viewModel.categoryFilter.value == category.label
+                        chip.isChecked = category.label == viewModel.categoryFilter.value
                         chip.setOnCheckedChangeListener { chipView, checked ->
-                            if (checked)
-                                viewModel.setCategoryFilter(chipView.tag as String)
-                            else
-                                viewModel.clearCategoryFilter()
+                            if (checked) viewModel.setCategoryFilter(chipView.tag as String)
                         }
                         binding.cgProductCategories.addView(chip)
                     }
@@ -68,14 +65,15 @@ class ProductFilterFragment : Fragment() {
         }
     }
 
-    private fun createFilterChipFrom(context: Context): Chip {
-        val drawable = ChipDrawable.createFromAttributes(
+    private fun createChoiceChipFrom(context: Context): Chip {
+        /*val drawable = ChipDrawable.createFromAttributes(
             context,
             null,
             0,
             R.style.Widget_App_Chip_Choice
         )
-        return Chip(context).apply { setChipDrawable(drawable) }
+        return Chip(context).apply { setChipDrawable(drawable) }*/
+        return Chip(context, null, R.attr.CategoryChipChoiceStyle)
     }
 
     private fun createActionChipFrom(context: Context): Chip {

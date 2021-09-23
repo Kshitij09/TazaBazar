@@ -10,4 +10,6 @@
     <id name="navigation_cart" />
     <id name="navigation_orders" />
     <id name="navigation_profile" />
+
+    <attr name="CategoryChipChoiceStyle" format="reference" />
 </resources>

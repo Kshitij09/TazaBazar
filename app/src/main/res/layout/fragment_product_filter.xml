@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/category_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -17,5 +18,6 @@
         android:id="@+id/cg_product_categories"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:singleSelection="true"
         android:layout_marginHorizontal="4dp" />
 </LinearLayout>
