@@ -8,7 +8,7 @@ import java.net.HttpURLConnection
 
 class TestProductApi {
     private val client = OkHttpClient.Builder().build()
-    private val api = ApiModule.provideTazaBazarApi(client)
+    private val api = ApiModule.provideProductApi(client)
 
     @Test
     fun test_getAllProducts() = runBlocking {

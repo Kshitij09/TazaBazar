@@ -23,7 +23,7 @@ object ApiModule {
         return retrofitBuilder.client(client).build()
     }
 
-    fun provideTazaBazarApi(client: OkHttpClient): ProductApi {
+    fun provideProductApi(client: OkHttpClient): ProductApi {
         return provideRetrofitWith(client).create()
     }
 }

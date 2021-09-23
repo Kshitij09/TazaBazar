@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.kshitijpatil.tazabazar.api.dto.ProductCategoryDto
 import com.kshitijpatil.tazabazar.api.dto.ProductResponse
 import com.kshitijpatil.tazabazar.data.ProductRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.kshitijpatil.tazabazar.domain.Result
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -41,8 +41,7 @@ class HomeViewModel(private val productRepository: ProductRepository) : ViewMode
 
     fun refreshProductList() {
         viewModelScope.launch {
-            val productList =
-                productRepository.getProductListByCategories(_categoryFilter.value)
+            val productList = productRepository.getProductListBy(_categoryFilter.value)
             _productList.emit(productList)
         }
     }
