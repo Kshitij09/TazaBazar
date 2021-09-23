@@ -16,6 +16,10 @@ class HomeViewModel(private val productRepository: ProductRepository) : ViewMode
     val categoryFilter: StateFlow<String?>
         get() = _categoryFilter
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String>
+        get() = _searchQuery
+
     /** Start with empty default state, fetch from repository in background */
     val productCategories: StateFlow<List<ProductCategoryDto>> = flow {
         emit(productRepository.getProductCategories())
@@ -28,7 +32,9 @@ class HomeViewModel(private val productRepository: ProductRepository) : ViewMode
 
     private fun refreshProductList() {
         viewModelScope.launch {
-            val productList = productRepository.getProductListBy(_categoryFilter.value)
+            val query = if (_searchQuery.value.isBlank()) null
+            else _searchQuery.value
+            val productList = productRepository.getProductListBy(_categoryFilter.value, query)
             _productList.emit(productList)
         }
     }
@@ -40,6 +46,11 @@ class HomeViewModel(private val productRepository: ProductRepository) : ViewMode
 
     fun clearCategoryFilter() {
         _categoryFilter.value = null
+        refreshProductList()
+    }
+
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
         refreshProductList()
     }
 }

@@ -4,4 +4,5 @@
     <dimen name="product_item_preview_height">128dp</dimen>
     <dimen name="product_item_card_radius">16dp</dimen>
     <dimen name="cart_button_size">40dp</dimen>
+    <dimen name="product_search_input_corner_radius">6dp</dimen>
 </resources>

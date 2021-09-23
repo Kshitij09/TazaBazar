@@ -1,17 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/category_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_alignParentTop="true"
-    android:layout_marginTop="4dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:background="@color/tzb_light_gray">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/text_field_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:hint="@string/label_search_product"
+        app:boxBackgroundColor="@color/white"
+        app:boxCornerRadiusBottomEnd="@dimen/product_search_input_corner_radius"
+        app:boxCornerRadiusBottomStart="@dimen/product_search_input_corner_radius"
+        app:boxCornerRadiusTopEnd="@dimen/product_search_input_corner_radius"
+        app:boxCornerRadiusTopStart="@dimen/product_search_input_corner_radius"
+        app:boxStrokeColor="@android:color/transparent"
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp"
+        app:endIconMode="clear_text"
+        app:hintTextColor="@android:color/darker_gray">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progress_categories"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:indeterminate="true" />
 
     <com.google.android.material.chip.ChipGroup

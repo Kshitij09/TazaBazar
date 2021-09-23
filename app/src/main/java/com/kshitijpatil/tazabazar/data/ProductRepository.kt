@@ -11,8 +11,8 @@ interface ProductRepository {
     /** Get product categories, if something goes wrong, return an empty list */
     suspend fun getProductCategories(): List<ProductCategoryDto>
 
-    /** Get all products, optionally filter by [category] */
-    suspend fun getProductListBy(category: String?): List<ProductResponse>
+    /** Get all products, optionally filter by [category] and [query] */
+    suspend fun getProductListBy(category: String?, query: String?): List<ProductResponse>
 }
 
 class ProductRepositoryImpl(
@@ -25,10 +25,13 @@ class ProductRepositoryImpl(
         }
     }
 
-    override suspend fun getProductListBy(category: String?): List<ProductResponse> {
+    override suspend fun getProductListBy(
+        category: String?,
+        query: String?
+    ): List<ProductResponse> {
         return withContext(dispatchers.io) {
-            Timber.d("fetching products for category: $category ")
-            productApi.getAllProducts(category)
+            Timber.d("fetching products for category: $category , query: $query")
+            productApi.getAllProducts(category, query)
         }
     }
 }

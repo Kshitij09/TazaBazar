@@ -14,9 +14,16 @@ import com.google.android.material.chip.ChipDrawable
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentProductFilterBinding
 import com.kshitijpatil.tazabazar.di.ViewModelFactory
+import com.kshitijpatil.tazabazar.util.textChanges
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.debounce
 
 class ProductFilterFragment : Fragment() {
+
+    companion object {
+        const val SEARCH_DEBOUNCE_MILLIS = 1500L
+    }
+
     private var _binding: FragmentProductFilterBinding? = null
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by activityViewModels {
@@ -30,7 +37,18 @@ class ProductFilterFragment : Fragment() {
     ): View? {
         _binding = FragmentProductFilterBinding.inflate(inflater, container, false)
         observeCategoryFilters()
+        observeSearchQuery()
         return binding.root
+    }
+
+    private fun observeSearchQuery() {
+        lifecycleScope.launchWhenCreated {
+            binding.textFieldSearch.editText?.let { searchField ->
+                searchField.textChanges()
+                    .debounce(SEARCH_DEBOUNCE_MILLIS)
+                    .collect { viewModel.setSearchQuery(it.toString()) }
+            }
+        }
     }
 
     private fun observeCategoryFilters() {
