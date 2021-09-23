@@ -15,7 +15,7 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by activityViewModels {
-        ViewModelFactory(requireContext().applicationContext)
+        ViewModelFactory(this, requireContext().applicationContext, arguments)
     }
     private val productListAdapter = ProductListAdapter()
 

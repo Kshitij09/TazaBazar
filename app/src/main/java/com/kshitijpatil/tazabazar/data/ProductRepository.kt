@@ -30,8 +30,11 @@ class ProductRepositoryImpl(
         query: String?
     ): List<ProductResponse> {
         return withContext(dispatchers.io) {
-            Timber.d("fetching products for category: $category , query: $query")
-            productApi.getAllProducts(category, query)
+            // double checking for the blank query
+            // Blank query will be mapped as a null value
+            val q = query?.let { if (it.isBlank()) null else it }
+            Timber.d("fetching products for category: $category , query: $q")
+            productApi.getAllProducts(category, q)
         }
     }
 }

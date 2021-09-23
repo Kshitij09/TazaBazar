@@ -8,14 +8,15 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.chip.Chip
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentProductFilterBinding
 import com.kshitijpatil.tazabazar.di.ViewModelFactory
+import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
 import com.kshitijpatil.tazabazar.util.textChanges
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
 
 class ProductFilterFragment : Fragment() {
 
@@ -26,7 +27,7 @@ class ProductFilterFragment : Fragment() {
     private var _binding: FragmentProductFilterBinding? = null
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by activityViewModels {
-        ViewModelFactory(requireContext().applicationContext)
+        ViewModelFactory(this, requireContext().applicationContext, arguments)
     }
 
     override fun onCreateView(
@@ -35,49 +36,56 @@ class ProductFilterFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentProductFilterBinding.inflate(inflater, container, false)
-        observeCategoryFilters()
-        observeSearchQuery()
         return binding.root
     }
 
-    private fun observeSearchQuery() {
-        lifecycleScope.launchWhenCreated {
-            binding.textFieldSearch.editText?.let { searchField ->
-                searchField.textChanges()
-                    .debounce(SEARCH_DEBOUNCE_MILLIS)
-                    .collect { viewModel.setSearchQuery(it.toString()) }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        reloadUiState()
+        launchAndRepeatWithViewLifecycle {
+            launch { observeSearchQuery() }
+            launch { observeCategoryFilters() }
         }
     }
 
-    private fun observeCategoryFilters() {
+    private fun reloadUiState() {
+        binding.textFieldSearch.editText?.setText(viewModel.searchQuery.value)
+    }
+
+    private suspend fun observeSearchQuery() {
+        binding.textFieldSearch.editText?.let { searchField ->
+            searchField.textChanges()
+                .debounce(SEARCH_DEBOUNCE_MILLIS)
+                .collect { viewModel.setSearchQuery(it.toString()) }
+        }
+    }
+
+    private suspend fun observeCategoryFilters() {
         val context = binding.root.context
-        lifecycleScope.launchWhenCreated {
-            viewModel.productCategories.collect { categories ->
-                if (categories.isNotEmpty()) {
-                    binding.cgProductCategories.removeAllViews()
-                    binding.progressCategories.isVisible = true
+        viewModel.productCategories.collect { categories ->
+            if (categories.isNotEmpty()) {
+                binding.cgProductCategories.removeAllViews()
+                binding.progressCategories.isVisible = true
 
-                    val allChip = createActionChipFrom(context)
-                    allChip.text = context.getString(R.string.label_all)
-                    allChip.setOnClickListener {
-                        binding.cgProductCategories.clearCheck()
-                        viewModel.clearCategoryFilter()
-                    }
-                    binding.cgProductCategories.addView(allChip)
-
-                    categories.forEach { category ->
-                        val chip = createChoiceChipFrom(context)
-                        chip.text = category.name
-                        chip.tag = category.label
-                        chip.isChecked = category.label == viewModel.categoryFilter.value
-                        chip.setOnCheckedChangeListener { chipView, checked ->
-                            if (checked) viewModel.setCategoryFilter(chipView.tag as String)
-                        }
-                        binding.cgProductCategories.addView(chip)
-                    }
-                    binding.progressCategories.isVisible = false
+                val allChip = createActionChipFrom(context)
+                allChip.text = context.getString(R.string.label_all)
+                allChip.setOnClickListener {
+                    binding.cgProductCategories.clearCheck()
+                    viewModel.clearCategoryFilter()
                 }
+                binding.cgProductCategories.addView(allChip)
+
+                categories.forEach { category ->
+                    val chip = createChoiceChipFrom(context)
+                    chip.text = category.name
+                    chip.tag = category.label
+                    chip.isChecked = category.label == viewModel.searchCategory.value
+                    chip.setOnCheckedChangeListener { chipView, checked ->
+                        if (checked) viewModel.setCategoryFilter(chipView.tag as String)
+                    }
+                    binding.cgProductCategories.addView(chip)
+                }
+                binding.progressCategories.isVisible = false
             }
         }
     }

@@ -1,56 +1,87 @@
 package com.kshitijpatil.tazabazar.ui.home
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kshitijpatil.tazabazar.api.dto.ProductCategoryDto
 import com.kshitijpatil.tazabazar.api.dto.ProductResponse
 import com.kshitijpatil.tazabazar.data.ProductRepository
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
-class HomeViewModel(private val productRepository: ProductRepository) : ViewModel() {
+class HomeViewModel(
+    private val savedStateHandle: SavedStateHandle,
+    private val productRepository: ProductRepository
+) : ViewModel() {
+    companion object {
+        private const val KEY_QUERY = "query"
+        private const val KEY_CATEGORY = "category"
+    }
+
     private val _productList = MutableStateFlow<List<ProductResponse>>(emptyList())
     val productList: StateFlow<List<ProductResponse>>
         get() = _productList
-    private val _categoryFilter = MutableStateFlow<String?>(null)
-    val categoryFilter: StateFlow<String?>
-        get() = _categoryFilter
 
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String>
-        get() = _searchQuery
+    private val _filter = MutableStateFlow(
+        FilterParams(
+            query = savedStateHandle[KEY_QUERY],
+            category = savedStateHandle[KEY_CATEGORY]
+        )
+    )
+    val searchQuery: StateFlow<String?>
+        get() = _filter
+            .map { it.query }
+            .stateIn(viewModelScope, WhileSubscribed(), _filter.value.query)
 
-    /** Start with empty default state, fetch from repository in background */
+    val searchCategory: StateFlow<String?>
+        get() = _filter
+            .map { it.category }
+            .stateIn(viewModelScope, WhileSubscribed(), _filter.value.category)
+
+    /** Start with empty default state, fetch from the repository in background */
     val productCategories: StateFlow<List<ProductCategoryDto>> = flow {
         emit(productRepository.getProductCategories())
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    }.stateIn(viewModelScope, WhileSubscribed(), emptyList())
 
 
     init {
-        refreshProductList()
+        _filter.onEach {
+            Timber.d("Filter updated: $it")
+            refreshProductList(it)
+        }
+            .launchIn(viewModelScope)
     }
 
-    private fun refreshProductList() {
+    private fun refreshProductList(filterParams: FilterParams) {
         viewModelScope.launch {
-            val query = if (_searchQuery.value.isBlank()) null
-            else _searchQuery.value
-            val productList = productRepository.getProductListBy(_categoryFilter.value, query)
+            val productList = productRepository.getProductListBy(
+                category = filterParams.category,
+                query = filterParams.query
+            )
             _productList.emit(productList)
         }
     }
 
     fun setCategoryFilter(category: String) {
-        _categoryFilter.value = category
-        refreshProductList()
+        _filter.value = _filter.value.copy(category = category)
+        savedStateHandle[KEY_CATEGORY] = category
     }
 
     fun clearCategoryFilter() {
-        _categoryFilter.value = null
-        refreshProductList()
+        _filter.value = _filter.value.copy(category = null)
+        savedStateHandle[KEY_CATEGORY] = null
     }
 
     fun setSearchQuery(query: String) {
-        _searchQuery.value = query
-        refreshProductList()
+        val q = if (query.isBlank()) null else query
+        _filter.value = _filter.value.copy(query = q)
+        savedStateHandle[KEY_QUERY] = query
     }
+
+    data class FilterParams(
+        val query: String? = null,
+        val category: String? = null
+    )
 }
