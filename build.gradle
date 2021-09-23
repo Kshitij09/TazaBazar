@@ -24,6 +24,18 @@ plugins {
     id 'com.github.ben-manes.versions' version '0.39.0'
 }
 
+subprojects {
+    configurations.configureEach {
+        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+            kotlinOptions {
+                // Enable experimental coroutines APIs, including Flow
+                freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+                freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.FlowPreview"
+            }
+        }
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
