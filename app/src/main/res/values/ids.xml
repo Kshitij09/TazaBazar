@@ -12,4 +12,5 @@
     <id name="navigation_profile" />
 
     <attr name="CategoryChipChoiceStyle" format="reference" />
+    <attr name="CategoryChipActionStyle" format="reference" />
 </resources>

@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipDrawable
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentProductFilterBinding
 import com.kshitijpatil.tazabazar.di.ViewModelFactory
@@ -84,23 +83,10 @@ class ProductFilterFragment : Fragment() {
     }
 
     private fun createChoiceChipFrom(context: Context): Chip {
-        /*val drawable = ChipDrawable.createFromAttributes(
-            context,
-            null,
-            0,
-            R.style.Widget_App_Chip_Choice
-        )
-        return Chip(context).apply { setChipDrawable(drawable) }*/
         return Chip(context, null, R.attr.CategoryChipChoiceStyle)
     }
 
     private fun createActionChipFrom(context: Context): Chip {
-        val drawable = ChipDrawable.createFromAttributes(
-            context,
-            null,
-            0,
-            R.style.Widget_App_Chip_Action
-        )
-        return Chip(context).apply { setChipDrawable(drawable) }
+        return Chip(context, null, R.attr.CategoryChipActionStyle)
     }
 }

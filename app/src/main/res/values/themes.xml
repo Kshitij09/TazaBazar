@@ -16,6 +16,7 @@
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="CategoryChipChoiceStyle">@style/Widget.App.Chip.Choice</item>
+        <item name="CategoryChipActionStyle">@style/Widget.App.Chip.Action</item>
     </style>
 
     <style name="Widget.App.Button.OutlinedButton.IconOnly" parent="Widget.MaterialComponents.Button.OutlinedButton">
