@@ -30,6 +30,7 @@ subprojects {
                 // Enable experimental coroutines APIs, including Flow
                 freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
                 freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.FlowPreview"
+                freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
             }
         }
     }

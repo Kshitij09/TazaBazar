@@ -1,8 +1,12 @@
 package com.kshitijpatil.tazabazar
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.threeten.bp.LocalDateTime
+import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.ZoneId
+import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.temporal.ChronoUnit
 
 /**
@@ -22,5 +26,15 @@ class ExampleUnitTest {
         val now = LocalDateTime.now()
         val later = now.plusHours(2).plusMinutes(30)
         println("Minutes elapsed: ${ChronoUnit.MINUTES.between(now, later)}")
+    }
+
+    @Test
+    fun test_parse_offsetdatetime() {
+        val timeString = "2021-09-24T06:29:31.504576Z"
+        val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+        val offsetDateTime = formatter.parse(timeString, OffsetDateTime::from)
+        assertNotNull(offsetDateTime)
+        val istDateTime = offsetDateTime.atZoneSameInstant(ZoneId.of("Asia/Kolkata"))
+        print(istDateTime.format(formatter))
     }
 }

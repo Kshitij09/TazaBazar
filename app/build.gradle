@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'kotlin-kapt'
     id 'androidx.navigation.safeargs.kotlin'
 }
 
@@ -15,6 +16,15 @@ android {
         versionName "0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += [
+                        "room.incremental": "true",
+                        "room.schemaLocation":"$projectDir/schemas".toString(),
+                ]
+            }
+        }
     }
 
     buildTypes {
@@ -25,6 +35,16 @@ android {
     }
     buildFeatures {
         viewBinding true
+    }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+
+            all {
+                minHeapSize = "64m"
+                maxHeapSize = "128m"
+            }
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -44,6 +64,9 @@ dependencies {
     implementation libs.androidx.fragment.fragmentKtx
     implementation libs.androidx.lifecycle.lifecycleRuntimeKtx
     implementation libs.androidx.navigation.navigationFragmentKtx
+    implementation libs.androidx.room.ktx
+    implementation libs.androidx.room.runtime
+    kapt libs.androidx.room.compiler
     implementation libs.androidx.navigation.navigationUiKtx
 
     // third-party
@@ -57,5 +80,12 @@ dependencies {
     // Needed for Tzdb
     testImplementation "org.threeten:threetenbp:${libs.versions.threetenbp.get()}"
     testImplementation libs.truth
+    testImplementation libs.robolectric
+    testImplementation libs.androidx.archCoreKtx
+    testImplementation libs.androidx.test.core
+    testImplementation libs.androidx.test.rules
+    testImplementation libs.androidx.test.junit
+    testImplementation libs.kotlin.coroutines.test
+    testImplementation libs.turbine
     androidTestImplementation libs.androidx.test.junit
 }

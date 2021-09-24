@@ -22,7 +22,7 @@ data class ProductResponse(
         @Json(name = "id")
         val id: Int,
         @Json(name = "price")
-        val price: Int,
+        val price: Float,
         @Json(name = "quantity_label")
         val quantityLabel: String,
         @Json(name = "stock_available")
