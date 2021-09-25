@@ -1,9 +1,6 @@
 package com.kshitijpatil.tazabazar.data.local
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -12,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ProductDao : UpsertBaseDao<ProductEntity> {
     @Transaction
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertProductAndInventories(
         product: ProductEntity,
         inventories: List<InventoryEntity>
@@ -43,6 +40,10 @@ interface ProductDao : UpsertBaseDao<ProductEntity> {
 
     @Query("SELECT * FROM product WHERE name LIKE :name")
     suspend fun getProductsByName(name: String): List<ProductEntity>
+
+    @Transaction
+    @Query("SELECT * FROM product WHERE name LIKE :name")
+    suspend fun getProductWithInventoriesByName(name: String): List<ProductWithInventories>
 
     @Query("SELECT * FROM product WHERE sku IN (:productSkus)")
     suspend fun getProductsBySkus(productSkus: List<String>): List<ProductEntity>

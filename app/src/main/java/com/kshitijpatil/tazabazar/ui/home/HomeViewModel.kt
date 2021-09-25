@@ -3,9 +3,9 @@ package com.kshitijpatil.tazabazar.ui.home
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kshitijpatil.tazabazar.api.dto.ProductCategoryDto
-import com.kshitijpatil.tazabazar.api.dto.ProductResponse
 import com.kshitijpatil.tazabazar.data.ProductRepository
+import com.kshitijpatil.tazabazar.model.Product
+import com.kshitijpatil.tazabazar.model.ProductCategory
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.launch
@@ -20,8 +20,8 @@ class HomeViewModel(
         private const val KEY_CATEGORY = "category"
     }
 
-    private val _productList = MutableStateFlow<List<ProductResponse>>(emptyList())
-    val productList: StateFlow<List<ProductResponse>>
+    private val _productList = MutableStateFlow<List<Product>>(emptyList())
+    val productList: StateFlow<List<Product>>
         get() = _productList
 
     private val _filter = MutableStateFlow(
@@ -41,7 +41,7 @@ class HomeViewModel(
             .stateIn(viewModelScope, WhileSubscribed(), _filter.value.category)
 
     /** Start with empty default state, fetch from the repository in background */
-    val productCategories: StateFlow<List<ProductCategoryDto>> = flow {
+    val productCategories: StateFlow<List<ProductCategory>> = flow {
         emit(productRepository.getProductCategories())
     }.stateIn(viewModelScope, WhileSubscribed(), emptyList())
 
@@ -50,8 +50,7 @@ class HomeViewModel(
         _filter.onEach {
             Timber.d("Filter updated: $it")
             refreshProductList(it)
-        }
-            .launchIn(viewModelScope)
+        }.launchIn(viewModelScope)
     }
 
     private fun refreshProductList(filterParams: FilterParams) {

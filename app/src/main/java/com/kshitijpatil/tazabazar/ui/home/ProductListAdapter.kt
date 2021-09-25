@@ -9,12 +9,12 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.request.CachePolicy
 import com.kshitijpatil.tazabazar.R
-import com.kshitijpatil.tazabazar.api.dto.ProductResponse
 import com.kshitijpatil.tazabazar.databinding.ProductItemViewBinding
+import com.kshitijpatil.tazabazar.model.Product
 import java.lang.ref.WeakReference
 
 class ProductListAdapter :
-    ListAdapter<ProductResponse, ProductListAdapter.ProductViewHolder>(ProductResponseDiffCallback()) {
+    ListAdapter<Product, ProductListAdapter.ProductViewHolder>(ProductDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -27,14 +27,14 @@ class ProductListAdapter :
         holder.bind(item)
     }
 
-    class ProductResponseDiffCallback : DiffUtil.ItemCallback<ProductResponse>() {
-        override fun areItemsTheSame(oldItem: ProductResponse, newItem: ProductResponse): Boolean {
+    class ProductDiffCallback : DiffUtil.ItemCallback<Product>() {
+        override fun areItemsTheSame(oldItem: Product, newItem: Product): Boolean {
             return oldItem.sku == newItem.sku
         }
 
         override fun areContentsTheSame(
-            oldItem: ProductResponse,
-            newItem: ProductResponse
+            oldItem: Product,
+            newItem: Product
         ): Boolean {
             return oldItem == newItem
         }
@@ -49,7 +49,7 @@ class ProductListAdapter :
     ) : RecyclerView.ViewHolder(binding.root) {
         private val contextRef = WeakReference(binding.root.context)
 
-        fun bind(item: ProductResponse) {
+        fun bind(item: Product) {
             binding.tvName.text = item.name
             // TODO: Make it list menu
             val inventory = item.inventories[0]

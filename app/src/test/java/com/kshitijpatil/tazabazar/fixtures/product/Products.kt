@@ -10,5 +10,6 @@ val leafyVegetables = ProductCategoryEntity("leafy-vegetables", "Leafy Vegetable
 val fruits = ProductCategoryEntity("fruits", "Fruits", "fru")
 val tomatoRed = ProductEntity("vgt-001", "Tomato Red", vegetables.label, "image-uri")
 val tomatoRedInv1 = InventoryEntity(1, tomatoRed.sku, 15f, "500 gm", 31, OffsetDateTime.now())
+val tomatoRedInv2 = InventoryEntity(2, tomatoRed.sku, 25f, "1 kg", 15, OffsetDateTime.now())
 val tomatoGreen = ProductEntity("vgt-002", "Green Tomato", vegetables.label, "image-uri")
 val tomatoGreenInv1 = InventoryEntity(2, tomatoGreen.sku, 10f, "300 gm", 10, OffsetDateTime.now())
