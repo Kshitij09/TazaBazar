@@ -145,6 +145,17 @@ class ProductDaoTest {
     }
 
     @Test
+    fun getProductsByCategoryAndName() = scope.runBlockingTest {
+        insertVegetablesCategory()
+        val products = listOf(tomatoRed, tomatoGreen)
+        productDao.insertAll(products)
+        var reloaded = productDao.getProductsByCategoryAndName(vegetables.label, "%red%")
+        assertThat(reloaded).containsExactly(ProductWithInventories(tomatoRed))
+        reloaded = productDao.getProductsByCategoryAndName(vegetables.label, "%green%")
+        assertThat(reloaded).containsExactly(ProductWithInventories(tomatoGreen))
+    }
+
+    @Test
     fun observeAllProducts_whenProductUpdates_shouldEmitNewList() {
         val product1 = tomatoRed;
         val product2 = tomatoGreen

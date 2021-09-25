@@ -50,6 +50,14 @@ interface ProductDao : UpsertBaseDao<ProductEntity> {
     @Query("SELECT * FROM product WHERE category = :category")
     suspend fun getProductsByCategory(category: String): List<ProductEntity>
 
+    @Transaction
     @Query("SELECT * FROM product WHERE category = :category")
     suspend fun getProductWithInventoriesByCategory(category: String): List<ProductWithInventories>
+
+    @Transaction
+    @Query("SELECT * FROM product WHERE category = :category AND name LIKE :name")
+    suspend fun getProductsByCategoryAndName(
+        category: String,
+        name: String
+    ): List<ProductWithInventories>
 }
