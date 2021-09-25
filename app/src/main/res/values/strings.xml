@@ -5,7 +5,7 @@
     <string name="label_cart">Cart</string>
     <string name="label_orders">Orders</string>
     <string name="label_profile">Profile</string>
-    <string name="info_price_rupee_template">\u20B9 %1$d</string>
+    <string name="info_price_rupee_template">\u20B9 %1$.2f</string>
     <string name="label_all">All</string>
-    <string name="label_search_product">Search Product...</string>
+    <string name="label_search_product">Search Product…</string>
 </resources>
