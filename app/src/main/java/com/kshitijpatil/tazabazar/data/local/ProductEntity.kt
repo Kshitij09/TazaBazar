@@ -4,7 +4,23 @@ import androidx.room.*
 import androidx.room.ForeignKey.CASCADE
 import org.threeten.bp.OffsetDateTime
 
-@Entity(tableName = "product")
+@Entity(tableName = "product_category")
+data class ProductCategoryEntity(
+    @PrimaryKey val label: String,
+    val name: String,
+    @ColumnInfo(name = "sku_prefix") val skuPrefix: String
+)
+
+@Entity(
+    tableName = "product",
+    foreignKeys = [ForeignKey(
+        entity = ProductCategoryEntity::class,
+        parentColumns = ["label"],
+        childColumns = ["category"],
+        onDelete = CASCADE
+    )],
+    indices = [Index(value = ["category"])]
+)
 data class ProductEntity(
     @PrimaryKey val sku: String,
     val name: String,

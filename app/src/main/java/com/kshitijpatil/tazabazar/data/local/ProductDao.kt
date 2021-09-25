@@ -26,24 +26,30 @@ interface ProductDao : UpsertBaseDao<ProductEntity> {
 
     @Transaction
     @Query("SELECT * FROM product")
-    fun getAllProductWithInventories(): List<ProductWithInventories>
+    suspend fun getAllProductWithInventories(): List<ProductWithInventories>
 
     @Transaction
     @Query("SELECT * FROM product")
     fun observeAllProductWithInventories(): Flow<List<ProductWithInventories>>
 
     @Query("SELECT * FROM product")
-    fun getAllProducts(): List<ProductEntity>
+    suspend fun getAllProducts(): List<ProductEntity>
 
     @Query("SELECT * FROM product")
     fun observeAllProducts(): Flow<List<ProductEntity>>
 
     @Query("SELECT * FROM product WHERE sku = :sku")
-    fun getProductBySku(sku: String): ProductEntity?
+    suspend fun getProductBySku(sku: String): ProductEntity?
 
     @Query("SELECT * FROM product WHERE name LIKE :name")
-    fun getProductsByName(name: String): List<ProductEntity>
+    suspend fun getProductsByName(name: String): List<ProductEntity>
 
     @Query("SELECT * FROM product WHERE sku IN (:productSkus)")
-    fun getProductsBySkus(productSkus: List<String>): List<ProductEntity>
+    suspend fun getProductsBySkus(productSkus: List<String>): List<ProductEntity>
+
+    @Query("SELECT * FROM product WHERE category = :category")
+    suspend fun getProductsByCategory(category: String): List<ProductEntity>
+
+    @Query("SELECT * FROM product WHERE category = :category")
+    suspend fun getProductWithInventoriesByCategory(category: String): List<ProductWithInventories>
 }

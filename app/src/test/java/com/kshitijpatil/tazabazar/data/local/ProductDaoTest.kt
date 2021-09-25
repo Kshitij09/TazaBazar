@@ -1,5 +1,6 @@
 package com.kshitijpatil.tazabazar.data.local
 
+import android.database.sqlite.SQLiteConstraintException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -8,6 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import com.kshitijpatil.tazabazar.fixtures.product.tomatoGreen
 import com.kshitijpatil.tazabazar.fixtures.product.tomatoRed
 import com.kshitijpatil.tazabazar.fixtures.product.tomatoRedInv1
+import com.kshitijpatil.tazabazar.fixtures.product.vegetables
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
@@ -23,9 +25,23 @@ class ProductDaoTest {
     private val appDatabase = TestInject.appDatabase(ApplicationProvider.getApplicationContext())
     private val productDao = appDatabase.productDao
     private val inventoryDao = appDatabase.inventoryDao
+    private val productCategoryDao = appDatabase.productCategoryDao
+
+    private suspend fun insertVegetablesCategory() {
+        productCategoryDao.insert(vegetables)
+    }
+
+    @Test(expected = SQLiteConstraintException::class)
+    fun insertProduct_withoutCategory_shouldRaiseSQLConstraintException() {
+        scope.runBlockingTest {
+            val product = tomatoRed
+            productDao.insert(product)
+        }
+    }
 
     @Test
     fun insertProduct() = scope.runBlockingTest {
+        insertVegetablesCategory()
         val product = tomatoRed
         productDao.insert(product)
         val retrieved = productDao.getAllProducts()
@@ -35,6 +51,7 @@ class ProductDaoTest {
 
     @Test
     fun insertProductWithInventories() = scope.runBlockingTest {
+        insertVegetablesCategory()
         val product = tomatoRed
         val inv = tomatoRedInv1
         productDao.insertProductAndInventories(product, listOf(inv))
@@ -48,6 +65,7 @@ class ProductDaoTest {
 
     @Test
     fun getProductBySku() = scope.runBlockingTest {
+        insertVegetablesCategory()
         val product = tomatoRed
         productDao.insert(product)
         val reloaded = productDao.getProductBySku(product.sku)
@@ -57,6 +75,7 @@ class ProductDaoTest {
     // Also covers the update operation
     @Test
     fun upsertProduct() = scope.runBlockingTest {
+        insertVegetablesCategory()
         var product = tomatoRed
         val rowId = productDao.insert(product)
         assertThat(rowId).isNotEqualTo(-1)
@@ -70,12 +89,14 @@ class ProductDaoTest {
     }
 
     private suspend fun insertAndAssertProduct(product: ProductEntity) {
+        insertVegetablesCategory()
         productDao.insert(product)
         assertThat(productDao.getProductBySku(product.sku)).isEqualTo(product)
     }
 
     @Test
     fun deleteProduct() = scope.runBlockingTest {
+        insertVegetablesCategory()
         // Given
         val product = tomatoRed
         insertAndAssertProduct(product)
@@ -96,6 +117,7 @@ class ProductDaoTest {
 
     @Test
     fun getProductsByName() = scope.runBlockingTest {
+        insertVegetablesCategory()
         val product1 = tomatoRed;
         val product2 = tomatoGreen
         productDao.insertAll(product1, product2)
@@ -105,6 +127,7 @@ class ProductDaoTest {
 
     @Test
     fun getProductsBySkus() = scope.runBlockingTest {
+        insertVegetablesCategory()
         val product1 = tomatoRed;
         val product2 = tomatoGreen
         productDao.insertAll(product1, product2)
@@ -113,10 +136,20 @@ class ProductDaoTest {
     }
 
     @Test
+    fun getProductsByCategory() = scope.runBlockingTest {
+        insertVegetablesCategory()
+        val products = listOf(tomatoRed, tomatoGreen)
+        productDao.insertAll(products)
+        val reloaded = productDao.getProductsByCategory(vegetables.label)
+        assertThat(reloaded).containsExactlyElementsIn(products)
+    }
+
+    @Test
     fun observeAllProducts_whenProductUpdates_shouldEmitNewList() {
         val product1 = tomatoRed;
         val product2 = tomatoGreen
         scope.runBlockingTest {
+            insertVegetablesCategory()
             productDao.observeAllProducts().test {
                 assertThat(awaitItem()).isEmpty()
                 productDao.insert(product1)
@@ -135,6 +168,7 @@ class ProductDaoTest {
         val product1 = tomatoRed
         val inv1 = tomatoRedInv1
         scope.runBlockingTest {
+            insertVegetablesCategory()
             productDao.observeAllProductWithInventories().test {
                 assertThat(awaitItem()).isEmpty()
                 productDao.insert(product1)
