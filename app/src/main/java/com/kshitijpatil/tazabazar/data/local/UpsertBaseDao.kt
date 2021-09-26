@@ -8,16 +8,19 @@ import androidx.room.*
  */
 interface UpsertBaseDao<E> {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertAll(entity: List<E>)
+    suspend fun insertAll(entity: List<E>): List<Long>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertAll(vararg entity: E)
+    suspend fun insertAll(vararg entity: E): List<Long>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(entity: E): Long
 
     @Update
     suspend fun update(entity: E)
+
+    @Update
+    suspend fun updateAll(entities: List<E>)
 
     @Delete
     suspend fun delete(entity: E): Int
@@ -37,5 +40,13 @@ suspend inline fun <E> UpsertBaseDao<E>.upsert(entity: E) {
 
 @Transaction
 suspend inline fun <E> UpsertBaseDao<E>.upsertAll(entities: List<E>) {
-    entities.forEach { upsert(it) }
+    val insertResult = insertAll(entities)
+    val updateList = mutableListOf<E>()
+    for (i in entities.indices) {
+        // insert didn't occur
+        if (insertResult[i] == -1L)
+            updateList.add(entities[i])
+    }
+    if (updateList.isNotEmpty())
+        updateAll(updateList)
 }
