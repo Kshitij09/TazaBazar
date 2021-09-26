@@ -74,7 +74,7 @@ class ProductRepositoryImpl(
             productsLastSynced == null || currentTimeMillis() - productsLastSynced!! > productCacheExpiryMillis
         if (cacheExpired) {
             Timber.d("Product Cache expired! fetching products from the remote source")
-            mutex.withLock { refreshProductCache() }
+            refreshProductCache()
         }
     }
 
@@ -94,13 +94,18 @@ class ProductRepositoryImpl(
     override suspend fun refreshProductCache() = withContext(dispatchers.io) {
         val remoteProducts = productRemoteDataSource.getAllProducts()
             .map(productEntityMapper::map)
+        val allInventories = remoteProducts
+            .map { it.inventories }
+            .flatten()
+            .toList()
         appDatabase.withTransaction {
-            appDatabase.productDao.deleteAll()
-            assert(appDatabase.productDao.getAllProducts().isEmpty())
-            remoteProducts.forEach {
-                appDatabase.productDao.insertProductAndInventories(it.product, it.inventories)
-            }
+            appDatabase.productDao.deleteAll() // To avoid any inconsistencies
+            // NO for insert in for-loop
+            appDatabase.productDao.insertAll(remoteProducts.map { it.product })
+            appDatabase.inventoryDao.insertAll(allInventories)
         }
-        productsLastSynced = currentTimeMillis()
+        mutex.withLock {
+            productsLastSynced = currentTimeMillis()
+        }
     }
 }

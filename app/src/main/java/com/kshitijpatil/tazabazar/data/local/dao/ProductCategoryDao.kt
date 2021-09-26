@@ -1,10 +1,11 @@
-package com.kshitijpatil.tazabazar.data.local
+package com.kshitijpatil.tazabazar.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.kshitijpatil.tazabazar.data.local.ProductCategoryEntity
 
 @Dao
-interface ProductCategoryDao : UpsertBaseDao<ProductCategoryEntity> {
+interface ProductCategoryDao : ReplacingDao<ProductCategoryEntity> {
     @Query("SELECT * FROM product_category")
     suspend fun getAllCategories(): List<ProductCategoryEntity>
 

@@ -1,6 +1,8 @@
 package com.kshitijpatil.tazabazar.data.local
 
 import com.kshitijpatil.tazabazar.data.ProductDataSource
+import com.kshitijpatil.tazabazar.data.local.dao.ProductCategoryDao
+import com.kshitijpatil.tazabazar.data.local.dao.ProductDao
 import com.kshitijpatil.tazabazar.data.mapper.ProductWithInventoriesToProduct
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.model.ProductCategory

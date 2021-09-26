@@ -1,15 +1,18 @@
-package com.kshitijpatil.tazabazar.data.local
+package com.kshitijpatil.tazabazar.data.local.dao
 
 import androidx.room.*
+import com.kshitijpatil.tazabazar.data.local.InventoryEntity
+import com.kshitijpatil.tazabazar.data.local.ProductEntity
+import com.kshitijpatil.tazabazar.data.local.ProductWithInventories
 import kotlinx.coroutines.flow.Flow
 
 /**
  * The Data Access Object for [ProductEntity] class
  */
 @Dao
-interface ProductDao : UpsertBaseDao<ProductEntity> {
+interface ProductDao : ReplacingDao<ProductEntity> {
     @Transaction
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProductAndInventories(
         product: ProductEntity,
         inventories: List<InventoryEntity>

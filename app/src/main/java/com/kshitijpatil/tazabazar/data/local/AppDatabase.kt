@@ -2,6 +2,9 @@ package com.kshitijpatil.tazabazar.data.local
 
 import android.content.Context
 import androidx.room.*
+import com.kshitijpatil.tazabazar.data.local.dao.InventoryDao
+import com.kshitijpatil.tazabazar.data.local.dao.ProductCategoryDao
+import com.kshitijpatil.tazabazar.data.local.dao.ProductDao
 
 @Database(
     entities = [ProductEntity::class, InventoryEntity::class, ProductCategoryEntity::class],

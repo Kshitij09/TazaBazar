@@ -1,12 +1,14 @@
-package com.kshitijpatil.tazabazar.data.local
+package com.kshitijpatil.tazabazar.data.local.dao
 
-import androidx.room.*
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Transaction
 
 /**
  * Base Dao for entities using [OnConflictStrategy.IGNORE]
  * and need default implementation for upsert operation
  */
-interface UpsertBaseDao<E> {
+interface UpsertDao<E> : BaseDao<E> {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(entity: List<E>): List<Long>
 
@@ -15,22 +17,9 @@ interface UpsertBaseDao<E> {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(entity: E): Long
-
-    @Update
-    suspend fun update(entity: E)
-
-    @Update
-    suspend fun updateAll(entities: List<E>)
-
-    @Delete
-    suspend fun delete(entity: E): Int
-
-    @Delete
-    suspend fun deleteAll(entities: List<E>)
-
 }
 
-suspend inline fun <E> UpsertBaseDao<E>.upsert(entity: E) {
+suspend inline fun <E> UpsertDao<E>.upsert(entity: E) {
     val rowid = insert(entity)
     // item was not inserted
     if (rowid == -1L) {
@@ -39,7 +28,7 @@ suspend inline fun <E> UpsertBaseDao<E>.upsert(entity: E) {
 }
 
 @Transaction
-suspend inline fun <E> UpsertBaseDao<E>.upsertAll(entities: List<E>) {
+suspend inline fun <E> UpsertDao<E>.upsertAll(entities: List<E>) {
     val insertResult = insertAll(entities)
     val updateList = mutableListOf<E>()
     for (i in entities.indices) {
