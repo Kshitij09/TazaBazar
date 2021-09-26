@@ -39,11 +39,6 @@ android {
     testOptions {
         unitTests {
             includeAndroidResources = true
-
-            all {
-                minHeapSize = "64m"
-                maxHeapSize = "128m"
-            }
         }
     }
     compileOptions {
@@ -82,10 +77,8 @@ dependencies {
     testImplementation libs.truth
     testImplementation libs.robolectric
     testImplementation libs.androidx.archCoreKtx
-    testImplementation libs.androidx.test.core
     testImplementation libs.androidx.test.rules
     testImplementation libs.androidx.test.junit
     testImplementation libs.kotlin.coroutines.test
     testImplementation libs.turbine
-    androidTestImplementation libs.androidx.test.junit
 }
