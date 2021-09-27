@@ -36,6 +36,27 @@ import timber.log.Timber
  *   }
  */
 
+/**
+ *
+ * adapter.setOnFavoriteToggledListener { sku, isFavorite ->
+ *      viewModel.submitFavoriteAction(sku, isFavorite)
+ * }
+ * -------------
+ * HomeViewModel
+ *  init {
+ *      favoritePendingActions.collect{ action ->
+ *          val productMap = productList.value
+ *          var product = productMap[action.sku]
+ *          productMap[actions.sku] = product.copy(isFavorite = action.isFavorite)
+ *          productList.emit(productMap)
+ *      }
+ *  }
+ *
+ *   fun submitFavoriteAction(sku: String, isFavorite: Boolean) {
+ *      favoritePendingActions.emit(FavoriteAction(sku,isFavorite)
+ *   }
+ */
+
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
