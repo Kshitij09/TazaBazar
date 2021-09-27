@@ -1,18 +1,18 @@
-package com.kshitijpatil.tazabazar.data.local
+package com.kshitijpatil.tazabazar.data.local.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room.*
+import com.kshitijpatil.tazabazar.data.local.InventoryEntity
+import com.kshitijpatil.tazabazar.data.local.ProductEntity
+import com.kshitijpatil.tazabazar.data.local.ProductWithInventories
 import kotlinx.coroutines.flow.Flow
 
 /**
  * The Data Access Object for [ProductEntity] class
  */
 @Dao
-interface ProductDao : UpsertBaseDao<ProductEntity> {
+interface ProductDao : ReplacingDao<ProductEntity> {
     @Transaction
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProductAndInventories(
         product: ProductEntity,
         inventories: List<InventoryEntity>
@@ -43,6 +43,10 @@ interface ProductDao : UpsertBaseDao<ProductEntity> {
 
     @Query("SELECT * FROM product WHERE name LIKE :name")
     suspend fun getProductsByName(name: String): List<ProductEntity>
+
+    @Transaction
+    @Query("SELECT * FROM product WHERE name LIKE :name")
+    suspend fun getProductWithInventoriesByName(name: String): List<ProductWithInventories>
 
     @Query("SELECT * FROM product WHERE sku IN (:productSkus)")
     suspend fun getProductsBySkus(productSkus: List<String>): List<ProductEntity>

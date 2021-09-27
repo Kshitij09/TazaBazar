@@ -14,12 +14,18 @@
         tools:layout="@layout/fragment_product_filter" />
 
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_products"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_products"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/filter_fragment"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:spanCount="2"
-        tools:listitem="@layout/product_item_view" />
+        android:layout_below="@id/filter_fragment">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_products"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="2"
+            tools:listitem="@layout/product_item_view" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </RelativeLayout>

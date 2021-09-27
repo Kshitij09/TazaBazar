@@ -1,40 +1,95 @@
 package com.kshitijpatil.tazabazar.data
 
-import com.kshitijpatil.tazabazar.api.ProductApi
-import com.kshitijpatil.tazabazar.api.dto.ProductCategoryDto
-import com.kshitijpatil.tazabazar.api.dto.ProductResponse
+import androidx.room.withTransaction
+import com.kshitijpatil.tazabazar.data.local.AppDatabase
+import com.kshitijpatil.tazabazar.data.mapper.ProductCategoryToProductCategoryEntity
+import com.kshitijpatil.tazabazar.data.mapper.ProductToProductWithInventories
+import com.kshitijpatil.tazabazar.model.Product
+import com.kshitijpatil.tazabazar.model.ProductCategory
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
+import com.kshitijpatil.tazabazar.util.NetworkUtils
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 interface ProductRepository {
     /** Get product categories, if something goes wrong, return an empty list */
-    suspend fun getProductCategories(): List<ProductCategoryDto>
+    suspend fun getProductCategories(forceRefresh: Boolean = false): List<ProductCategory>
 
-    /** Get all products, optionally filter by [category] and [query] */
-    suspend fun getProductListBy(category: String?, query: String?): List<ProductResponse>
+    /** Get all products */
+    suspend fun getAllProducts(forceRefresh: Boolean = false): List<Product>
+
+    /** Get products filtered by [category] and/or [query] */
+    suspend fun getProductListBy(
+        category: String?,
+        query: String?,
+        forceRefresh: Boolean = false
+    ): List<Product>
+
+    suspend fun refreshProductData()
 }
 
 class ProductRepositoryImpl(
-    private val productApi: ProductApi,
-    private val dispatchers: AppCoroutineDispatchers
+    private val productRemoteDataSource: ProductDataSource,
+    private val productLocalDataSource: ProductDataSource,
+    private val networkUtils: NetworkUtils,
+    private val appDatabase: AppDatabase,
+    private val dispatchers: AppCoroutineDispatchers,
+    private val productEntityMapper: ProductToProductWithInventories,
+    private val categoryEntityMapper: ProductCategoryToProductCategoryEntity
 ) : ProductRepository {
-    override suspend fun getProductCategories(): List<ProductCategoryDto> {
+    override suspend fun getProductCategories(forceRefresh: Boolean): List<ProductCategory> {
+        if (forceRefresh) refreshProductData()
         return withContext(dispatchers.io) {
-            productApi.getProductCategories()
+            productLocalDataSource.getProductCategories()
+        }
+    }
+
+    override suspend fun getAllProducts(forceRefresh: Boolean): List<Product> {
+        if (forceRefresh) refreshProductData()
+        return withContext(dispatchers.io) {
+            productLocalDataSource.getAllProducts()
         }
     }
 
     override suspend fun getProductListBy(
         category: String?,
-        query: String?
-    ): List<ProductResponse> {
+        query: String?,
+        forceRefresh: Boolean
+    ): List<Product> {
+        if (forceRefresh) refreshProductData()
         return withContext(dispatchers.io) {
-            // double checking for the blank query
-            // Blank query will be mapped as a null value
-            val q = query?.let { if (it.isBlank()) null else it }
-            Timber.d("fetching products for category: $category , query: $q")
-            productApi.getAllProducts(category, q)
+            Timber.d("Retrieving products for category: $category , query: $query")
+            productLocalDataSource.getProductsBy(category, query)
+        }
+    }
+
+    override suspend fun refreshProductData() {
+        withContext(dispatchers.io) {
+            if (!networkUtils.hasNetworkConnection()) {
+                Timber.d("Failed to refresh! No internet connection")
+                return@withContext
+            }
+            Timber.d("Synchronising Product Categories")
+            val remoteData = productRemoteDataSource.getProductCategories()
+                .map(categoryEntityMapper::map)
+            Timber.d("Received ${remoteData.size} categories from the remote source")
+
+            Timber.d("Synchronising Product and Inventories")
+            val remoteProducts = productRemoteDataSource.getAllProducts()
+                .map(productEntityMapper::map)
+            Timber.d("Received ${remoteProducts.size} products from the remote source")
+            val allInventories = remoteProducts
+                .map { it.inventories }
+                .flatten()
+                .toList()
+            appDatabase.withTransaction {
+                // NOTE: Cascading
+                appDatabase.productCategoryDao.deleteAll() // To avoid any inconsistencies
+                appDatabase.productCategoryDao.insertAll(remoteData)
+                // NO for insert in for-loop
+                appDatabase.productDao.insertAll(remoteProducts.map { it.product })
+                appDatabase.inventoryDao.insertAll(allInventories)
+            }
         }
     }
 }

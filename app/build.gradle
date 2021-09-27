@@ -39,11 +39,6 @@ android {
     testOptions {
         unitTests {
             includeAndroidResources = true
-
-            all {
-                minHeapSize = "64m"
-                maxHeapSize = "128m"
-            }
         }
     }
     compileOptions {
@@ -58,6 +53,7 @@ dependencies {
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
     implementation libs.androidx.recyclerview
+    implementation libs.androidx.swiperefreshlayout
     implementation libs.androidx.constraintlayout
     implementation libs.androidx.cardview
     implementation libs.android.material
@@ -82,10 +78,10 @@ dependencies {
     testImplementation libs.truth
     testImplementation libs.robolectric
     testImplementation libs.androidx.archCoreKtx
-    testImplementation libs.androidx.test.core
     testImplementation libs.androidx.test.rules
     testImplementation libs.androidx.test.junit
     testImplementation libs.kotlin.coroutines.test
     testImplementation libs.turbine
-    androidTestImplementation libs.androidx.test.junit
+    testImplementation libs.mockito.core
+    testImplementation libs.mockito.kotlin
 }

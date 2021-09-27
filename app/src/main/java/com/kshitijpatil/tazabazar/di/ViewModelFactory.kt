@@ -20,6 +20,8 @@ class ViewModelFactory(
         loggingInterceptor,
         httpEventListener
     )
+    private val productRepository =
+        RepositoryModule.provideProductRepository(appContext, okhttpClient)
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(
@@ -28,8 +30,7 @@ class ViewModelFactory(
         handle: SavedStateHandle
     ): T {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
-            val repository = RepositoryModule.provideProductRepository(okhttpClient)
-            return HomeViewModel(handle, repository) as T
+            return HomeViewModel(handle, productRepository) as T
         }
         throw IllegalArgumentException()
     }

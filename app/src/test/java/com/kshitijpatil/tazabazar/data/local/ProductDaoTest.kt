@@ -6,10 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.kshitijpatil.tazabazar.fixtures.product.tomatoGreen
-import com.kshitijpatil.tazabazar.fixtures.product.tomatoRed
-import com.kshitijpatil.tazabazar.fixtures.product.tomatoRedInv1
-import com.kshitijpatil.tazabazar.fixtures.product.vegetables
+import com.kshitijpatil.tazabazar.fixtures.product.*
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
@@ -74,18 +71,22 @@ class ProductDaoTest {
 
     // Also covers the update operation
     @Test
-    fun upsertProduct() = scope.runBlockingTest {
+    fun insertProduct_whenExists_shouldGetReplaced() = scope.runBlockingTest {
         insertVegetablesCategory()
         var product = tomatoRed
-        val rowId = productDao.insert(product)
+        val inv = tomatoRedInv1
+        val rowId = productDao.insertProductAndInventories(product, listOf(inv))
         assertThat(rowId).isNotEqualTo(-1)
         // re-inserting same entity would be skipped
         product = product.copy(name = "Tomato Red")
-        assertThat(productDao.insert(product)).isEqualTo(-1)
-        // upsert should update when an entity already exists
-        productDao.upsert(product)
+        // insert should replace when an entity already exists
+        productDao.insert(product)
         val reloaded = productDao.getProductBySku(product.sku)
         assertThat(reloaded).isEqualTo(product)
+        // replacing a product will also delete the associated inventories
+        // this is expected behaviour assuming entities will be replaced
+        // altogether most the times
+        assertThat(inventoryDao.getInventoryById(inv.id)).isNull()
     }
 
     private suspend fun insertAndAssertProduct(product: ProductEntity) {
@@ -113,6 +114,17 @@ class ProductDaoTest {
         // Test
         productDao.deleteAll()
         assertThat(productDao.getAllProductWithInventories()).isEmpty()
+    }
+
+    @Test
+    fun deleteAllProducts_shouldCascadeInventories() = scope.runBlockingTest {
+        insertVegetablesCategory()
+        productDao.insertProductAndInventories(tomatoRed, listOf(tomatoRedInv1, tomatoRedInv2))
+        productDao.insertProductAndInventories(tomatoGreen, listOf(tomatoGreenInv1))
+        assertThat(inventoryDao.getAllInventories()).isNotEmpty()
+        productDao.deleteAll()
+        assertThat(productDao.getAllProducts()).isEmpty()
+        assertThat(inventoryDao.getAllInventories()).isEmpty()
     }
 
     @Test

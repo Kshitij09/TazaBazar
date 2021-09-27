@@ -32,6 +32,12 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeProductList(productListAdapter)
+        binding.swipeRefreshProducts.setOnRefreshListener {
+            binding.swipeRefreshProducts.isRefreshing = true
+            viewModel.refreshData().invokeOnCompletion {
+                binding.swipeRefreshProducts.isRefreshing = false
+            }
+        }
     }
 
     private fun observeProductList(productListAdapter: ProductListAdapter) {
