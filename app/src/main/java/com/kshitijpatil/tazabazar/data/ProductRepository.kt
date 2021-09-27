@@ -13,13 +13,17 @@ import timber.log.Timber
 
 interface ProductRepository {
     /** Get product categories, if something goes wrong, return an empty list */
-    suspend fun getProductCategories(): List<ProductCategory>
+    suspend fun getProductCategories(forceRefresh: Boolean = false): List<ProductCategory>
 
     /** Get all products */
-    suspend fun getAllProducts(): List<Product>
+    suspend fun getAllProducts(forceRefresh: Boolean = false): List<Product>
 
     /** Get products filtered by [category] and/or [query] */
-    suspend fun getProductListBy(category: String?, query: String?): List<Product>
+    suspend fun getProductListBy(
+        category: String?,
+        query: String?,
+        forceRefresh: Boolean = false
+    ): List<Product>
 
     suspend fun refreshProductData()
 }
@@ -33,11 +37,15 @@ class ProductRepositoryImpl(
     private val productEntityMapper: ProductToProductWithInventories,
     private val categoryEntityMapper: ProductCategoryToProductCategoryEntity
 ) : ProductRepository {
-    override suspend fun getProductCategories(): List<ProductCategory> {
-        return productLocalDataSource.getProductCategories()
+    override suspend fun getProductCategories(forceRefresh: Boolean): List<ProductCategory> {
+        if (forceRefresh) refreshProductData()
+        return withContext(dispatchers.io) {
+            productLocalDataSource.getProductCategories()
+        }
     }
 
-    override suspend fun getAllProducts(): List<Product> {
+    override suspend fun getAllProducts(forceRefresh: Boolean): List<Product> {
+        if (forceRefresh) refreshProductData()
         return withContext(dispatchers.io) {
             productLocalDataSource.getAllProducts()
         }
@@ -45,8 +53,10 @@ class ProductRepositoryImpl(
 
     override suspend fun getProductListBy(
         category: String?,
-        query: String?
+        query: String?,
+        forceRefresh: Boolean
     ): List<Product> {
+        if (forceRefresh) refreshProductData()
         return withContext(dispatchers.io) {
             Timber.d("Retrieving products for category: $category , query: $query")
             productLocalDataSource.getProductsBy(category, query)

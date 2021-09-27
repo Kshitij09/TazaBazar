@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.kshitijpatil.tazabazar.data.ProductRepository
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.model.ProductCategory
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.launch
@@ -49,14 +50,21 @@ class HomeViewModel(
     private val cacheExpired: Boolean = true
 
     init {
-        // NOTE: We're using this mechanism to filter list by
-        // the last saved parameters from savedInstanceState
-        _filter.onEach {
-            Timber.d("Filter updated: $it")
-            updateProductList(it)
-        }.launchIn(viewModelScope)
+        var refreshJob: Job? = null
         if (cacheExpired) {
-            viewModelScope.launch { productRepository.refreshProductData() }
+            refreshJob = viewModelScope.launch { productRepository.refreshProductData() }
+        }
+        viewModelScope.launch {
+            refreshJob?.join() // wait till cache is updated (if required)
+
+            // NOTE: We're initializing `_filter` with the values from savedInstanceState
+            // this will inherently call `updateProductList`, either for
+            // 1) Last saved filters or
+            // 2) no filters (null values)
+            _filter.collect {
+                Timber.d("Filter updated: $it")
+                updateProductList(it)
+            }
         }
     }
 
