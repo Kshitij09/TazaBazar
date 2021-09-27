@@ -11,4 +11,7 @@ interface ProductCategoryDao : ReplacingDao<ProductCategoryEntity> {
 
     @Query("SELECT * FROM product_category WHERE label = :label")
     suspend fun getCategoryByLabel(label: String): ProductCategoryEntity?
+
+    @Query("DELETE FROM product_category")
+    suspend fun deleteAll()
 }

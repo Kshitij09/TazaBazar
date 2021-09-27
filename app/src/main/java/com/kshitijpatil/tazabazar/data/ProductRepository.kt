@@ -8,11 +8,8 @@ import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.model.ProductCategory
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
 import com.kshitijpatil.tazabazar.util.NetworkUtils
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.lang.System.currentTimeMillis
 
 interface ProductRepository {
     /** Get product categories, if something goes wrong, return an empty list */
@@ -24,7 +21,7 @@ interface ProductRepository {
     /** Get products filtered by [category] and/or [query] */
     suspend fun getProductListBy(category: String?, query: String?): List<Product>
 
-    suspend fun refreshProductCache()
+    suspend fun refreshProductData()
 }
 
 class ProductRepositoryImpl(
@@ -34,47 +31,15 @@ class ProductRepositoryImpl(
     private val appDatabase: AppDatabase,
     private val dispatchers: AppCoroutineDispatchers,
     private val productEntityMapper: ProductToProductWithInventories,
-    private val categoryEntityMapper: ProductCategoryToProductCategoryEntity,
-    private val productCacheExpiryMillis: Long
+    private val categoryEntityMapper: ProductCategoryToProductCategoryEntity
 ) : ProductRepository {
-    private var categoryFirstRun = true
-    private val mutex = Mutex()
     override suspend fun getProductCategories(): List<ProductCategory> {
-        return if (!networkUtils.hasNetworkConnection()) {
-            Timber.d("Network not connected")
-            withContext(dispatchers.io) {
-                productLocalDataSource.getProductCategories()
-            }
-        } else {
-            if (categoryFirstRun) {
-                Timber.d("Caching Product categories...")
-                withContext(dispatchers.io) {
-                    val remoteData = productRemoteDataSource.getProductCategories()
-                        .map(categoryEntityMapper::map)
-                    appDatabase.productCategoryDao.insertAll(remoteData)
-                    categoryFirstRun = false
-                }
-            }
-            productLocalDataSource.getProductCategories()
-        }
+        return productLocalDataSource.getProductCategories()
     }
-
-    // TODO: Persist this in stored preferences
-    private var productsLastSynced: Long? = null
 
     override suspend fun getAllProducts(): List<Product> {
-        if (networkUtils.hasNetworkConnection()) {
-            refreshProductCacheIfExpired()
-        }
-        return withContext(dispatchers.io) { productLocalDataSource.getAllProducts() }
-    }
-
-    private suspend fun refreshProductCacheIfExpired() {
-        val cacheExpired =
-            productsLastSynced == null || currentTimeMillis() - productsLastSynced!! > productCacheExpiryMillis
-        if (cacheExpired) {
-            Timber.d("Product Cache expired! fetching products from the remote source")
-            refreshProductCache()
+        return withContext(dispatchers.io) {
+            productLocalDataSource.getAllProducts()
         }
     }
 
@@ -83,29 +48,38 @@ class ProductRepositoryImpl(
         query: String?
     ): List<Product> {
         return withContext(dispatchers.io) {
-            if (networkUtils.hasNetworkConnection()) {
-                refreshProductCacheIfExpired()
-            }
             Timber.d("Retrieving products for category: $category , query: $query")
             productLocalDataSource.getProductsBy(category, query)
         }
     }
 
-    override suspend fun refreshProductCache() = withContext(dispatchers.io) {
-        val remoteProducts = productRemoteDataSource.getAllProducts()
-            .map(productEntityMapper::map)
-        val allInventories = remoteProducts
-            .map { it.inventories }
-            .flatten()
-            .toList()
-        appDatabase.withTransaction {
-            appDatabase.productDao.deleteAll() // To avoid any inconsistencies
-            // NO for insert in for-loop
-            appDatabase.productDao.insertAll(remoteProducts.map { it.product })
-            appDatabase.inventoryDao.insertAll(allInventories)
-        }
-        mutex.withLock {
-            productsLastSynced = currentTimeMillis()
+    override suspend fun refreshProductData() {
+        withContext(dispatchers.io) {
+            if (!networkUtils.hasNetworkConnection()) {
+                Timber.d("Failed to refresh! No internet connection")
+                return@withContext
+            }
+            Timber.d("Synchronising Product Categories")
+            val remoteData = productRemoteDataSource.getProductCategories()
+                .map(categoryEntityMapper::map)
+            Timber.d("Received ${remoteData.size} categories from the remote source")
+            appDatabase.productCategoryDao.deleteAll()
+            appDatabase.productCategoryDao.insertAll(remoteData)
+
+            Timber.d("Synchronising Product and Inventories")
+            val remoteProducts = productRemoteDataSource.getAllProducts()
+                .map(productEntityMapper::map)
+            Timber.d("Received ${remoteProducts.size} products from the remote source")
+            val allInventories = remoteProducts
+                .map { it.inventories }
+                .flatten()
+                .toList()
+            appDatabase.withTransaction {
+                appDatabase.productDao.deleteAll() // To avoid any inconsistencies
+                // NO for insert in for-loop
+                appDatabase.productDao.insertAll(remoteProducts.map { it.product })
+                appDatabase.inventoryDao.insertAll(allInventories)
+            }
         }
     }
 }

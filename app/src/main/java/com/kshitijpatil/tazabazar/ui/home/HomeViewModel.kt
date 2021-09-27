@@ -45,15 +45,22 @@ class HomeViewModel(
         emit(productRepository.getProductCategories())
     }.stateIn(viewModelScope, WhileSubscribed(), emptyList())
 
+    // TODO: update this
+    private val cacheExpired: Boolean = true
 
     init {
+        // NOTE: We're using this mechanism to filter list by
+        // the last saved parameters from savedInstanceState
         _filter.onEach {
             Timber.d("Filter updated: $it")
-            refreshProductList(it)
+            updateProductList(it)
         }.launchIn(viewModelScope)
+        if (cacheExpired) {
+            viewModelScope.launch { productRepository.refreshProductData() }
+        }
     }
 
-    private fun refreshProductList(filterParams: FilterParams) {
+    private fun updateProductList(filterParams: FilterParams) {
         viewModelScope.launch {
             val productList = productRepository.getProductListBy(
                 category = filterParams.category,

@@ -34,8 +34,7 @@ object RepositoryModule {
             appDatabase,
             appDispatchers,
             MapperModule.productToProductWithInventories,
-            MapperModule.productCategoryToProductCategoryEntity,
-            provideProductCacheExpiryMillis()
+            MapperModule.productCategoryToProductCategoryEntity
         )
     }
 
