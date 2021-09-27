@@ -51,7 +51,7 @@ object RepositoryModule {
     fun provideLocalDataSource(appDatabase: AppDatabase): ProductDataSource {
         return ProductLocalDataSource(
             productDao = appDatabase.productDao,
-            productMapper = MapperModule.ProductWithInventoriesToProduct,
+            productMapper = MapperModule.productWithInventoriesToProduct,
             productCategoryDao = appDatabase.productCategoryDao
         )
     }

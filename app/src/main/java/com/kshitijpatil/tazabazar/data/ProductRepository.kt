@@ -73,8 +73,6 @@ class ProductRepositoryImpl(
             val remoteData = productRemoteDataSource.getProductCategories()
                 .map(categoryEntityMapper::map)
             Timber.d("Received ${remoteData.size} categories from the remote source")
-            appDatabase.productCategoryDao.deleteAll()
-            appDatabase.productCategoryDao.insertAll(remoteData)
 
             Timber.d("Synchronising Product and Inventories")
             val remoteProducts = productRemoteDataSource.getAllProducts()
@@ -85,7 +83,9 @@ class ProductRepositoryImpl(
                 .flatten()
                 .toList()
             appDatabase.withTransaction {
-                appDatabase.productDao.deleteAll() // To avoid any inconsistencies
+                // NOTE: Cascading
+                appDatabase.productCategoryDao.deleteAll() // To avoid any inconsistencies
+                appDatabase.productCategoryDao.insertAll(remoteData)
                 // NO for insert in for-loop
                 appDatabase.productDao.insertAll(remoteProducts.map { it.product })
                 appDatabase.inventoryDao.insertAll(allInventories)
