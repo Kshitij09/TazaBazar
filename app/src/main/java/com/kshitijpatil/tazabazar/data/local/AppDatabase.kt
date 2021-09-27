@@ -1,7 +1,9 @@
 package com.kshitijpatil.tazabazar.data.local
 
-import android.content.Context
-import androidx.room.*
+import androidx.room.AutoMigration
+import androidx.room.Database
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.kshitijpatil.tazabazar.data.local.dao.InventoryDao
 import com.kshitijpatil.tazabazar.data.local.dao.ProductCategoryDao
 import com.kshitijpatil.tazabazar.data.local.dao.ProductDao
@@ -21,12 +23,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val productCategoryDao: ProductCategoryDao
 
     companion object {
-        private const val databaseName = "tazabazaar-db"
-
-        fun buildDatabase(context: Context): AppDatabase {
-            return Room.databaseBuilder(context, AppDatabase::class.java, databaseName)
-                .fallbackToDestructiveMigration()
-                .build()
-        }
+        const val databaseName = "tazabazaar-db"
     }
 }
