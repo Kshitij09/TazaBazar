@@ -29,6 +29,17 @@
         <item name="android:minHeight">48dp</item>
     </style>
 
+    <style name="Widget.App.FavoriteButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="cornerRadius">5dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:insetRight">0dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="android:padding">0dp</item>
+    </style>
+
     <style name="Widget.App.Chip.Choice" parent="Widget.MaterialComponents.Chip.Choice">
         <item name="chipBackgroundColor">@color/product_category_chip_background</item>
     </style>

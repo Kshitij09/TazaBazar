@@ -5,4 +5,7 @@
     <dimen name="product_item_card_radius">16dp</dimen>
     <dimen name="cart_button_size">40dp</dimen>
     <dimen name="product_search_input_corner_radius">6dp</dimen>
+    <dimen name="product_item_favorite_btn_size">32dp</dimen>
+    <dimen name="product_item_favorite_icon_size">20dp</dimen>
+    <dimen name="product_item_favorite_margin_top_end">8dp</dimen>
 </resources>

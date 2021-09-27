@@ -7,6 +7,11 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="tzb_light_gray">#E6E6E6</color>
+    <color name="tzb_gray_100">#E6E6E6</color>
+    <color name="tzb_gray_200">#B2B2B2</color>
+    <color name="tzb_gray_400">#696969</color>
+    <color name="tzb_gray_600">#505050</color>
     <color name="tzb_orange">#FBA308</color>
+    <color name="tzb_green">#8CC63F</color>
+    <color name="tzb_green_light">#E8F4D9</color>
 </resources>
