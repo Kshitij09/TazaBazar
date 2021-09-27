@@ -35,15 +35,18 @@ jobs:
       - name: Build Project
         run: ./gradlew assembleDebug --stacktrace
 
+      - name: Run Unit tests
+        run: ./gradlew test
+
       - name: Upload build outputs (APKs)
         uses: actions/upload-artifact@v2
         with:
           name: build-outputs
-          path: ./app/build/outputs
+          path: app/build/outputs
 
       - name: Upload build reports
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: build-reports
-          path: ./app/build/reports
+          path: app/build/reports
