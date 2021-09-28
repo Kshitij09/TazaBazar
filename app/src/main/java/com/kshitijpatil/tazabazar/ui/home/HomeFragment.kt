@@ -72,8 +72,9 @@ class HomeFragment : Fragment() {
     }
 
     private fun observeProductList(productListAdapter: ProductListAdapter) {
-        lifecycleScope.launchWhenCreated {
-            viewModel.productList.collect(productListAdapter::submitList)
+        // Collect viewModel Flows in a confined viewLifecycle scope
+        launchAndRepeatWithViewLifecycle {
+            launch { viewModel.productList.collect(productListAdapter::submitList) }
         }
     }
 
