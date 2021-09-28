@@ -7,12 +7,14 @@ import androidx.recyclerview.widget.ListAdapter
 import com.kshitijpatil.tazabazar.databinding.ProductItemViewBinding
 import com.kshitijpatil.tazabazar.model.Product
 
-class ProductListAdapter : ListAdapter<Product, ProductViewHolder>(ProductDiffCallback()) {
+class ProductListAdapter(
+    var onItemActionCallback: ProductViewHolder.OnItemActionCallback? = null
+) : ListAdapter<Product, ProductViewHolder>(ProductDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         val binding = ProductItemViewBinding.inflate(layoutInflater, parent, false)
-        return ProductViewHolder(binding)
+        return ProductViewHolder(binding, onItemActionCallback)
     }
 
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {

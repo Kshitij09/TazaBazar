@@ -14,7 +14,8 @@ import com.kshitijpatil.tazabazar.model.Product
 // TODO: Handle discount details
 // TODO: Handle Cart Action
 class ProductViewHolder(
-    private val binding: ProductItemViewBinding
+    private val binding: ProductItemViewBinding,
+    var onItemActionCallback: OnItemActionCallback? = null
 ) : RecyclerView.ViewHolder(binding.root) {
     private var isFavorite = false
 
@@ -28,6 +29,7 @@ class ProductViewHolder(
         binding.btnFavorite.setOnClickListener {
             isFavorite = !isFavorite
             updateFavoriteButtonColors(binding.btnFavorite, isFavorite)
+            onItemActionCallback?.onFavoriteToggled(item.sku, isFavorite)
         }
         loadImage(binding.ivImage, item.imageUri)
     }
@@ -56,5 +58,14 @@ class ProductViewHolder(
             memoryCachePolicy(CachePolicy.ENABLED)
             memoryCacheKey(imageUri)
         }
+    }
+
+    interface OnItemActionCallback {
+        /**
+         * Called whenever user clicks on the favorite button
+         * @param productSku sku of the product whose favorite was toggled
+         * @param isFavorite whether product was marked is favorite
+         */
+        fun onFavoriteToggled(productSku: String, isFavorite: Boolean)
     }
 }
