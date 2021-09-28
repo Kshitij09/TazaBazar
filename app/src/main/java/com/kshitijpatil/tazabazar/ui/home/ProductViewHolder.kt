@@ -50,7 +50,6 @@ class ProductViewHolder(
 
     private fun loadImage(imageView: ImageView, imageUri: String) {
         imageView.load(imageUri) {
-            crossfade(true)
             placeholder(R.drawable.product_preview_placeholder)
             error(R.drawable.product_preview_placeholder)
             memoryCachePolicy(CachePolicy.ENABLED)
