@@ -6,10 +6,35 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.coroutineScope
 import com.kshitijpatil.tazabazar.databinding.FragmentHomeBinding
 import com.kshitijpatil.tazabazar.di.ViewModelFactory
+import com.kshitijpatil.tazabazar.ui.SwipeRefreshHandler
+import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import timber.log.Timber
+
+/**
+ *
+ * adapter.setOnFavoriteToggledListener { sku, isFavorite ->
+ *      viewModel.submitFavoriteAction(sku, isFavorite)
+ * }
+ * -------------
+ * HomeViewModel
+ *  init {
+ *      favoritePendingActions.collect{ action ->
+ *          val productMap = productList.value
+ *          var product = productMap[action.sku]
+ *          productMap[actions.sku] = product.copy(isFavorite = action.isFavorite)
+ *          productList.emit(productMap)
+ *      }
+ *  }
+ *
+ *   fun submitFavoriteAction(sku: String, isFavorite: Boolean) {
+ *      favoritePendingActions.emit(FavoriteAction(sku,isFavorite)
+ *   }
+ */
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -31,13 +56,19 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Timber.d("On View Created called")
         observeProductList(productListAdapter)
-        binding.swipeRefreshProducts.setOnRefreshListener {
-            binding.swipeRefreshProducts.isRefreshing = true
-            viewModel.refreshData().invokeOnCompletion {
-                binding.swipeRefreshProducts.isRefreshing = false
-            }
-        }
+        setupSwipeRefreshUI()
+    }
+
+    private fun setupSwipeRefreshUI() {
+        val swipeRefreshHandler = SwipeRefreshHandler(
+            scope = viewLifecycleOwner.lifecycle.coroutineScope,
+            swipeRefreshLayout = binding.swipeRefreshProducts,
+            action = { viewModel.refreshData() }
+        )
+        lifecycle.addObserver(swipeRefreshHandler)
+        binding.swipeRefreshProducts.setOnRefreshListener(swipeRefreshHandler)
     }
 
     private fun observeProductList(productListAdapter: ProductListAdapter) {

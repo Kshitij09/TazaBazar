@@ -67,7 +67,7 @@ class HomeViewModel(
         }
     }
 
-    fun refreshData() = viewModelScope.launch {
+    suspend fun refreshData() {
         productRepository.refreshProductData()
         _productCategories.emit(productRepository.getProductCategories())
         updateProductList(_filter.value)
