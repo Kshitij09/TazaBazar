@@ -6,19 +6,32 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/nav_host_fragment"
-        android:name="androidx.navigation.fragment.NavHostFragment"
+    <FrameLayout
+        android:id="@+id/content_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/bottom_nav_bar"
-        android:layout_alignParentTop="true"
-        app:defaultNavHost="true"
-        app:navGraph="@navigation/navigation_main"
-        tools:layout="@layout/fragment_home" />
+        android:layout_above="@id/bottom_navigation"
+        android:layout_alignParentTop="true">
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/nav_host_fragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/navigation_main"
+            tools:layout="@layout/fragment_home" />
+
+        <com.kshitijpatil.tazabazar.widget.FadingSnackbar
+            android:id="@+id/snackbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_nav_bar"
+        android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="@dimen/bottom_bar_height"
         android:layout_alignParentBottom="true"

@@ -7,10 +7,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.coroutineScope
+import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentHomeBinding
 import com.kshitijpatil.tazabazar.di.ViewModelFactory
 import com.kshitijpatil.tazabazar.ui.SwipeRefreshHandler
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
+import com.kshitijpatil.tazabazar.ui.favorite.FavoriteOptionsBottomSheet
+import com.kshitijpatil.tazabazar.widget.FadingSnackbar
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -74,6 +77,18 @@ class HomeFragment : Fragment() {
         productListAdapter.onItemActionCallback = object : ProductViewHolder.OnItemActionCallback {
             override fun onFavoriteToggled(productSku: String, isFavorite: Boolean) {
                 viewModel.submitFavoriteAction(productSku, isFavorite)
+                val snackBarLayout = requireActivity().findViewById<FadingSnackbar>(R.id.snackbar)
+                val favoriteOptions = FavoriteOptionsBottomSheet()
+                snackBarLayout.show(
+                    messageText = "$productSku marked favorite",
+                    actionId = R.string.action_change,
+                    actionClick = {
+                        favoriteOptions.show(
+                            parentFragmentManager,
+                            FavoriteOptionsBottomSheet.TAG
+                        )
+                    }
+                )
             }
         }
         binding.rvProducts.adapter = productListAdapter
