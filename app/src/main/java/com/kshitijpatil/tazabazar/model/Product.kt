@@ -7,7 +7,8 @@ data class Product(
     val name: String,
     val category: String,
     val imageUri: String,
-    val inventories: List<Inventory> = emptyList()
+    val inventories: List<Inventory> = emptyList(),
+    val isFavorite: Boolean = false
 )
 
 data class Inventory(

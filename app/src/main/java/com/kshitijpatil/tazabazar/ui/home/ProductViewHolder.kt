@@ -17,17 +17,15 @@ class ProductViewHolder(
     private val binding: ProductItemViewBinding,
     var onItemActionCallback: OnItemActionCallback? = null
 ) : RecyclerView.ViewHolder(binding.root) {
-    private var isFavorite = false
-
     fun bind(item: Product) {
         binding.tvName.text = item.name
         // TODO: Make it list menu
         val inventory = item.inventories[0]
         binding.tvQuantityLabel.text = inventory.quantityLabel
         binding.tvPrice.text = getPriceStringFor(inventory.price)
-        updateFavoriteButtonColors(binding.btnFavorite, isFavorite)
+        updateFavoriteButtonColors(binding.btnFavorite, item.isFavorite)
         binding.btnFavorite.setOnClickListener {
-            isFavorite = !isFavorite
+            val isFavorite = !item.isFavorite
             updateFavoriteButtonColors(binding.btnFavorite, isFavorite)
             onItemActionCallback?.onFavoriteToggled(item.sku, isFavorite)
         }

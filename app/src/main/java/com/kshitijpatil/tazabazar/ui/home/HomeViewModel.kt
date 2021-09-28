@@ -73,6 +73,16 @@ class HomeViewModel(
         updateProductList(_filter.value)
     }
 
+    fun submitFavoriteAction(productSku: String, isFavorite: Boolean) {
+        val currentList = _productList.value.toMutableList()
+        val itemIndex = currentList.indexOfFirst { it.sku == productSku }
+        if (itemIndex != -1) {
+            val matchingItem = currentList[itemIndex]
+            currentList[itemIndex] = matchingItem.copy(isFavorite = isFavorite)
+            viewModelScope.launch { _productList.emit(currentList) }
+        }
+    }
+
     private fun updateProductList(filterParams: FilterParams) {
         viewModelScope.launch {
             val productList = productRepository.getProductListBy(

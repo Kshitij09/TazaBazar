@@ -71,6 +71,11 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        productListAdapter.onItemActionCallback = object : ProductViewHolder.OnItemActionCallback {
+            override fun onFavoriteToggled(productSku: String, isFavorite: Boolean) {
+                viewModel.submitFavoriteAction(productSku, isFavorite)
+            }
+        }
         binding.rvProducts.adapter = productListAdapter
         return binding.root
     }
