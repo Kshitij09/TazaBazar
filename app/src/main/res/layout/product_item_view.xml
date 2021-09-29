@@ -30,10 +30,10 @@
             android:layout_height="@dimen/product_item_favorite_btn_size"
             android:layout_marginTop="@dimen/product_item_favorite_margin_top_end"
             android:layout_marginEnd="@dimen/product_item_favorite_margin_top_end"
-            app:backgroundTint="@color/tzb_green_light"
+            app:backgroundTint="@color/tzb_gray_100"
+            app:iconTint="@color/tzb_gray_200"
             app:icon="@drawable/favorite_filled"
             app:iconSize="@dimen/product_item_favorite_icon_size"
-            app:iconTint="@color/tzb_green"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
