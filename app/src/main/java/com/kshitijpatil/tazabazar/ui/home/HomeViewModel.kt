@@ -4,8 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kshitijpatil.tazabazar.data.ProductRepository
+import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.model.ProductCategory
+import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
@@ -14,7 +16,8 @@ import timber.log.Timber
 
 class HomeViewModel(
     private val savedStateHandle: SavedStateHandle,
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    private val dispatchers: AppCoroutineDispatchers
 ) : ViewModel() {
     companion object {
         private const val KEY_QUERY = "query"
@@ -73,16 +76,6 @@ class HomeViewModel(
         updateProductList(_filter.value)
     }
 
-    fun submitFavoriteAction(productSku: String, isFavorite: Boolean) {
-        val currentList = _productList.value.toMutableList()
-        val itemIndex = currentList.indexOfFirst { it.sku == productSku }
-        if (itemIndex != -1) {
-            val matchingItem = currentList[itemIndex]
-            currentList[itemIndex] = matchingItem.copy(isFavorite = isFavorite)
-            viewModelScope.launch { _productList.emit(currentList) }
-        }
-    }
-
     private fun updateProductList(filterParams: FilterParams) {
         viewModelScope.launch {
             val productList = productRepository.getProductListBy(
@@ -107,6 +100,28 @@ class HomeViewModel(
         val q = if (query.isBlank()) null else query
         _filter.value = _filter.value.copy(query = q)
         savedStateHandle[KEY_QUERY] = query
+    }
+
+    /**
+     * Will update the favorites in persistent storage and memory cache parallelly
+     */
+    fun updateFavorites(productSku: String, favoriteChoices: Set<FavoriteType>): Job {
+        return viewModelScope.launch {
+            launch {
+                productRepository.updateFavorites(productSku, favoriteChoices)
+            }
+            launch(dispatchers.computation) {
+                val currentList = _productList.value.toMutableList()
+                val updateIndex = currentList.indexOfFirst { it.sku == productSku }
+                if (updateIndex != -1) {
+                    val updated = currentList[updateIndex].copy(favorites = favoriteChoices)
+                    currentList[updateIndex] = updated
+                    _productList.emit(currentList)
+                } else {
+                    Timber.d("updateFavorites: product with sku=$productSku not found in cache")
+                }
+            }
+        }
     }
 
     data class FilterParams(

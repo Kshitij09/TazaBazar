@@ -7,7 +7,11 @@
     <fragment
         android:id="@id/navigation_home"
         android:name="com.kshitijpatil.tazabazar.ui.home.HomeFragment"
-        android:label="HomeFragment" />
+        android:label="HomeFragment">
+        <action
+            android:id="@+id/action_navigation_home_to_bottom_sheet_favorite_options"
+            app:destination="@id/bottom_sheet_favorite_options" />
+    </fragment>
 
     <fragment
         android:id="@id/navigation_favorite"
@@ -28,5 +32,19 @@
         android:id="@id/navigation_profile"
         android:name="com.kshitijpatil.tazabazar.ui.profile.ProfileFragment"
         android:label="ProfileFragment" />
+
+    <dialog
+        android:id="@id/bottom_sheet_favorite_options"
+        android:name="com.kshitijpatil.tazabazar.ui.favorite.FavoriteOptionsBottomSheet"
+        android:label="FavoriteOptions">
+        <argument
+            android:name="productSku"
+            app:argType="string" />
+        <argument
+            android:name="current_favorites"
+            android:defaultValue="@null"
+            app:argType="integer[]"
+            app:nullable="true" />
+    </dialog>
 
 </navigation>

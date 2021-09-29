@@ -9,8 +9,15 @@ data class Product(
     val category: String,
     val imageUri: String,
     val inventories: List<Inventory> = emptyList(),
-    val favorites: List<FavoriteType> = emptyList()
-)
+    val favorites: Set<FavoriteType> = emptySet()
+) {
+    /** Creates a copy of this instance with favorites now having [FavoriteType.WEEKLY] */
+    fun withToWeeklyFavorites(): Product {
+        val newFavorites = favorites.toMutableSet()
+        newFavorites.add(FavoriteType.WEEKLY)
+        return this.copy(favorites = newFavorites)
+    }
+}
 
 data class Inventory(
     val id: Int,

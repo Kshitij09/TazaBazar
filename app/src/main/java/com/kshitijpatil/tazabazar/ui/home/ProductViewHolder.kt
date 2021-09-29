@@ -23,11 +23,9 @@ class ProductViewHolder(
         val inventory = item.inventories[0]
         binding.tvQuantityLabel.text = inventory.quantityLabel
         binding.tvPrice.text = getPriceStringFor(inventory.price)
-        updateFavoriteButtonColors(binding.btnFavorite, item.isFavorite)
+        updateFavoriteButtonColors(binding.btnFavorite, item.favorites.isNotEmpty())
         binding.btnFavorite.setOnClickListener {
-            val isFavorite = !item.isFavorite
-            updateFavoriteButtonColors(binding.btnFavorite, isFavorite)
-            onItemActionCallback?.onFavoriteToggled(item.sku, isFavorite)
+            onItemActionCallback?.onFavoriteClicked(item)
         }
         loadImage(binding.ivImage, item.imageUri)
     }
@@ -60,9 +58,8 @@ class ProductViewHolder(
     interface OnItemActionCallback {
         /**
          * Called whenever user clicks on the favorite button
-         * @param productSku sku of the product whose favorite was toggled
-         * @param isFavorite whether product was marked is favorite
+         * @param product whose favorite was clicked
          */
-        fun onFavoriteToggled(productSku: String, isFavorite: Boolean)
+        fun onFavoriteClicked(product: Product)
     }
 }
