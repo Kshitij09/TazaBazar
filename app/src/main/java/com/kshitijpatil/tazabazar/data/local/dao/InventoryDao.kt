@@ -2,7 +2,7 @@ package com.kshitijpatil.tazabazar.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.kshitijpatil.tazabazar.data.local.InventoryEntity
+import com.kshitijpatil.tazabazar.data.local.entity.InventoryEntity
 
 @Dao
 interface InventoryDao : ReplacingDao<InventoryEntity> {
