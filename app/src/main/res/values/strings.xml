@@ -9,4 +9,9 @@
     <string name="label_all">All</string>
     <string name="label_search_product">Search Product…</string>
     <string name="action_change">Change</string>
+    <string name="info_added_to_weekly_favorites">Added to Weekly Favorites</string>
+    <string name="label_weekly_list">Weekly List</string>
+    <string name="label_monthly_list">Monthly List</string>
+    <string name="action_done">Done</string>
+    <string name="label_add_to_contd">Add to…</string>
 </resources>
