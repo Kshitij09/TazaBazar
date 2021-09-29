@@ -1,5 +1,6 @@
 package com.kshitijpatil.tazabazar.model
 
+import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import org.threeten.bp.OffsetDateTime
 
 data class Product(
@@ -8,7 +9,7 @@ data class Product(
     val category: String,
     val imageUri: String,
     val inventories: List<Inventory> = emptyList(),
-    val isFavorite: Boolean = false
+    val favorites: List<FavoriteType> = emptyList()
 )
 
 data class Inventory(
