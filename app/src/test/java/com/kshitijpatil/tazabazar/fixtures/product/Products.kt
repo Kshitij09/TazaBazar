@@ -1,9 +1,9 @@
 package com.kshitijpatil.tazabazar.fixtures.product
 
-import com.kshitijpatil.tazabazar.data.local.InventoryEntity
-import com.kshitijpatil.tazabazar.data.local.ProductCategoryEntity
-import com.kshitijpatil.tazabazar.data.local.ProductEntity
-import com.kshitijpatil.tazabazar.data.local.ProductWithInventories
+import com.kshitijpatil.tazabazar.data.local.entity.InventoryEntity
+import com.kshitijpatil.tazabazar.data.local.entity.ProductCategoryEntity
+import com.kshitijpatil.tazabazar.data.local.entity.ProductEntity
+import com.kshitijpatil.tazabazar.data.local.entity.ProductWithInventories
 import org.threeten.bp.OffsetDateTime
 
 val vegetables = ProductCategoryEntity("vegetables", "Vegetables", "vgt")

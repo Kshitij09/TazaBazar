@@ -1,9 +1,10 @@
 package com.kshitijpatil.tazabazar.data.local.dao
 
 import androidx.room.*
-import com.kshitijpatil.tazabazar.data.local.InventoryEntity
-import com.kshitijpatil.tazabazar.data.local.ProductEntity
-import com.kshitijpatil.tazabazar.data.local.ProductWithInventories
+import com.kshitijpatil.tazabazar.data.local.entity.FavoriteEntity
+import com.kshitijpatil.tazabazar.data.local.entity.InventoryEntity
+import com.kshitijpatil.tazabazar.data.local.entity.ProductEntity
+import com.kshitijpatil.tazabazar.data.local.entity.ProductWithInventories
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -16,6 +17,21 @@ interface ProductDao : ReplacingDao<ProductEntity> {
     suspend fun insertProductAndInventories(
         product: ProductEntity,
         inventories: List<InventoryEntity>
+    )
+
+    @Transaction
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertProductWithInventoriesAndFavorites(
+        product: ProductEntity,
+        inventories: List<InventoryEntity>,
+        favorites: List<FavoriteEntity>
+    )
+
+    @Transaction
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertProductWithFavorites(
+        product: ProductEntity,
+        favorites: List<FavoriteEntity>
     )
 
     @Query("DELETE FROM product WHERE sku= :sku")
@@ -57,6 +73,7 @@ interface ProductDao : ReplacingDao<ProductEntity> {
     @Transaction
     @Query("SELECT * FROM product WHERE category = :category")
     suspend fun getProductWithInventoriesByCategory(category: String): List<ProductWithInventories>
+
 
     @Transaction
     @Query("SELECT * FROM product WHERE category = :category AND name LIKE :name")

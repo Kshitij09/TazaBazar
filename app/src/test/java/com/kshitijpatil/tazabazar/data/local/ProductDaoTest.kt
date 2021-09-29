@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.kshitijpatil.tazabazar.data.local.entity.*
 import com.kshitijpatil.tazabazar.fixtures.product.*
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
@@ -23,6 +24,7 @@ class ProductDaoTest {
     private val productDao = appDatabase.productDao
     private val inventoryDao = appDatabase.inventoryDao
     private val productCategoryDao = appDatabase.productCategoryDao
+    private val favoriteDao = appDatabase.favoriteDao
 
     private suspend fun insertVegetablesCategory() {
         productCategoryDao.insert(vegetables)
@@ -58,6 +60,37 @@ class ProductDaoTest {
         assertThat(savedProductWithInventories.product).isEqualTo(product)
         assertThat(savedProductWithInventories.inventories).hasSize(1)
         assertThat(savedProductWithInventories.inventories[0]).isEqualTo(inv)
+    }
+
+    @Test
+    fun insertProductWithFavorites() = scope.runBlockingTest {
+        insertVegetablesCategory()
+        val product = tomatoRed;
+        val product2 = tomatoGreen
+        val weeklyFavorite = FavoriteEntity(FavoriteType.WEEKLY, product.sku)
+        productDao.insertProductWithFavorites(product, listOf(weeklyFavorite))
+        productDao.insert(product2)
+
+        val expectedEntities = listOf(
+            ProductWithInventoriesAndFavorites(product, favorites = listOf(weeklyFavorite)),
+            ProductWithInventoriesAndFavorites(product2)
+        )
+        var retrieved = favoriteDao.getAllProductWithInventoriesAndFavorites()
+        assertThat(retrieved).containsExactlyElementsIn(expectedEntities)
+
+        // since all products are vegetables only
+        retrieved = favoriteDao.getProductWithInventoriesAndFavoritesByCategory(vegetables.label)
+        assertThat(retrieved).containsExactlyElementsIn(expectedEntities)
+
+        // again, both contain 'tomato' in their names
+        retrieved = favoriteDao.getProductWithInventoriesAndFavoritesByName("%tomato%")
+        assertThat(retrieved).containsExactlyElementsIn(expectedEntities)
+
+        retrieved = favoriteDao.getProductsWithInventoriesAndFavoritesByCategoryAndName(
+            vegetables.label,
+            tomatoGreen.name
+        )
+        assertThat(retrieved).containsExactly(ProductWithInventoriesAndFavorites(tomatoGreen))
     }
 
     @Test
@@ -130,7 +163,7 @@ class ProductDaoTest {
     @Test
     fun getProductsByName() = scope.runBlockingTest {
         insertVegetablesCategory()
-        val product1 = tomatoRed;
+        val product1 = tomatoRed
         val product2 = tomatoGreen
         productDao.insertAll(product1, product2)
         val reloaded = productDao.getProductsByName("%tomato%")
@@ -140,7 +173,7 @@ class ProductDaoTest {
     @Test
     fun getProductsBySkus() = scope.runBlockingTest {
         insertVegetablesCategory()
-        val product1 = tomatoRed;
+        val product1 = tomatoRed
         val product2 = tomatoGreen
         productDao.insertAll(product1, product2)
         val reloaded = productDao.getProductsBySkus(listOf(product1.sku, product2.sku))
@@ -169,7 +202,7 @@ class ProductDaoTest {
 
     @Test
     fun observeAllProducts_whenProductUpdates_shouldEmitNewList() {
-        val product1 = tomatoRed;
+        val product1 = tomatoRed
         val product2 = tomatoGreen
         scope.runBlockingTest {
             insertVegetablesCategory()
@@ -195,7 +228,8 @@ class ProductDaoTest {
             productDao.observeAllProductWithInventories().test {
                 assertThat(awaitItem()).isEmpty()
                 productDao.insert(product1)
-                assertThat(awaitItem()).containsExactly(ProductWithInventories(product1))
+                var actual = awaitItem()
+                assertThat(actual).containsExactly(ProductWithInventories(product1))
                 inventoryDao.insert(inv1)
                 assertThat(awaitItem()).containsExactly(
                     ProductWithInventories(

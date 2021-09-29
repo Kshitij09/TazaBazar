@@ -2,7 +2,11 @@ package com.kshitijpatil.tazabazar.data.mapper
 
 import com.kshitijpatil.tazabazar.api.dto.ProductCategoryDto
 import com.kshitijpatil.tazabazar.api.dto.ProductResponse
-import com.kshitijpatil.tazabazar.data.local.*
+import com.kshitijpatil.tazabazar.data.local.TazaBazarTypeConverters
+import com.kshitijpatil.tazabazar.data.local.entity.InventoryEntity
+import com.kshitijpatil.tazabazar.data.local.entity.ProductCategoryEntity
+import com.kshitijpatil.tazabazar.data.local.entity.ProductEntity
+import com.kshitijpatil.tazabazar.data.local.entity.ProductWithInventories
 import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.model.ProductCategory
