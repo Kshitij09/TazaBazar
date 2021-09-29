@@ -4,7 +4,6 @@ import androidx.room.*
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteEntity
 import com.kshitijpatil.tazabazar.data.local.entity.InventoryEntity
 import com.kshitijpatil.tazabazar.data.local.entity.ProductEntity
-import com.kshitijpatil.tazabazar.data.local.entity.ProductWithInventories
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -40,14 +39,6 @@ interface ProductDao : ReplacingDao<ProductEntity> {
     @Query("DELETE FROM product")
     suspend fun deleteAll()
 
-    @Transaction
-    @Query("SELECT * FROM product")
-    suspend fun getAllProductWithInventories(): List<ProductWithInventories>
-
-    @Transaction
-    @Query("SELECT * FROM product")
-    fun observeAllProductWithInventories(): Flow<List<ProductWithInventories>>
-
     @Query("SELECT * FROM product")
     suspend fun getAllProducts(): List<ProductEntity>
 
@@ -60,25 +51,9 @@ interface ProductDao : ReplacingDao<ProductEntity> {
     @Query("SELECT * FROM product WHERE name LIKE :name")
     suspend fun getProductsByName(name: String): List<ProductEntity>
 
-    @Transaction
-    @Query("SELECT * FROM product WHERE name LIKE :name")
-    suspend fun getProductWithInventoriesByName(name: String): List<ProductWithInventories>
-
     @Query("SELECT * FROM product WHERE sku IN (:productSkus)")
     suspend fun getProductsBySkus(productSkus: List<String>): List<ProductEntity>
 
     @Query("SELECT * FROM product WHERE category = :category")
     suspend fun getProductsByCategory(category: String): List<ProductEntity>
-
-    @Transaction
-    @Query("SELECT * FROM product WHERE category = :category")
-    suspend fun getProductWithInventoriesByCategory(category: String): List<ProductWithInventories>
-
-
-    @Transaction
-    @Query("SELECT * FROM product WHERE category = :category AND name LIKE :name")
-    suspend fun getProductsByCategoryAndName(
-        category: String,
-        name: String
-    ): List<ProductWithInventories>
 }

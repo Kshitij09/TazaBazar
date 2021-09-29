@@ -1,14 +1,14 @@
 package com.kshitijpatil.tazabazar.data.local
 
 import com.kshitijpatil.tazabazar.data.ProductDataSource
+import com.kshitijpatil.tazabazar.data.local.dao.InventoryDao
 import com.kshitijpatil.tazabazar.data.local.dao.ProductCategoryDao
-import com.kshitijpatil.tazabazar.data.local.dao.ProductDao
 import com.kshitijpatil.tazabazar.data.mapper.ProductWithInventoriesToProduct
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.model.ProductCategory
 
 class ProductLocalDataSource(
-    private val productDao: ProductDao,
+    private val inventoryDao: InventoryDao,
     private val productMapper: ProductWithInventoriesToProduct,
     private val productCategoryDao: ProductCategoryDao
 ) : ProductDataSource {
@@ -23,19 +23,19 @@ class ProductLocalDataSource(
     }
 
     override suspend fun getAllProducts(): List<Product> {
-        return productDao.getAllProductWithInventories()
+        return inventoryDao.getAllProductWithInventories()
             .map(productMapper::map)
     }
 
     override suspend fun getProductsBy(category: String?, query: String?): List<Product> {
         val productEntities = if (category != null && query != null) {
-            productDao.getProductsByCategoryAndName(category, "%$query%")
+            inventoryDao.getProductsByCategoryAndName(category, "%$query%")
         } else if (category != null) {
-            productDao.getProductWithInventoriesByCategory(category)
+            inventoryDao.getProductWithInventoriesByCategory(category)
         } else if (query != null) {
-            productDao.getProductWithInventoriesByName("%$query%")
+            inventoryDao.getProductWithInventoriesByName("%$query%")
         } else {
-            productDao.getAllProductWithInventories()
+            inventoryDao.getAllProductWithInventories()
         }
         return productEntities.map(productMapper::map)
     }

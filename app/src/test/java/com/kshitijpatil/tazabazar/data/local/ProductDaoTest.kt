@@ -54,7 +54,7 @@ class ProductDaoTest {
         val product = tomatoRed
         val inv = tomatoRedInv1
         productDao.insertProductAndInventories(product, listOf(inv))
-        val retrieved = productDao.getAllProductWithInventories()
+        val retrieved = inventoryDao.getAllProductWithInventories()
         assertThat(retrieved).hasSize(1)
         val savedProductWithInventories = retrieved[0]
         assertThat(savedProductWithInventories.product).isEqualTo(product)
@@ -146,7 +146,7 @@ class ProductDaoTest {
         insertAndAssertProduct(product)
         // Test
         productDao.deleteAll()
-        assertThat(productDao.getAllProductWithInventories()).isEmpty()
+        assertThat(inventoryDao.getAllProductWithInventories()).isEmpty()
     }
 
     @Test
@@ -194,9 +194,9 @@ class ProductDaoTest {
         insertVegetablesCategory()
         val products = listOf(tomatoRed, tomatoGreen)
         productDao.insertAll(products)
-        var reloaded = productDao.getProductsByCategoryAndName(vegetables.label, "%red%")
+        var reloaded = inventoryDao.getProductsByCategoryAndName(vegetables.label, "%red%")
         assertThat(reloaded).containsExactly(ProductWithInventories(tomatoRed))
-        reloaded = productDao.getProductsByCategoryAndName(vegetables.label, "%green%")
+        reloaded = inventoryDao.getProductsByCategoryAndName(vegetables.label, "%green%")
         assertThat(reloaded).containsExactly(ProductWithInventories(tomatoGreen))
     }
 
@@ -225,7 +225,7 @@ class ProductDaoTest {
         val inv1 = tomatoRedInv1
         scope.runBlockingTest {
             insertVegetablesCategory()
-            productDao.observeAllProductWithInventories().test {
+            inventoryDao.observeAllProductWithInventories().test {
                 assertThat(awaitItem()).isEmpty()
                 productDao.insert(product1)
                 var actual = awaitItem()
