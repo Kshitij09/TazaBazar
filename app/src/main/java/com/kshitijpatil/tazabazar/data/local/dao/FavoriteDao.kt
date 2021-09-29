@@ -20,6 +20,9 @@ interface FavoriteDao {
     @Delete
     suspend fun delete(favoriteEntity: FavoriteEntity)
 
+    @Query("DELETE FROM favorite WHERE product_sku = :productSku")
+    suspend fun deleteFavoritesBySku(productSku: String)
+
     @Query("SELECT * FROM favorite")
     suspend fun getAllFavorites(): List<FavoriteEntity>
 

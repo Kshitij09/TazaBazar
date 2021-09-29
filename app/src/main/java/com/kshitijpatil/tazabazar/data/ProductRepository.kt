@@ -2,6 +2,8 @@ package com.kshitijpatil.tazabazar.data
 
 import androidx.room.withTransaction
 import com.kshitijpatil.tazabazar.data.local.AppDatabase
+import com.kshitijpatil.tazabazar.data.local.entity.FavoriteEntity
+import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.data.mapper.ProductCategoryToProductCategoryEntity
 import com.kshitijpatil.tazabazar.data.mapper.ProductToProductWithInventories
 import com.kshitijpatil.tazabazar.model.Product
@@ -26,6 +28,9 @@ interface ProductRepository {
     ): List<Product>
 
     suspend fun refreshProductData()
+
+    /** Update Favorite Choices of a Product with given sku */
+    suspend fun updateFavorites(productSku: String, favoriteChoices: Set<FavoriteType>)
 }
 
 class ProductRepositoryImpl(
@@ -89,6 +94,17 @@ class ProductRepositoryImpl(
                 // NO for insert in for-loop
                 appDatabase.productDao.insertAll(remoteProducts.map { it.product })
                 appDatabase.inventoryDao.insertAll(allInventories)
+            }
+        }
+    }
+
+    override suspend fun updateFavorites(productSku: String, favoriteChoices: Set<FavoriteType>) {
+        Timber.d("Updating favorites for productSku=$productSku to $favoriteChoices")
+        withContext(dispatchers.io) {
+            appDatabase.withTransaction {
+                appDatabase.favoriteDao.deleteFavoritesBySku(productSku)
+                val favoriteEntities = favoriteChoices.map { FavoriteEntity(it, productSku) }
+                appDatabase.favoriteDao.insertAll(favoriteEntities)
             }
         }
     }

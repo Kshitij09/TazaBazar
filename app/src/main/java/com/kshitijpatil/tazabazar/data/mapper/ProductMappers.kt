@@ -61,7 +61,7 @@ class ProductWithInventoriesAndFavoritesToProduct(
         val inventories = from.inventories.map(inventoryMapper::map)
         val favorites = from.favorites.map(FavoriteEntity::type)
         val product = productMapper.map(from.product)
-        return product.copy(inventories = inventories, favorites = favorites)
+        return product.copy(inventories = inventories, favorites = favorites.toSet())
     }
 }
 
