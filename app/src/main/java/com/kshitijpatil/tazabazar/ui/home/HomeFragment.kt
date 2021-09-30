@@ -63,7 +63,6 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Timber.d("On View Created called")
         observeProductList(productListAdapter)
         setupSwipeRefreshUI()
     }
