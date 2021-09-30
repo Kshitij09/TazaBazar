@@ -42,6 +42,7 @@ object RepositoryModule {
             appDatabase,
             appDispatchers,
             MapperModule.productToProductWithInventories,
+            MapperModule.productWithInventoriesToProduct,
             MapperModule.productCategoryToProductCategoryEntity
         )
         productRepository = newRepo

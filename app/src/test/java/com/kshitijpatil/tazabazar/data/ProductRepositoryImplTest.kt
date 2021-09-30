@@ -226,6 +226,7 @@ class ProductRepositoryImplTest {
             appDatabase,
             testAppDispatchers,
             MapperModule.productToProductWithInventories,
+            MapperModule.productWithInventoriesToProduct,
             MapperModule.productCategoryToProductCategoryEntity
         )
     }

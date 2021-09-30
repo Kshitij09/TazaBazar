@@ -6,6 +6,7 @@ import com.kshitijpatil.tazabazar.data.local.entity.FavoriteEntity
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.data.mapper.ProductCategoryToProductCategoryEntity
 import com.kshitijpatil.tazabazar.data.mapper.ProductToProductWithInventories
+import com.kshitijpatil.tazabazar.data.mapper.ProductWithInventoriesToProduct
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.model.ProductCategory
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
@@ -19,6 +20,8 @@ interface ProductRepository {
 
     /** Get all products */
     suspend fun getAllProducts(forceRefresh: Boolean = false): List<Product>
+
+    suspend fun getProductsByFavoriteType(favoriteType: FavoriteType): List<Product>
 
     /** Get products filtered by [category] and/or [query] */
     suspend fun getProductListBy(
@@ -40,6 +43,7 @@ class ProductRepositoryImpl(
     private val appDatabase: AppDatabase,
     private val dispatchers: AppCoroutineDispatchers,
     private val productEntityMapper: ProductToProductWithInventories,
+    private val productMapper: ProductWithInventoriesToProduct,
     private val categoryEntityMapper: ProductCategoryToProductCategoryEntity
 ) : ProductRepository {
     override suspend fun getProductCategories(forceRefresh: Boolean): List<ProductCategory> {
@@ -54,6 +58,23 @@ class ProductRepositoryImpl(
         return withContext(dispatchers.io) {
             productLocalDataSource.getAllProducts()
         }
+    }
+
+    override suspend fun getProductsByFavoriteType(favoriteType: FavoriteType): List<Product> {
+        val productEntities = withContext(dispatchers.io) {
+            when (favoriteType) {
+                FavoriteType.WEEKLY -> appDatabase.favoriteDao.getWeeklyFavoriteProductWithInventories()
+                FavoriteType.MONTHLY -> appDatabase.favoriteDao.getMonthlyFavoriteProductWithInventories()
+            }
+        }
+        return productEntities
+            .map(productMapper::map)
+            .map {
+                when (favoriteType) {
+                    FavoriteType.WEEKLY -> it.copy(favorites = setOf(FavoriteType.WEEKLY))
+                    FavoriteType.MONTHLY -> it.copy(favorites = setOf(FavoriteType.MONTHLY))
+                }
+            }
     }
 
     override suspend fun getProductListBy(

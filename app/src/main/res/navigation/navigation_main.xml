@@ -16,7 +16,11 @@
     <fragment
         android:id="@id/navigation_favorite"
         android:name="com.kshitijpatil.tazabazar.ui.favorite.FavoriteFragment"
-        android:label="FavoriteFragment" />
+        android:label="FavoriteFragment">
+        <action
+            android:id="@+id/action_navigation_favorite_to_fragment_favorite_products"
+            app:destination="@id/fragment_favorite_products" />
+    </fragment>
 
     <fragment
         android:id="@id/navigation_cart"
@@ -46,5 +50,14 @@
             app:argType="integer[]"
             app:nullable="true" />
     </dialog>
+
+    <fragment
+        android:id="@id/fragment_favorite_products"
+        android:name="com.kshitijpatil.tazabazar.ui.favorite.FavoriteProductsFragment"
+        android:label="FavoriteProductsFragment">
+        <argument
+            android:name="list_title"
+            app:argType="reference" />
+    </fragment>
 
 </navigation>
