@@ -13,13 +13,7 @@ class ViewModelFactory(
     appContext: Context,
     defaultArgs: Bundle?
 ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
-    private val loggingInterceptor = AppModule.provideLoggingInterceptor()
-    private val httpEventListener = AppModule.provideLoggingEventListener()
-    private val okhttpClient = AppModule.provideOkHttpClient(
-        appContext,
-        loggingInterceptor,
-        httpEventListener
-    )
+    private val okhttpClient = AppModule.provideOkHttpClient(appContext)
     private val productRepository =
         RepositoryModule.provideProductRepository(appContext, okhttpClient)
     private val appCoroutineDispatchers = AppModule.provideAppCoroutineDispatchers()
