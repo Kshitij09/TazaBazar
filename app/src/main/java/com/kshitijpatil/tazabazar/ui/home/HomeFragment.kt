@@ -10,6 +10,7 @@ import androidx.lifecycle.coroutineScope
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.databinding.FragmentHomeBinding
@@ -58,6 +59,7 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
         snackbar = requireActivity().findViewById(R.id.snackbar)
         productListAdapter.onItemActionCallback = this
         binding.rvProducts.adapter = productListAdapter
+        binding.rvProducts.layoutManager = GridLayoutManager(requireContext(), 2)
         return binding.root
     }
 
