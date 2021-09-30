@@ -22,6 +22,7 @@ class FavoriteDaoTest {
     private val scope = TestCoroutineScope()
     private val appDatabase = TestInject.appDatabase(ApplicationProvider.getApplicationContext())
     private val productDao = appDatabase.productDao
+    private val inventoryDao = appDatabase.inventoryDao
     private val productCategoryDao = appDatabase.productCategoryDao
     private val favoriteDao = appDatabase.favoriteDao
 
@@ -63,12 +64,14 @@ class FavoriteDaoTest {
      * monthly - tomatoRed
      */
     private suspend fun loadFavoriteFixtures() {
-        productCategoryDao.insert(vegetables)
-        productDao.insertAll(tomatoRed, tomatoGreen)
+        productCategoryDao.insertAll(vegetables, fruits)
+        productDao.insertAll(tomatoRed, tomatoGreen, sitafal)
+        inventoryDao.insertAll(tomatoGreenInv1, tomatoRedInv1, tomatoRedInv2, sitafalInv)
         val favorites = listOf(
             FavoriteEntity(FavoriteType.WEEKLY, tomatoRed.sku),
             FavoriteEntity(FavoriteType.WEEKLY, tomatoGreen.sku),
-            FavoriteEntity(FavoriteType.MONTHLY, tomatoRed.sku)
+            FavoriteEntity(FavoriteType.MONTHLY, tomatoRed.sku),
+            FavoriteEntity(FavoriteType.MONTHLY, sitafal.sku),
         )
         favoriteDao.insertAll(favorites)
     }
@@ -78,8 +81,8 @@ class FavoriteDaoTest {
         loadFavoriteFixtures()
         val actual = favoriteDao.getWeeklyFavoriteProductWithInventories()
         assertThat(actual).containsExactly(
-            ProductWithInventories(tomatoRed),
-            ProductWithInventories(tomatoGreen)
+            ProductWithInventories(tomatoRed, listOf(tomatoRedInv1, tomatoRedInv2)),
+            ProductWithInventories(tomatoGreen, listOf(tomatoGreenInv1))
         )
     }
 
@@ -87,7 +90,10 @@ class FavoriteDaoTest {
     fun getMonthlyFavoriteProductWithInventories() = scope.runBlockingTest {
         loadFavoriteFixtures()
         val actual = favoriteDao.getMonthlyFavoriteProductWithInventories()
-        assertThat(actual).containsExactly(ProductWithInventories(tomatoRed))
+        assertThat(actual).containsExactly(
+            ProductWithInventories(tomatoRed, listOf(tomatoRedInv1, tomatoRedInv2)),
+            ProductWithInventories(sitafal, listOf(sitafalInv))
+        )
     }
 
 
