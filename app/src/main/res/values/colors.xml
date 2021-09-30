@@ -13,6 +13,7 @@
     <color name="tzb_gray_600">#505050</color>
     <color name="tzb_orange">#FBA308</color>
     <color name="tzb_green">#388E3C</color>
+    <color name="tzb_green_medium">#81C784</color>
     <color name="tzb_green_darker">#00796B</color>
     <color name="tzb_green_light">#E8F4D9</color>
 </resources>

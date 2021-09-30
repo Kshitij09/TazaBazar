@@ -14,4 +14,7 @@
     <string name="label_monthly_list">Monthly List</string>
     <string name="action_done">Done</string>
     <string name="label_add_to_contd">Add to…</string>
+    <string name="title_my_weekly_list">My Weekly List</string>
+    <string name="title_my_monthly_list">My Monthly List</string>
+    <string name="title_my_favorite_list">My Favorite List</string>
 </resources>
