@@ -102,25 +102,10 @@ class HomeViewModel(
         savedStateHandle[KEY_QUERY] = query
     }
 
-    /**
-     * Will update the favorites in persistent storage and memory cache parallelly
-     */
-    fun updateFavorites(productSku: String, favoriteChoices: Set<FavoriteType>): Job {
-        return viewModelScope.launch {
-            launch {
-                productRepository.updateFavorites(productSku, favoriteChoices)
-            }
-            launch(dispatchers.computation) {
-                val currentList = _productList.value.toMutableList()
-                val updateIndex = currentList.indexOfFirst { it.sku == productSku }
-                if (updateIndex != -1) {
-                    val updated = currentList[updateIndex].copy(favorites = favoriteChoices)
-                    currentList[updateIndex] = updated
-                    _productList.emit(currentList)
-                } else {
-                    Timber.d("updateFavorites: product with sku=$productSku not found in cache")
-                }
-            }
+    fun updateFavorites(productSku: String, favoriteChoices: Set<FavoriteType>) {
+        viewModelScope.launch {
+            productRepository.updateFavorites(productSku, favoriteChoices)
+            updateProductList(_filter.value)
         }
     }
 

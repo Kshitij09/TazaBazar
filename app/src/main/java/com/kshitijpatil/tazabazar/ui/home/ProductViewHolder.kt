@@ -25,6 +25,11 @@ class ProductViewHolder(
         binding.tvPrice.text = getPriceStringFor(inventory.price)
         updateFavoriteButtonColors(binding.btnFavorite, item.favorites.isNotEmpty())
         binding.btnFavorite.setOnClickListener {
+            // Update favorite colors in advance
+            // since item will be added in weekly list
+            // by default
+            if (item.favorites.isEmpty())
+                updateFavoriteButtonColors(binding.btnFavorite, true)
             onItemActionCallback?.onFavoriteClicked(item)
         }
         loadImage(binding.ivImage, item.imageUri)
