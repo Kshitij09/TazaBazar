@@ -18,6 +18,7 @@ import com.kshitijpatil.tazabazar.ui.home.ProductListAdapter.ProductLayoutType
 import com.kshitijpatil.tazabazar.ui.home.ProductViewHolder
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
 import kotlinx.coroutines.flow.collect
+import timber.log.Timber
 
 class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
     private var _binding: FragmentFavoriteProductsBinding? = null
@@ -69,6 +70,11 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
     }
 
     override fun onFavoriteClicked(product: Product) {
-
+        if (product.favorites.isNotEmpty())
+            viewModel.removeFavorites(product)
+        else {
+            val favoriteType = titleIdToFavoriteType(args.listTitle)
+            Timber.e("Product: '$product' inappropriately appeared in $favoriteType list")
+        }
     }
 }

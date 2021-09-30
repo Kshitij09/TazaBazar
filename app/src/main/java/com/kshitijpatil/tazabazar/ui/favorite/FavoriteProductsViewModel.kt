@@ -32,6 +32,20 @@ class FavoriteProductsViewModel(
             _productList.emit(favoriteProducts)
         }
     }
+
+    fun removeFavorites(product: Product) {
+        viewModelScope.launch {
+            productRepository.updateFavorites(product.sku, emptySet())
+        }
+        loadFavoriteProducts()
+    }
+
+    fun addToFavorite(product: Product, favoriteType: FavoriteType) {
+        viewModelScope.launch {
+            productRepository.updateFavorites(product.sku, setOf(favoriteType))
+        }
+        loadFavoriteProducts()
+    }
 }
 
 class FavoriteProductsViewModelFactory(
