@@ -2,7 +2,7 @@
 <resources>
     <!-- Fragments -->
     <id name="fragment_splash" />
-    <id name="fragment_main" />
+    <id name="fragment_dashboard" />
     <id name="fragment_favorite_products" />
     <id name="bottom_sheet_favorite_options" />
 

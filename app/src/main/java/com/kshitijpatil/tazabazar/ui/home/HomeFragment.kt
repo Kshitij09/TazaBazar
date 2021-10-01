@@ -6,9 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.coroutineScope
 import androidx.fragment.app.setFragmentResultListener
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.kshitijpatil.tazabazar.R
@@ -18,7 +17,6 @@ import com.kshitijpatil.tazabazar.di.ViewModelFactory
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.ui.SwipeRefreshHandler
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
-import com.kshitijpatil.tazabazar.ui.favorite.FavoriteOptionsBottomSheet
 import com.kshitijpatil.tazabazar.widget.FadingSnackbar
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -41,7 +39,7 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
         ViewModelFactory(this, requireContext().applicationContext, arguments)
     }
     private val productListAdapter = ProductListAdapter()
-    private var snackbar: FadingSnackbar? = null
+    private lateinit var snackbar: FadingSnackbar
     private val favoriteTypeValues = enumValues<FavoriteType>()
 
 
@@ -56,7 +54,7 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        snackbar = requireActivity().findViewById(R.id.snackbar)
+        snackbar = binding.snackbar
         productListAdapter.onItemActionCallback = this
         binding.rvProducts.adapter = productListAdapter
         binding.rvProducts.layoutManager = GridLayoutManager(requireContext(), 2)
@@ -80,7 +78,7 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
     // ====================
 
     private fun showFavoriteSnackbarFor(product: Product) {
-        snackbar?.show(
+        snackbar.show(
             messageId = R.string.info_added_to_weekly_favorites,
             actionId = R.string.action_change,
             actionClick = {

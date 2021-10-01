@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.databinding.FragmentFavoriteBinding
@@ -35,7 +35,7 @@ class FavoriteFragment : Fragment() {
         val titleRes = favoriteTypeToTitleRes(favoriteType)
         val direction =
             FavoriteFragmentDirections.actionNavigationFavoriteToFragmentFavoriteProducts(titleRes)
-        requireActivity().findNavController(R.id.nav_host_fragment).navigate(direction)
+        findNavController().navigate(direction)
     }
 
     override fun onDestroyView() {

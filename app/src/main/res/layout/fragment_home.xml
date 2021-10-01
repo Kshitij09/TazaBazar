@@ -27,4 +27,13 @@
             tools:listitem="@layout/product_grid_item_view"
             tools:spanCount="2" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.kshitijpatil.tazabazar.widget.FadingSnackbar
+        android:id="@+id/snackbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"
+        tools:visibility="visible" />
 </RelativeLayout>
