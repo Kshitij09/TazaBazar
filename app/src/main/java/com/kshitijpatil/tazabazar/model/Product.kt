@@ -1,5 +1,6 @@
 package com.kshitijpatil.tazabazar.model
 
+import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import org.threeten.bp.OffsetDateTime
 
 data class Product(
@@ -7,21 +8,14 @@ data class Product(
     val name: String,
     val category: String,
     val imageUri: String,
-    val inventories: List<Inventory> = emptyList()
+    val inventories: List<Inventory> = emptyList(),
+    val favorites: Set<FavoriteType> = emptySet()
 ) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Product
-
-        if (sku != other.sku) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return sku.hashCode()
+    /** Creates a copy of this instance with favorites now having [FavoriteType.WEEKLY] */
+    fun withToWeeklyFavorites(): Product {
+        val newFavorites = favorites.toMutableSet()
+        newFavorites.add(FavoriteType.WEEKLY)
+        return this.copy(favorites = newFavorites)
     }
 }
 

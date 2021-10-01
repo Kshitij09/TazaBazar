@@ -36,9 +36,9 @@ object AppModule {
 
     fun provideOkHttpClient(
         context: Context,
-        loggingInterceptor: HttpLoggingInterceptor?,
-        eventListener: LoggingEventListener.Factory?
     ): OkHttpClient {
+        val loggingInterceptor = provideLoggingInterceptor()
+        val eventListener = provideLoggingEventListener()
         return OkhttpClientManager.getInstance(context)
             .newBuilder()
             .apply {

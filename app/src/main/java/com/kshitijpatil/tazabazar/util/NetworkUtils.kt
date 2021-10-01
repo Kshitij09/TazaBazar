@@ -12,6 +12,7 @@ import android.os.Build
  */
 open class NetworkUtils(val context: Context) {
 
+    @Suppress("Deprecation")
     open fun hasNetworkConnection(): Boolean {
         var result = false
         val connectivityManager =

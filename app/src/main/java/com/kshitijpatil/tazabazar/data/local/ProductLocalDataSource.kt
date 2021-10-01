@@ -1,15 +1,15 @@
 package com.kshitijpatil.tazabazar.data.local
 
 import com.kshitijpatil.tazabazar.data.ProductDataSource
+import com.kshitijpatil.tazabazar.data.local.dao.FavoriteDao
 import com.kshitijpatil.tazabazar.data.local.dao.ProductCategoryDao
-import com.kshitijpatil.tazabazar.data.local.dao.ProductDao
-import com.kshitijpatil.tazabazar.data.mapper.ProductWithInventoriesToProduct
+import com.kshitijpatil.tazabazar.data.mapper.ProductWithInventoriesAndFavoritesToProduct
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.model.ProductCategory
 
 class ProductLocalDataSource(
-    private val productDao: ProductDao,
-    private val productMapper: ProductWithInventoriesToProduct,
+    private val favoriteDao: FavoriteDao,
+    private val productMapper: ProductWithInventoriesAndFavoritesToProduct,
     private val productCategoryDao: ProductCategoryDao
 ) : ProductDataSource {
     override suspend fun getProductCategories(): List<ProductCategory> {
@@ -23,19 +23,22 @@ class ProductLocalDataSource(
     }
 
     override suspend fun getAllProducts(): List<Product> {
-        return productDao.getAllProductWithInventories()
+        return favoriteDao.getAllProductWithInventoriesAndFavorites()
             .map(productMapper::map)
     }
 
     override suspend fun getProductsBy(category: String?, query: String?): List<Product> {
         val productEntities = if (category != null && query != null) {
-            productDao.getProductsByCategoryAndName(category, "%$query%")
+            favoriteDao.getProductsWithInventoriesAndFavoritesByCategoryAndName(
+                category,
+                "%$query%"
+            )
         } else if (category != null) {
-            productDao.getProductWithInventoriesByCategory(category)
+            favoriteDao.getProductWithInventoriesAndFavoritesByCategory(category)
         } else if (query != null) {
-            productDao.getProductWithInventoriesByName("%$query%")
+            favoriteDao.getProductWithInventoriesAndFavoritesByName("%$query%")
         } else {
-            productDao.getAllProductWithInventories()
+            favoriteDao.getAllProductWithInventoriesAndFavorites()
         }
         return productEntities.map(productMapper::map)
     }

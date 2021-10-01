@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="margin_normal">16dp</dimen>
     <dimen name="bottom_bar_height">56dp</dimen>
     <dimen name="product_item_preview_height">128dp</dimen>
     <dimen name="product_item_card_radius">16dp</dimen>
     <dimen name="cart_button_size">40dp</dimen>
     <dimen name="product_search_input_corner_radius">6dp</dimen>
+    <dimen name="product_item_favorite_btn_size">32dp</dimen>
+    <dimen name="product_item_favorite_icon_size">20dp</dimen>
+    <dimen name="product_item_favorite_margin_top_end">8dp</dimen>
+    <dimen name="margin_medium">32dp</dimen>
 </resources>

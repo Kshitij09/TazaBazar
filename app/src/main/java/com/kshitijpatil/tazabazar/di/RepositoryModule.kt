@@ -42,6 +42,7 @@ object RepositoryModule {
             appDatabase,
             appDispatchers,
             MapperModule.productToProductWithInventories,
+            MapperModule.productWithInventoriesToProduct,
             MapperModule.productCategoryToProductCategoryEntity
         )
         productRepository = newRepo
@@ -50,8 +51,8 @@ object RepositoryModule {
 
     fun provideLocalDataSource(appDatabase: AppDatabase): ProductDataSource {
         return ProductLocalDataSource(
-            productDao = appDatabase.productDao,
-            productMapper = MapperModule.productWithInventoriesToProduct,
+            favoriteDao = appDatabase.favoriteDao,
+            productMapper = MapperModule.productWithInventoriesAndFavoritesToProduct,
             productCategoryDao = appDatabase.productCategoryDao
         )
     }

@@ -8,9 +8,15 @@ object MapperModule {
     val inventoryEntityToInventory = InventoryEntityToInventory()
     val productToProductWithInventories =
         ProductToProductWithInventories(inventoryToInventoryEntity)
-    val productWithInventoriesToProduct =
-        ProductWithInventoriesToProduct(inventoryEntityToInventory)
+    val productToProductWithInventoriesAndFavorites = ProductToProductWithInventoriesAndFavorites(
+        inventoryToInventoryEntity
+    )
     val productEntityToProduct = ProductEntityToProduct()
+    val productWithInventoriesToProduct =
+        ProductWithInventoriesToProduct(productEntityToProduct, inventoryEntityToInventory)
+    val productWithInventoriesAndFavoritesToProduct = ProductWithInventoriesAndFavoritesToProduct(
+        productEntityToProduct, inventoryEntityToInventory
+    )
     val productCategoryEntityToProductCategory = ProductCategoryEntityToProductCategory()
     val productCategoryToProductCategoryEntity = ProductCategoryToProductCategoryEntity()
     val productCategoryDtoToProductCategory = ProductCategoryDtoToProductCategory()

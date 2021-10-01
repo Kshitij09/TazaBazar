@@ -164,7 +164,7 @@ class ProductRepositoryImplTest {
             // should update local data store
             val actualCategories = appDatabase.productCategoryDao.getAllCategories()
             assertThat(actualCategories).containsExactlyElementsIn(remoteCategories)
-            val actualProducts = appDatabase.productDao.getAllProductWithInventories()
+            val actualProducts = appDatabase.inventoryDao.getAllProductWithInventories()
             assertThat(actualProducts).containsExactlyElementsIn(remoteProducts)
         }
     }
@@ -226,6 +226,7 @@ class ProductRepositoryImplTest {
             appDatabase,
             testAppDispatchers,
             MapperModule.productToProductWithInventories,
+            MapperModule.productWithInventoriesToProduct,
             MapperModule.productCategoryToProductCategoryEntity
         )
     }

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/txt_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginVertical="8dp"
+        android:text="@string/label_add_to_contd"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
+
+    <View
+        android:id="@+id/header_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:alpha="0.1"
+        android:background="?colorOnSurface" />
+
+    <RelativeLayout
+        android:id="@+id/layout_weekly_choice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <CheckBox
+            android:id="@+id/cb_weekly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/cb_weekly"
+            android:layout_toEndOf="@id/cb_weekly"
+            android:text="@string/label_weekly_list"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_monthly_choice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <CheckBox
+            android:id="@+id/cb_monthly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/cb_monthly"
+            android:layout_toEndOf="@id/cb_monthly"
+            android:text="@string/label_monthly_list"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/list_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:alpha="0.1"
+        android:background="?colorOnSurface" />
+
+    <Button
+        android:id="@+id/btn_done"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/action_done"
+        android:textAlignment="textStart"
+        android:textAllCaps="false"
+        app:icon="@drawable/ic_baseline_check_24"
+        app:iconPadding="8dp" />
+</LinearLayout>

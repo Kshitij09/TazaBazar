@@ -13,15 +13,10 @@ class ViewModelFactory(
     appContext: Context,
     defaultArgs: Bundle?
 ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
-    private val loggingInterceptor = AppModule.provideLoggingInterceptor()
-    private val httpEventListener = AppModule.provideLoggingEventListener()
-    private val okhttpClient = AppModule.provideOkHttpClient(
-        appContext,
-        loggingInterceptor,
-        httpEventListener
-    )
+    private val okhttpClient = AppModule.provideOkHttpClient(appContext)
     private val productRepository =
         RepositoryModule.provideProductRepository(appContext, okhttpClient)
+    private val appCoroutineDispatchers = AppModule.provideAppCoroutineDispatchers()
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(
@@ -30,7 +25,7 @@ class ViewModelFactory(
         handle: SavedStateHandle
     ): T {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
-            return HomeViewModel(handle, productRepository) as T
+            return HomeViewModel(handle, productRepository, appCoroutineDispatchers) as T
         }
         throw IllegalArgumentException()
     }
