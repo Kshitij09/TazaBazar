@@ -36,7 +36,7 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by activityViewModels {
-        ViewModelFactory(this, requireContext().applicationContext, arguments)
+        ViewModelFactory(requireActivity(), requireContext().applicationContext, arguments)
     }
     private val productListAdapter = ProductListAdapter()
     private lateinit var snackbar: FadingSnackbar

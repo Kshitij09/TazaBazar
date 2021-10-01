@@ -16,7 +16,9 @@ import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
 import com.kshitijpatil.tazabazar.util.textChanges
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class ProductFilterFragment : Fragment() {
 
@@ -27,7 +29,7 @@ class ProductFilterFragment : Fragment() {
     private var _binding: FragmentProductFilterBinding? = null
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by activityViewModels {
-        ViewModelFactory(this, requireContext().applicationContext, arguments)
+        ViewModelFactory(requireActivity(), requireContext().applicationContext, arguments)
     }
 
     override fun onCreateView(
@@ -45,7 +47,18 @@ class ProductFilterFragment : Fragment() {
         launchAndRepeatWithViewLifecycle {
             launch { observeSearchQuery() }
             launch { observeCategoryFilters() }
+            launch { observeClearFiltersEvent() }
         }
+    }
+
+    private suspend fun observeClearFiltersEvent() {
+        viewModel.uiEvents
+            .filter { it is HomeViewModel.UiEvent.ClearFilters }
+            .collect {
+                Timber.d("product-filters: ClearFilters Event received")
+                binding.cgProductCategories.clearCheck()
+                binding.textFieldSearch.editText?.setText("")
+            }
     }
 
     private fun reloadUiState() {

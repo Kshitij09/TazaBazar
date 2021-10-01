@@ -51,6 +51,10 @@ class HomeViewModel(
     // TODO: update this
     private val cacheExpired: Boolean = true
 
+    private val _uiEvents = MutableSharedFlow<UiEvent>()
+    val uiEvents: SharedFlow<UiEvent>
+        get() = _uiEvents.asSharedFlow()
+
     init {
         var refreshJob: Job? = null
         if (cacheExpired) {
@@ -96,6 +100,11 @@ class HomeViewModel(
         savedStateHandle[KEY_CATEGORY] = null
     }
 
+    fun clearSearchQuery() {
+        _filter.value = _filter.value.copy(query = null)
+        savedStateHandle[KEY_QUERY] = null
+    }
+
     fun setSearchQuery(query: String) {
         val q = if (query.isBlank()) null else query
         _filter.value = _filter.value.copy(query = q)
@@ -109,8 +118,18 @@ class HomeViewModel(
         }
     }
 
+    fun clearAllFilters() {
+        clearCategoryFilter()
+        clearSearchQuery()
+        viewModelScope.launch { _uiEvents.emit(UiEvent.ClearFilters) }
+    }
+
     data class FilterParams(
         val query: String? = null,
         val category: String? = null
     )
+
+    sealed class UiEvent {
+        object ClearFilters : UiEvent()
+    }
 }
