@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.kshitijpatil.tazabazar.R
@@ -31,6 +32,10 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
 
         /** Use this key to pass product-sku back and forth */
         const val FAVORITE_SKU_KEY = "com.kshitijpatil.tazabazar.ui.home.favorite-product-sku"
+
+        /** Use this key to notify [HomeFragment] about product-list has been updated */
+        const val PRODUCTS_UPDATED_RESULT_KEY =
+            "com.kshitijpatil.tazabazar.ui.home.products-updated"
     }
 
     private var _binding: FragmentHomeBinding? = null
@@ -46,6 +51,7 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         listenFavoriteOptionsResult()
+        listenProductsUpdatedResult()
     }
 
     override fun onCreateView(
@@ -110,11 +116,18 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
         }
     }
 
+    private fun listenProductsUpdatedResult() {
+        setFragmentResultListener(PRODUCTS_UPDATED_RESULT_KEY) { _, _ ->
+            Timber.d("Received a result indicating product list updated")
+            lifecycleScope.launch { viewModel.reloadProductsData() }
+        }
+    }
+
     private fun setupSwipeRefreshUI() {
         val swipeRefreshHandler = SwipeRefreshHandler(
             scope = viewLifecycleOwner.lifecycle.coroutineScope,
             swipeRefreshLayout = binding.swipeRefreshProducts,
-            action = { viewModel.refreshData() }
+            action = { viewModel.reloadProductsData(forceRefresh = true) }
         )
         lifecycle.addObserver(swipeRefreshHandler)
         binding.swipeRefreshProducts.setOnRefreshListener(swipeRefreshHandler)

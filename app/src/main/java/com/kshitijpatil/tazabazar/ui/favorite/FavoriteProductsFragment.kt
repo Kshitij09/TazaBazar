@@ -5,7 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,6 +15,7 @@ import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.databinding.FragmentFavoriteProductsBinding
 import com.kshitijpatil.tazabazar.model.Product
+import com.kshitijpatil.tazabazar.ui.home.HomeFragment
 import com.kshitijpatil.tazabazar.ui.home.ProductListAdapter
 import com.kshitijpatil.tazabazar.ui.home.ProductListAdapter.ProductLayoutType
 import com.kshitijpatil.tazabazar.ui.home.ProductViewHolder
@@ -70,11 +73,16 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
     }
 
     override fun onFavoriteClicked(product: Product) {
-        if (product.favorites.isNotEmpty())
+        if (product.favorites.isNotEmpty()) {
             viewModel.removeFavorites(product)
-        else {
+            notifyProductsUpdated()
+        } else {
             val favoriteType = titleIdToFavoriteType(args.listTitle)
             Timber.e("Product: '$product' inappropriately appeared in $favoriteType list")
         }
+    }
+
+    private fun notifyProductsUpdated() {
+        setFragmentResult(HomeFragment.PRODUCTS_UPDATED_RESULT_KEY, bundleOf())
     }
 }

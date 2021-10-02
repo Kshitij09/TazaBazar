@@ -74,8 +74,15 @@ class HomeViewModel(
         }
     }
 
-    suspend fun refreshData() {
-        productRepository.refreshProductData()
+    /**
+     * Reloads product-list and product-categories from the database
+     * or remote source.
+     * @param forceRefresh whether to fetch data from the remote source
+     */
+    suspend fun reloadProductsData(forceRefresh: Boolean = false) {
+        if (forceRefresh) {
+            productRepository.refreshProductData()
+        }
         _productCategories.emit(productRepository.getProductCategories())
         updateProductList(_filter.value)
     }
