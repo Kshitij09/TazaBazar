@@ -30,10 +30,10 @@ class FavoriteOptionsBottomSheet : BottomSheetDialogFragment() {
         initFavoriteCheckboxes()
         binding.btnDone.setOnClickListener {
             val bundle = bundleOf(
-                HomeFragment.FAVORITE_PREFERENCES_KEY to getFavoritePreferences(),
-                HomeFragment.FAVORITE_SKU_KEY to args.productSku
+                HomeFragment.FAVORITE_OPTIONS_BUNDLE_KEY to getFavoritePreferences(),
+                HomeFragment.FAVORITE_SKU_BUNDLE_KEY to args.productSku
             )
-            setFragmentResult(HomeFragment.FAVORITE_PREFERENCES_KEY, bundle)
+            setFragmentResult(HomeFragment.FAVORITE_OPTIONS_RESULT_KEY, bundle)
             dismiss()
         }
         binding.layoutWeeklyChoice.setOnClickListener {

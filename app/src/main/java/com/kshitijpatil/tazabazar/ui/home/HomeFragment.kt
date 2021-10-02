@@ -26,12 +26,17 @@ import timber.log.Timber
 class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
 
     companion object {
-        /** An array [FavoriteType] ordinals should be passed along this key */
-        const val FAVORITE_PREFERENCES_KEY =
-            "com.kshitijpatil.tazabazar.ui.home.favorite-preferences"
 
-        /** Use this key to pass product-sku back and forth */
-        const val FAVORITE_SKU_KEY = "com.kshitijpatil.tazabazar.ui.home.favorite-product-sku"
+        const val FAVORITE_OPTIONS_RESULT_KEY =
+            "com.kshitijpatil.tazabazar.ui.home.favorite-options-result"
+
+        /** Use this key with bundle to return an array of [FavoriteType] ordinals */
+        const val FAVORITE_OPTIONS_BUNDLE_KEY =
+            "com.kshitijpatil.tazabazar.ui.home.favorite-options-bundle"
+
+        /** Use this key with bundle to return product-sku */
+        const val FAVORITE_SKU_BUNDLE_KEY =
+            "com.kshitijpatil.tazabazar.ui.home.favorite-product-sku-bundle"
 
         /** Use this key to notify [HomeFragment] about product-list has been updated */
         const val PRODUCTS_UPDATED_RESULT_KEY =
@@ -104,9 +109,9 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
     }
 
     private fun listenFavoriteOptionsResult() {
-        setFragmentResultListener(FAVORITE_PREFERENCES_KEY) { _, bundle ->
-            val favoriteOrdinals = bundle.getIntArray(FAVORITE_PREFERENCES_KEY)
-            val productSku = bundle.getString(FAVORITE_SKU_KEY)
+        setFragmentResultListener(FAVORITE_OPTIONS_RESULT_KEY) { _, bundle ->
+            val favoriteOrdinals = bundle.getIntArray(FAVORITE_OPTIONS_BUNDLE_KEY)
+            val productSku = bundle.getString(FAVORITE_SKU_BUNDLE_KEY)
             val favoriteChoices = favoriteOrdinals?.map { favoriteTypeValues[it] }
             if (favoriteChoices != null && productSku != null) {
                 viewModel.updateFavorites(productSku, favoriteChoices.toSet())
