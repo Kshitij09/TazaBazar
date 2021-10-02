@@ -194,7 +194,16 @@
         "foreignKeys": []
       }
     ],
-    "views": [],
+    "views": [
+      {
+        "viewName": "weekly_favorite",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT product_sku FROM favorite WHERE type = 'WEEKLY'"
+      },
+      {
+        "viewName": "monthly_favorite",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT product_sku FROM favorite WHERE type = 'MONTHLY'"
+      }
+    ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
       "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '35b9a3acca87c439cedd1d1c2477e19d')"
