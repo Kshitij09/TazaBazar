@@ -16,11 +16,15 @@ import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.databinding.FragmentFavoriteProductsBinding
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.ui.home.HomeFragment
+import com.kshitijpatil.tazabazar.ui.home.ProductFilterFragment
 import com.kshitijpatil.tazabazar.ui.home.ProductListAdapter
 import com.kshitijpatil.tazabazar.ui.home.ProductListAdapter.ProductLayoutType
 import com.kshitijpatil.tazabazar.ui.home.ProductViewHolder
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
+import com.kshitijpatil.tazabazar.util.textChanges
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
@@ -33,13 +37,6 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
             requireContext().applicationContext,
             titleIdToFavoriteType(args.listTitle)
         )
-    }
-
-    private fun titleIdToFavoriteType(@StringRes titleId: Int): FavoriteType {
-        return when (titleId) {
-            R.string.title_my_monthly_list -> FavoriteType.MONTHLY
-            else -> FavoriteType.WEEKLY // Using weekly list by default
-        }
     }
 
     override fun onCreateView(
@@ -61,8 +58,10 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
         // fragment is created as favorites might
         // have changed since then
         viewModel.loadFavoriteProducts()
+
         launchAndRepeatWithViewLifecycle {
-            viewModel.productList.collect(productListAdapter::submitList)
+            launch { observeProductList() }
+            launch { observeSearchQuery() }
         }
     }
 
@@ -72,6 +71,18 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
         super.onDestroyView()
     }
 
+    private suspend fun observeProductList() {
+        viewModel.productList.collect(productListAdapter::submitList)
+    }
+
+    private suspend fun observeSearchQuery() {
+        binding.textFieldSearch.editText?.let { textField ->
+            textField.textChanges()
+                .debounce(ProductFilterFragment.SEARCH_DEBOUNCE_MILLIS)
+                .collect { viewModel.searchProductsBy(it.toString()) }
+        }
+    }
+
     override fun onFavoriteClicked(product: Product) {
         if (product.favorites.isNotEmpty()) {
             viewModel.removeFavorites(product)
@@ -79,6 +90,13 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
         } else {
             val favoriteType = titleIdToFavoriteType(args.listTitle)
             Timber.e("Product: '$product' inappropriately appeared in $favoriteType list")
+        }
+    }
+
+    private fun titleIdToFavoriteType(@StringRes titleId: Int): FavoriteType {
+        return when (titleId) {
+            R.string.title_my_monthly_list -> FavoriteType.MONTHLY
+            else -> FavoriteType.WEEKLY // Using weekly list by default
         }
     }
 

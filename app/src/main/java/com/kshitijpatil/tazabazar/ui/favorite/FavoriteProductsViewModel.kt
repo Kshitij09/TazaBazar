@@ -28,7 +28,7 @@ class FavoriteProductsViewModel(
 
     fun loadFavoriteProducts() {
         viewModelScope.launch {
-            val favoriteProducts = productRepository.getProductsByFavoriteType(favoriteType)
+            val favoriteProducts = productRepository.getProductListBy(favoriteType)
             _productList.emit(favoriteProducts)
         }
     }
@@ -40,11 +40,12 @@ class FavoriteProductsViewModel(
         loadFavoriteProducts()
     }
 
-    fun addToFavorite(product: Product, favoriteType: FavoriteType) {
+    fun searchProductsBy(query: String) {
         viewModelScope.launch {
-            productRepository.updateFavorites(product.sku, setOf(favoriteType))
+            val q = if (query.isBlank()) null else query
+            val newList = productRepository.getProductListBy(favoriteType, q)
+            _productList.emit(newList)
         }
-        loadFavoriteProducts()
     }
 }
 

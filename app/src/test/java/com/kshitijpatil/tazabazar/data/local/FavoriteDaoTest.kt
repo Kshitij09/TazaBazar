@@ -61,7 +61,7 @@ class FavoriteDaoTest {
 
     /**
      * weekly - tomatoRed, tomatoGreen
-     * monthly - tomatoRed
+     * monthly - tomatoRed, sitafal
      */
     private suspend fun loadFavoriteFixtures() {
         productCategoryDao.insertAll(vegetables, fruits)
@@ -94,6 +94,30 @@ class FavoriteDaoTest {
             ProductWithInventories(tomatoRed, listOf(tomatoRedInv1, tomatoRedInv2)),
             ProductWithInventories(sitafal, listOf(sitafalInv))
         )
+    }
+
+    @Test
+    fun getWeeklyFavoriteProductWithInventoriesByName() = scope.runBlockingTest {
+        loadFavoriteFixtures()
+        var actual = favoriteDao.getWeeklyFavoriteProductWithInventoriesByName("%sita%")
+        // sitafal is not part of weekly favorites
+        assertThat(actual).isEmpty()
+        actual = favoriteDao.getWeeklyFavoriteProductWithInventoriesByName("%green%")
+        assertThat(actual).containsExactly(
+            ProductWithInventories(tomatoGreen, listOf(tomatoGreenInv1))
+        )
+    }
+
+    @Test
+    fun getMonthlyFavoriteProductWithInventoriesByName() = scope.runBlockingTest {
+        loadFavoriteFixtures()
+        var actual = favoriteDao.getMonthlyFavoriteProductWithInventoriesByName("%sita%")
+        assertThat(actual).containsExactly(
+            ProductWithInventories(sitafal, listOf(sitafalInv))
+        )
+        actual = favoriteDao.getMonthlyFavoriteProductWithInventoriesByName("%green%")
+        // tomatoGreen is not part of monthly favorites
+        assertThat(actual).isEmpty()
     }
 
 

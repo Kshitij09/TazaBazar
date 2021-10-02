@@ -21,7 +21,8 @@ interface ProductRepository {
     /** Get all products */
     suspend fun getAllProducts(forceRefresh: Boolean = false): List<Product>
 
-    suspend fun getProductsByFavoriteType(favoriteType: FavoriteType): List<Product>
+    /** Get products filtered by [favoriteType] and/or [query] */
+    suspend fun getProductListBy(favoriteType: FavoriteType, query: String? = null): List<Product>
 
     /** Get products filtered by [category] and/or [query] */
     suspend fun getProductListBy(
@@ -60,11 +61,27 @@ class ProductRepositoryImpl(
         }
     }
 
-    override suspend fun getProductsByFavoriteType(favoriteType: FavoriteType): List<Product> {
+    // TODO: Extract into an use-case
+    override suspend fun getProductListBy(
+        favoriteType: FavoriteType,
+        query: String?
+    ): List<Product> {
+        Timber.d("Retrieving products for favoriteType: $favoriteType , query: $query")
         val productEntities = withContext(dispatchers.io) {
-            when (favoriteType) {
-                FavoriteType.WEEKLY -> appDatabase.favoriteDao.getWeeklyFavoriteProductWithInventories()
-                FavoriteType.MONTHLY -> appDatabase.favoriteDao.getMonthlyFavoriteProductWithInventories()
+            if (query == null) {
+                when (favoriteType) {
+                    FavoriteType.WEEKLY -> appDatabase.favoriteDao.getWeeklyFavoriteProductWithInventories()
+                    FavoriteType.MONTHLY -> appDatabase.favoriteDao.getMonthlyFavoriteProductWithInventories()
+                }
+            } else {
+                when (favoriteType) {
+                    FavoriteType.WEEKLY -> appDatabase.favoriteDao.getWeeklyFavoriteProductWithInventoriesByName(
+                        "%$query%"
+                    )
+                    FavoriteType.MONTHLY -> appDatabase.favoriteDao.getMonthlyFavoriteProductWithInventoriesByName(
+                        "%$query%"
+                    )
+                }
             }
         }
         return productEntities

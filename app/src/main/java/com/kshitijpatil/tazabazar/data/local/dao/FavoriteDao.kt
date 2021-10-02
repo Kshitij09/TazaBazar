@@ -57,6 +57,26 @@ interface FavoriteDao {
     suspend fun getWeeklyFavoriteProductWithInventories(): List<ProductWithInventories>
 
     @Transaction
+    @Query(
+        """
+        SELECT * FROM product
+        INNER JOIN weekly_favorite ON product.sku=weekly_favorite.product_sku
+        WHERE name LIKE :name
+    """
+    )
+    suspend fun getWeeklyFavoriteProductWithInventoriesByName(name: String): List<ProductWithInventories>
+
+    @Transaction
     @Query("SELECT * FROM product INNER JOIN monthly_favorite ON product.sku=monthly_favorite.product_sku")
     suspend fun getMonthlyFavoriteProductWithInventories(): List<ProductWithInventories>
+
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM product
+        INNER JOIN monthly_favorite ON product.sku=monthly_favorite.product_sku
+        WHERE name LIKE :name
+    """
+    )
+    suspend fun getMonthlyFavoriteProductWithInventoriesByName(name: String): List<ProductWithInventories>
 }
