@@ -1,14 +1,16 @@
 package com.kshitijpatil.tazabazar.data.local.entity
 
 import androidx.room.*
+import androidx.room.ForeignKey.CASCADE
 
-// TODO: Consider using deferred foreign keys over NO_ACTION ON_DELETE strategy
 @Entity(
     tableName = "cart_item", foreignKeys = [
         ForeignKey(
             entity = InventoryEntity::class,
             parentColumns = ["id"],
-            childColumns = ["inventory_id"]
+            childColumns = ["inventory_id"],
+            deferred = true,
+            onDelete = CASCADE
         )
     ]
 )
