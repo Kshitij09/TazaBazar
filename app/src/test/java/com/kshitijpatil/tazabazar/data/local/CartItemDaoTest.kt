@@ -92,6 +92,18 @@ class CartItemDaoTest {
         }
     }
 
+    @Test
+    fun deleteById() {
+        val cartItem1 = CartItemEntity(tomatoRedInv1.id, 4)
+        val cartItem2 = CartItemEntity(sitafalInv.id, 8)
+        scope.runBlockingTest {
+            cartItemDao.insertAll(cartItem1, cartItem2)
+            cartItemDao.deleteById(cartItem1.inventoryId)
+            val actual = cartItemDao.getAllCartItems()
+            assertThat(actual).doesNotContain(cartItem1)
+        }
+    }
+
     @After
     fun tearDown() {
         appDatabase.clearAllTables()

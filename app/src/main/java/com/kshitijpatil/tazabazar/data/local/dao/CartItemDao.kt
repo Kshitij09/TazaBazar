@@ -17,6 +17,9 @@ interface CartItemDao : UpsertDao<CartItemEntity> {
     @Query("SELECT * FROM cart_item WHERE inventory_id = :inventoryId")
     suspend fun getCartItemById(inventoryId: Int): CartItemEntity?
 
+    @Query("DELETE FROM cart_item WHERE inventory_id = :inventoryId")
+    suspend fun deleteById(inventoryId: Int)
+
     @Query("SELECT * FROM cart_item_detail_view WHERE inventory_id = :inventoryId")
     suspend fun getCartItemDetailViewById(inventoryId: Int): CartItemDetailView?
 }
