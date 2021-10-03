@@ -9,6 +9,7 @@ import coil.load
 import coil.request.CachePolicy
 import com.google.android.material.button.MaterialButton
 import com.kshitijpatil.tazabazar.R
+import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
 import java.lang.ref.WeakReference
 
@@ -24,6 +25,7 @@ class ProductViewHolder(
     private val tvPrice: TextView = view.findViewById(R.id.tv_price)
     private val tvQuantityLabel: TextView = view.findViewById(R.id.tv_quantity_label)
     private val btnFavorite: MaterialButton = view.findViewById(R.id.btn_favorite)
+    private val btnCart: MaterialButton = view.findViewById(R.id.btn_cart)
     private val ivImage: ImageView = view.findViewById(R.id.iv_image)
     fun bind(item: Product) {
         tvName.text = item.name
@@ -41,6 +43,12 @@ class ProductViewHolder(
             if (item.favorites.isEmpty())
                 updateFavoriteButtonColors(true)
             onItemActionCallback?.onFavoriteClicked(item)
+        }
+        btnCart.isEnabled = item.inventories.isNotEmpty()
+        btnCart.setOnClickListener {
+            // we can assure that defaultInventory is not null here
+            // since we would've disabled the button otherwise
+            onItemActionCallback?.onCartClicked(item.name, item.defaultInventory!!)
         }
         loadImage(item.imageUri)
     }
@@ -72,5 +80,12 @@ class ProductViewHolder(
          * @param product whose favorite was clicked
          */
         fun onFavoriteClicked(product: Product)
+
+        /**
+         * Called whenever user clicks the cart button
+         * @param productName Name of the Product added to cart
+         * @param inventory Currently selected inventory
+         */
+        fun onCartClicked(productName: String, inventory: Inventory)
     }
 }

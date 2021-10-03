@@ -15,6 +15,7 @@ import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.databinding.FragmentHomeBinding
 import com.kshitijpatil.tazabazar.di.ViewModelFactory
+import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.ui.SwipeRefreshHandler
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
@@ -156,6 +157,16 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
 
             showFavoriteSnackbarFor(product.withToWeeklyFavorites())
         }
+    }
+
+    override fun onCartClicked(productName: String, inventory: Inventory) {
+        viewModel.addToCart(inventory.id)
+        val cartMessage = requireContext().getString(
+            R.string.info_inventory_added_to_cart,
+            productName,
+            inventory.quantityLabel
+        )
+        snackbar.show(messageText = cartMessage)
     }
 
 }

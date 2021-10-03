@@ -18,4 +18,5 @@
     <string name="title_my_monthly_list">My Monthly List</string>
     <string name="title_my_favorite_list">My Favorite List</string>
     <string name="label_add_all_items_to_cart">Add All Items to Cart</string>
+    <string name="info_inventory_added_to_cart">%1$s - %2$s Added to cart</string>
 </resources>
