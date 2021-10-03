@@ -17,6 +17,9 @@ data class Product(
         newFavorites.add(FavoriteType.WEEKLY)
         return this.copy(favorites = newFavorites)
     }
+
+    val defaultInventory: Inventory?
+        get() = inventories.getOrNull(0)
 }
 
 data class Inventory(
