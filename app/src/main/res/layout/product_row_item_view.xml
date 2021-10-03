@@ -72,7 +72,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_cart"
-            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+            style="@style/Widget.App.Button.TextButton.IconOnly"
             android:layout_width="@dimen/cart_button_size"
             android:layout_height="40dp"
             app:backgroundTint="@color/tzb_orange"

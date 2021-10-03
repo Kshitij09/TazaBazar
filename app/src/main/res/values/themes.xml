@@ -24,7 +24,7 @@
         <item name="colorPrimaryVariant">@color/tzb_green_darker</item>
     </style>
 
-    <style name="Widget.App.Button.OutlinedButton.IconOnly" parent="Widget.MaterialComponents.Button.TextButton">
+    <style name="Widget.App.Button.TextButton.IconOnly" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
         <item name="android:insetRight">0dp</item>
@@ -32,6 +32,38 @@
         <item name="iconPadding">0dp</item>
         <item name="iconGravity">textStart</item>
         <item name="android:padding">8dp</item>
+    </style>
+
+    <style name="Widget.App.Button.OutlinedButton.IconOnly" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:insetRight">0dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="android:padding">8dp</item>
+    </style>
+
+    <style name="Widget.App.Button.UnelevatedButton.IconOnly" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:insetRight">0dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="android:padding">8dp</item>
+    </style>
+
+    <style name="Widget.App.Button.CartQuantity.Increment" parent="Widget.App.Button.OutlinedButton.IconOnly">
+        <item name="strokeColor">?attr/colorPrimary</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="strokeWidth">2dp</item>
+    </style>
+
+    <style name="Widget.App.Button.CartQuantity.Decrement" parent="Widget.App.Button.UnelevatedButton.IconOnly">
+        <item name="strokeColor">?attr/colorPrimary</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="strokeWidth">2dp</item>
     </style>
 
     <style name="Widget.App.FavoriteButton" parent="Widget.MaterialComponents.Button.TextButton">
