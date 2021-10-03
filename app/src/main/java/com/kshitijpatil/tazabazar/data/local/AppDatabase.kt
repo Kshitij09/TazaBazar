@@ -20,10 +20,10 @@ import com.kshitijpatil.tazabazar.data.local.entity.*
         MonthlyFavorite::class,
         CartItemDetailView::class
     ],
-    version = 5,
+    version = 4,
     exportSchema = true,
     autoMigrations = [
-        AutoMigration(from = 4, to = 5)
+        AutoMigration(from = 3, to = 4)
     ]
 )
 @TypeConverters(TazaBazarTypeConverters::class)

@@ -1,19 +1,11 @@
 package com.kshitijpatil.tazabazar.data.local.entity
 
-import androidx.room.*
-import androidx.room.ForeignKey.CASCADE
+import androidx.room.ColumnInfo
+import androidx.room.DatabaseView
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-@Entity(
-    tableName = "cart_item", foreignKeys = [
-        ForeignKey(
-            entity = InventoryEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["inventory_id"],
-            deferred = true,
-            onDelete = CASCADE
-        )
-    ]
-)
+@Entity(tableName = "cart_item")
 data class CartItemEntity(
     @ColumnInfo(name = "inventory_id")
     @PrimaryKey
