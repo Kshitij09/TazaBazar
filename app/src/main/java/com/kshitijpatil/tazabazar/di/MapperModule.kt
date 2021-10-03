@@ -20,4 +20,6 @@ object MapperModule {
     val productCategoryEntityToProductCategory = ProductCategoryEntityToProductCategory()
     val productCategoryToProductCategoryEntity = ProductCategoryToProductCategoryEntity()
     val productCategoryDtoToProductCategory = ProductCategoryDtoToProductCategory()
+
+    val cartItemDetailViewToCartItem = CartItemDetailViewToCartItem()
 }
