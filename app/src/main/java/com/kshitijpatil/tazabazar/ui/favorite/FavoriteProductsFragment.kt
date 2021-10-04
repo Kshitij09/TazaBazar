@@ -9,11 +9,15 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.databinding.FragmentFavoriteProductsBinding
+import com.kshitijpatil.tazabazar.domain.data
+import com.kshitijpatil.tazabazar.domain.succeeded
+import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.ui.home.HomeFragment
 import com.kshitijpatil.tazabazar.ui.home.ProductFilterFragment
@@ -22,6 +26,7 @@ import com.kshitijpatil.tazabazar.ui.home.ProductListAdapter.ProductLayoutType
 import com.kshitijpatil.tazabazar.ui.home.ProductViewHolder
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
 import com.kshitijpatil.tazabazar.util.textChanges
+import com.kshitijpatil.tazabazar.widget.FadingSnackbar
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
@@ -38,6 +43,7 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
             titleIdToFavoriteType(args.listTitle)
         )
     }
+    private lateinit var snackbar: FadingSnackbar
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,6 +54,7 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
         binding.tvListTitle.text = requireContext().getString(args.listTitle)
         productListAdapter.onItemActionCallback = this
         binding.rvProducts.adapter = productListAdapter
+        snackbar = binding.snackbar
         binding.rvProducts.layoutManager = LinearLayoutManager(requireContext())
         return binding.root
     }
@@ -58,10 +65,34 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
         // fragment is created as favorites might
         // have changed since then
         viewModel.loadFavoriteProducts()
-
+        setupAddAllButton()
         launchAndRepeatWithViewLifecycle {
             launch { observeProductList() }
             launch { observeSearchQuery() }
+        }
+    }
+
+    private fun setupAddAllButton() {
+        binding.btnAddAll.setOnClickListener {
+            lifecycleScope.launch {
+                val result = viewModel.addAllFavoritesToCart()
+                val context = requireContext()
+                val msg = if (result.succeeded) {
+                    val itemsCarted = result.data!!
+                    if (itemsCarted == 0) {
+                        context.getString(R.string.info_already_carted_multi)
+                    } else {
+                        context.resources.getQuantityString(
+                            R.plurals.info_no_of_items_added_to_cart,
+                            itemsCarted,
+                            itemsCarted
+                        )
+                    }
+                } else {
+                    context.getString(R.string.error_something_went_wrong)
+                }
+                snackbar.show(messageText = msg)
+            }
         }
     }
 
@@ -90,6 +121,19 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
         } else {
             val favoriteType = titleIdToFavoriteType(args.listTitle)
             Timber.e("Product: '$product' inappropriately appeared in $favoriteType list")
+        }
+    }
+
+    override fun onCartClicked(productName: String, inventory: Inventory) {
+        lifecycleScope.launch {
+            if (viewModel.addToCart(inventory).succeeded) {
+                val cartMessage = requireContext().getString(
+                    R.string.info_inventory_added_to_cart,
+                    productName,
+                    inventory.quantityLabel
+                )
+                snackbar.show(messageText = cartMessage)
+            }
         }
     }
 
