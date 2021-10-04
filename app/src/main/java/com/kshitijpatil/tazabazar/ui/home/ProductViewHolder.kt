@@ -5,12 +5,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
-import coil.request.CachePolicy
 import com.google.android.material.button.MaterialButton
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
+import com.kshitijpatil.tazabazar.ui.common.LoadImageDelegate
 import java.lang.ref.WeakReference
 
 // TODO: Handle out of stock
@@ -18,6 +17,7 @@ import java.lang.ref.WeakReference
 // TODO: Handle Cart Action
 class ProductViewHolder(
     view: View,
+    private val loadImageDelegate: LoadImageDelegate,
     var onItemActionCallback: OnItemActionCallback? = null
 ) : RecyclerView.ViewHolder(view) {
     private val viewRef = WeakReference(view)
@@ -28,6 +28,7 @@ class ProductViewHolder(
     private val btnCart: MaterialButton = view.findViewById(R.id.btn_cart)
     private val ivImage: ImageView = view.findViewById(R.id.iv_image)
     fun bind(item: Product) {
+        loadImageDelegate.load(ivImage, item.imageUri)
         tvName.text = item.name
         // TODO: Make it list menu
         val inventory = item.inventories[0]
@@ -50,7 +51,6 @@ class ProductViewHolder(
             // since we would've disabled the button otherwise
             onItemActionCallback?.onCartClicked(item.name, item.defaultInventory!!)
         }
-        loadImage(item.imageUri)
     }
 
     private fun updateFavoriteButtonColors(favorite: Boolean) {
@@ -62,15 +62,6 @@ class ProductViewHolder(
             btnFavorite.setIconTintResource(R.color.tzb_gray_200)
             btnFavorite.backgroundTintList =
                 ContextCompat.getColorStateList(btnFavorite.context, R.color.tzb_gray_100)
-        }
-    }
-
-    private fun loadImage(imageUri: String) {
-        ivImage.load(imageUri) {
-            placeholder(R.drawable.product_preview_placeholder)
-            error(R.drawable.product_preview_placeholder)
-            memoryCachePolicy(CachePolicy.ENABLED)
-            memoryCacheKey(imageUri)
         }
     }
 

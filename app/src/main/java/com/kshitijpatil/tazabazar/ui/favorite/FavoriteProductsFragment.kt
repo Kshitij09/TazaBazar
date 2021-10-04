@@ -19,6 +19,7 @@ import com.kshitijpatil.tazabazar.domain.data
 import com.kshitijpatil.tazabazar.domain.succeeded
 import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
+import com.kshitijpatil.tazabazar.ui.common.CoilProductLoadImageDelegate
 import com.kshitijpatil.tazabazar.ui.home.HomeFragment
 import com.kshitijpatil.tazabazar.ui.home.ProductFilterFragment
 import com.kshitijpatil.tazabazar.ui.home.ProductListAdapter
@@ -36,7 +37,8 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
     private var _binding: FragmentFavoriteProductsBinding? = null
     private val binding: FragmentFavoriteProductsBinding get() = _binding!!
     private val args: FavoriteProductsFragmentArgs by navArgs()
-    private val productListAdapter = ProductListAdapter(ProductLayoutType.ROW)
+    private val loadImageDelegate = CoilProductLoadImageDelegate()
+    private val productListAdapter = ProductListAdapter(loadImageDelegate, ProductLayoutType.ROW)
     private val viewModel: FavoriteProductsViewModel by viewModels {
         FavoriteProductsViewModelFactory(
             requireContext().applicationContext,

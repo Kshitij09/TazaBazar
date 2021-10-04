@@ -20,6 +20,7 @@ import com.kshitijpatil.tazabazar.domain.succeeded
 import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.ui.SwipeRefreshHandler
+import com.kshitijpatil.tazabazar.ui.common.CoilProductLoadImageDelegate
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
 import com.kshitijpatil.tazabazar.widget.FadingSnackbar
 import kotlinx.coroutines.flow.collect
@@ -51,7 +52,8 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
     private val viewModel: HomeViewModel by activityViewModels {
         ViewModelFactory(requireActivity(), requireContext().applicationContext, arguments)
     }
-    private val productListAdapter = ProductListAdapter()
+    private val loadImageDelegate = CoilProductLoadImageDelegate()
+    private val productListAdapter = ProductListAdapter(loadImageDelegate)
     private lateinit var snackbar: FadingSnackbar
     private val favoriteTypeValues = enumValues<FavoriteType>()
 
