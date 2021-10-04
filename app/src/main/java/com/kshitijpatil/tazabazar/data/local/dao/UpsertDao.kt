@@ -19,11 +19,14 @@ interface UpsertDao<E> : BaseDao<E> {
     suspend fun insert(entity: E): Long
 }
 
-suspend inline fun <E> UpsertDao<E>.upsert(entity: E) {
+suspend inline fun <E> UpsertDao<E>.upsert(entity: E): Boolean {
     val rowid = insert(entity)
     // item was not inserted
-    if (rowid == -1L) {
+    return if (rowid == -1L) {
         update(entity)
+        false
+    } else {
+        true
     }
 }
 
