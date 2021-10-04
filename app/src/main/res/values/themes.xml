@@ -54,18 +54,6 @@
         <item name="android:padding">8dp</item>
     </style>
 
-    <style name="Widget.App.Button.CartQuantity.Increment" parent="Widget.App.Button.OutlinedButton.IconOnly">
-        <item name="strokeColor">?attr/colorPrimary</item>
-        <item name="cornerRadius">12dp</item>
-        <item name="strokeWidth">2dp</item>
-    </style>
-
-    <style name="Widget.App.Button.CartQuantity.Decrement" parent="Widget.App.Button.UnelevatedButton.IconOnly">
-        <item name="strokeColor">?attr/colorPrimary</item>
-        <item name="cornerRadius">12dp</item>
-        <item name="strokeWidth">2dp</item>
-    </style>
-
     <style name="Widget.App.FavoriteButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="cornerRadius">5dp</item>
         <item name="android:insetTop">0dp</item>
