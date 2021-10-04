@@ -1,15 +1,15 @@
 package com.kshitijpatil.tazabazar.di
 
 import android.content.Context
-import com.kshitijpatil.tazabazar.domain.AddToCartUseCase
+import com.kshitijpatil.tazabazar.domain.AddOrUpdateCartItemUseCase
 import kotlinx.coroutines.CoroutineDispatcher
 
 object DomainModule {
     fun provideAddToCartUseCase(
         context: Context,
         dispatcher: CoroutineDispatcher
-    ): AddToCartUseCase {
+    ): AddOrUpdateCartItemUseCase {
         val repo = RepositoryModule.provideCartItemRepository(context)
-        return AddToCartUseCase(repo, dispatcher)
+        return AddOrUpdateCartItemUseCase(repo, dispatcher)
     }
 }

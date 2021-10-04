@@ -8,11 +8,11 @@ import com.kshitijpatil.tazabazar.model.CartItem
 import timber.log.Timber
 
 interface CartRepository {
-    /** Add inventory with given [inventoryId] to the cart */
-    suspend fun addToCart(inventoryId: Int, quantity: Int = 1)
-
-    /** Update given [CartItem] in the cart */
-    suspend fun updateCartItem(cartItem: CartItem)
+    /**
+     * Add or Update Cart Item with given [inventoryId]
+     * @return (Boolean) - Whether item was added to cart
+     */
+    suspend fun addOrUpdateCartItem(inventoryId: Int, quantity: Int = 1): Boolean
 
     /** Remove [CartItem] with given [inventoryId] from the cart */
     suspend fun removeFromCart(inventoryId: Int)
@@ -26,16 +26,10 @@ class CartRepositoryImpl(
     private val cartItemMapper: CartItemDetailViewToCartItem
 ) : CartRepository {
     // TODO: Check for quantity here
-    override suspend fun addToCart(inventoryId: Int, quantity: Int) {
+    override suspend fun addOrUpdateCartItem(inventoryId: Int, quantity: Int): Boolean {
         val cartItemEntity = CartItemEntity(inventoryId, quantity)
         Timber.d("Saving CartItemEntity: $cartItemEntity")
-        cartItemDao.upsert(cartItemEntity)
-    }
-
-    override suspend fun updateCartItem(cartItem: CartItem) {
-        val entity = CartItemEntity(cartItem.inventoryId, cartItem.quantity)
-        Timber.d("Saving CartItemEntity: $entity")
-        cartItemDao.upsert(entity)
+        return cartItemDao.upsert(cartItemEntity)
     }
 
     override suspend fun removeFromCart(inventoryId: Int) {

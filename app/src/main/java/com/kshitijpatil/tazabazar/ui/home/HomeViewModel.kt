@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kshitijpatil.tazabazar.data.ProductRepository
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
-import com.kshitijpatil.tazabazar.domain.AddToCartUseCase
+import com.kshitijpatil.tazabazar.domain.AddOrUpdateCartItemUseCase
+import com.kshitijpatil.tazabazar.domain.Result
+import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.model.ProductCategory
 import kotlinx.coroutines.Job
@@ -17,7 +19,7 @@ import timber.log.Timber
 class HomeViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val productRepository: ProductRepository,
-    private val addToCartUseCase: AddToCartUseCase
+    private val addOrUpdateCartItemUseCase: AddOrUpdateCartItemUseCase
 ) : ViewModel() {
     companion object {
         private const val KEY_QUERY = "query"
@@ -125,11 +127,8 @@ class HomeViewModel(
         }
     }
 
-    fun addToCart(inventoryId: Int) {
-        viewModelScope.launch {
-            // We add all the items with quantity=1 by default from here
-            addToCartUseCase(AddToCartUseCase.Params(inventoryId, 1))
-        }
+    suspend fun addToCart(inventory: Inventory): Result<Boolean> {
+        return addOrUpdateCartItemUseCase(AddOrUpdateCartItemUseCase.Params(inventory.id, 1))
     }
 
     fun clearAllFilters() {
