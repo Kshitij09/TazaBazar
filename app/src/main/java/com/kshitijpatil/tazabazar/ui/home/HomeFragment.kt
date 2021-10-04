@@ -15,6 +15,8 @@ import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.databinding.FragmentHomeBinding
 import com.kshitijpatil.tazabazar.di.ViewModelFactory
+import com.kshitijpatil.tazabazar.domain.data
+import com.kshitijpatil.tazabazar.domain.succeeded
 import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.ui.SwipeRefreshHandler
@@ -160,13 +162,21 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
     }
 
     override fun onCartClicked(productName: String, inventory: Inventory) {
-        viewModel.addToCart(inventory.id)
-        val cartMessage = requireContext().getString(
-            R.string.info_inventory_added_to_cart,
-            productName,
-            inventory.quantityLabel
-        )
-        snackbar.show(messageText = cartMessage)
+        lifecycleScope.launch {
+            val result = viewModel.addToCart(inventory)
+            if (result.succeeded) {
+                val cartMessage = if (result.data == true) {
+                    requireContext().getString(
+                        R.string.info_inventory_added_to_cart,
+                        productName,
+                        inventory.quantityLabel
+                    )
+                } else {
+                    requireContext().getString(R.string.info_already_carted_single)
+                }
+                snackbar.show(messageText = cartMessage)
+            }
+        }
     }
 
 }
