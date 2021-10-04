@@ -26,4 +26,9 @@
     <string name="info_already_carted_single">Already in the cart 😀</string>
     <string name="error_something_went_wrong">Something Went Wrong</string>
     <string name="info_inventory_added_to_cart">%1$s - %2$s Added to cart</string>
+    <string name="title_product_cart">Product Cart</string>
+    <string name="label_subtotal">Subtotal</string>
+    <string name="label_discount">Discount</string>
+    <string name="label_delivery">Delivery</string>
+    <string name="label_total">Total</string>
 </resources>
