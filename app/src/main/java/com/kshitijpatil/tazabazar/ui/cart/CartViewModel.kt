@@ -10,7 +10,6 @@ import com.kshitijpatil.tazabazar.model.CartConfiguration
 import com.kshitijpatil.tazabazar.model.CartItem
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class CartViewModel(private val cartRepository: CartRepository) : ViewModel() {
     private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
@@ -33,7 +32,6 @@ class CartViewModel(private val cartRepository: CartRepository) : ViewModel() {
     }
 
     fun incrementQuantity(item: CartItem) {
-        Timber.d("CartViewModel: Increment event received")
         viewModelScope.launch {
             cartRepository.addOrUpdateCartItem(item.inventoryId, item.quantity + 1)
             reloadCartItems()
@@ -41,7 +39,6 @@ class CartViewModel(private val cartRepository: CartRepository) : ViewModel() {
     }
 
     fun decrementQuantity(item: CartItem) {
-        Timber.d("CartViewModel: Decrement event received")
         viewModelScope.launch {
             if (item.quantity != 1) {
                 cartRepository.addOrUpdateCartItem(item.inventoryId, item.quantity - 1)
@@ -50,11 +47,6 @@ class CartViewModel(private val cartRepository: CartRepository) : ViewModel() {
             }
             reloadCartItems()
         }
-    }
-
-    suspend fun getCartConfiguration(): CartConfiguration {
-        Timber.d("I was called")
-        return cartRepository.getCartConfiguration()
     }
 }
 

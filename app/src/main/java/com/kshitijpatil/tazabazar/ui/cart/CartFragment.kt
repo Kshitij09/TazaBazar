@@ -98,7 +98,6 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
     }
 
     override fun onQuantityIncrement(item: CartItem) {
-        Timber.d("CartFragment: Increment event received")
         if (item.quantity < cartConfiguration.maxQuantityPerItem)
             viewModel.incrementQuantity(item)
         else {
@@ -111,7 +110,6 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
     }
 
     override fun onQuantityDecrement(item: CartItem) {
-        Timber.d("CartFragment: Decrement event received")
         viewModel.decrementQuantity(item)
     }
 }
