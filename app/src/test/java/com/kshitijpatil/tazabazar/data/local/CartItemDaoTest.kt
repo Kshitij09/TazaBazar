@@ -3,6 +3,7 @@ package com.kshitijpatil.tazabazar.data.local
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.kshitijpatil.tazabazar.data.local.dao.upsert
 import com.kshitijpatil.tazabazar.data.local.entity.CartItemDetailView
@@ -102,6 +103,28 @@ class CartItemDaoTest {
             val actual = cartItemDao.getAllCartItems()
             assertThat(actual).doesNotContain(cartItem1)
         }
+    }
+
+    @Test
+    fun observeCartItemCount() = scope.runBlockingTest {
+        cartItemDao.observeCartItemCount().test {
+            assertThat(awaitItem()).isEqualTo(0)
+
+            // insert
+            val cartItem1 = CartItemEntity(tomatoRedInv1.id, 4)
+            cartItemDao.insert(cartItem1)
+            assertThat(awaitItem()).isEqualTo(1)
+
+            // insert-2
+            val cartItem2 = CartItemEntity(sitafalInv.id, 8)
+            cartItemDao.insert(cartItem2)
+            assertThat(awaitItem()).isEqualTo(2)
+
+            // delete
+            cartItemDao.deleteById(cartItem1.inventoryId)
+            assertThat(awaitItem()).isEqualTo(1)
+        }
+
     }
 
     @After
