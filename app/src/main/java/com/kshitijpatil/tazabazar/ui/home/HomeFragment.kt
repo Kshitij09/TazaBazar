@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
@@ -15,8 +17,12 @@ import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.databinding.FragmentHomeBinding
 import com.kshitijpatil.tazabazar.di.ViewModelFactory
+import com.kshitijpatil.tazabazar.domain.data
+import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.ui.SwipeRefreshHandler
+import com.kshitijpatil.tazabazar.ui.cart.CartFragment
+import com.kshitijpatil.tazabazar.ui.common.CoilProductLoadImageDelegate
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
 import com.kshitijpatil.tazabazar.widget.FadingSnackbar
 import kotlinx.coroutines.flow.collect
@@ -48,7 +54,8 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
     private val viewModel: HomeViewModel by activityViewModels {
         ViewModelFactory(requireActivity(), requireContext().applicationContext, arguments)
     }
-    private val productListAdapter = ProductListAdapter()
+    private val loadImageDelegate = CoilProductLoadImageDelegate()
+    private val productListAdapter = ProductListAdapter(loadImageDelegate)
     private lateinit var snackbar: FadingSnackbar
     private val favoriteTypeValues = enumValues<FavoriteType>()
 
@@ -158,4 +165,25 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
         }
     }
 
+    override fun onCartClicked(productName: String, inventory: Inventory) {
+        lifecycleScope.launch {
+            viewModel.addToCart(inventory).data?.let { itemAdded ->
+                val cartMessage = if (itemAdded) {
+                    notifyCartChanged()
+                    requireContext().getString(
+                        R.string.info_inventory_added_to_cart,
+                        productName,
+                        inventory.quantityLabel
+                    )
+                } else {
+                    requireContext().getString(R.string.info_already_carted_single)
+                }
+                snackbar.show(messageText = cartMessage)
+            }
+        }
+    }
+
+    private fun notifyCartChanged() {
+        setFragmentResult(CartFragment.CART_CHANGED_RESULT, bundleOf())
+    }
 }

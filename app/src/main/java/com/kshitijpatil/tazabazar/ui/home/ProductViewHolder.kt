@@ -5,11 +5,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
-import coil.request.CachePolicy
 import com.google.android.material.button.MaterialButton
 import com.kshitijpatil.tazabazar.R
+import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
+import com.kshitijpatil.tazabazar.ui.common.LoadImageDelegate
 import java.lang.ref.WeakReference
 
 // TODO: Handle out of stock
@@ -17,6 +17,7 @@ import java.lang.ref.WeakReference
 // TODO: Handle Cart Action
 class ProductViewHolder(
     view: View,
+    private val loadImageDelegate: LoadImageDelegate,
     var onItemActionCallback: OnItemActionCallback? = null
 ) : RecyclerView.ViewHolder(view) {
     private val viewRef = WeakReference(view)
@@ -24,8 +25,10 @@ class ProductViewHolder(
     private val tvPrice: TextView = view.findViewById(R.id.tv_price)
     private val tvQuantityLabel: TextView = view.findViewById(R.id.tv_quantity_label)
     private val btnFavorite: MaterialButton = view.findViewById(R.id.btn_favorite)
+    private val btnCart: MaterialButton = view.findViewById(R.id.btn_cart)
     private val ivImage: ImageView = view.findViewById(R.id.iv_image)
     fun bind(item: Product) {
+        loadImageDelegate.load(ivImage, item.imageUri)
         tvName.text = item.name
         // TODO: Make it list menu
         val inventory = item.inventories[0]
@@ -42,7 +45,12 @@ class ProductViewHolder(
                 updateFavoriteButtonColors(true)
             onItemActionCallback?.onFavoriteClicked(item)
         }
-        loadImage(item.imageUri)
+        btnCart.isEnabled = item.inventories.isNotEmpty()
+        btnCart.setOnClickListener {
+            // we can assure that defaultInventory is not null here
+            // since we would've disabled the button otherwise
+            onItemActionCallback?.onCartClicked(item.name, item.defaultInventory!!)
+        }
     }
 
     private fun updateFavoriteButtonColors(favorite: Boolean) {
@@ -57,20 +65,18 @@ class ProductViewHolder(
         }
     }
 
-    private fun loadImage(imageUri: String) {
-        ivImage.load(imageUri) {
-            placeholder(R.drawable.product_preview_placeholder)
-            error(R.drawable.product_preview_placeholder)
-            memoryCachePolicy(CachePolicy.ENABLED)
-            memoryCacheKey(imageUri)
-        }
-    }
-
     interface OnItemActionCallback {
         /**
          * Called whenever user clicks on the favorite button
          * @param product whose favorite was clicked
          */
         fun onFavoriteClicked(product: Product)
+
+        /**
+         * Called whenever user clicks the cart button
+         * @param productName Name of the Product added to cart
+         * @param inventory Currently selected inventory
+         */
+        fun onCartClicked(productName: String, inventory: Inventory)
     }
 }

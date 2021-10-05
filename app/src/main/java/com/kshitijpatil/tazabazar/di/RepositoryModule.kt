@@ -5,9 +5,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.room.Room
 import com.kshitijpatil.tazabazar.api.ApiModule
 import com.kshitijpatil.tazabazar.api.ProductApi
-import com.kshitijpatil.tazabazar.data.ProductDataSource
-import com.kshitijpatil.tazabazar.data.ProductRepository
-import com.kshitijpatil.tazabazar.data.ProductRepositoryImpl
+import com.kshitijpatil.tazabazar.data.*
 import com.kshitijpatil.tazabazar.data.local.AppDatabase
 import com.kshitijpatil.tazabazar.data.local.ProductLocalDataSource
 import com.kshitijpatil.tazabazar.data.network.ProductRemoteDataSource
@@ -22,6 +20,10 @@ object RepositoryModule {
 
     @Volatile
     var productRepository: ProductRepository? = null
+        @VisibleForTesting set
+
+    @Volatile
+    var cartRepository: CartRepository? = null
         @VisibleForTesting set
 
 
@@ -47,6 +49,20 @@ object RepositoryModule {
         )
         productRepository = newRepo
         return newRepo
+    }
+
+    fun provideCartItemRepository(context: Context): CartRepository {
+        synchronized(lock) {
+            return cartRepository ?: createCartRepository(context)
+        }
+    }
+
+    fun createCartRepository(context: Context): CartRepository {
+        val appDatabase = database ?: createDatabase(context)
+        val mapper = MapperModule.cartItemDetailViewToCartItem
+        val repo = CartRepositoryImpl(appDatabase.cartItemDao, mapper)
+        cartRepository = repo
+        return repo
     }
 
     fun provideLocalDataSource(appDatabase: AppDatabase): ProductDataSource {

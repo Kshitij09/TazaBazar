@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 3,
-    "identityHash": "35b9a3acca87c439cedd1d1c2477e19d",
+    "version": 4,
+    "identityHash": "540033191909308fd70590c7f0bc7654",
     "entities": [
       {
         "tableName": "product",
@@ -192,6 +192,32 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "cart_item",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`inventory_id` INTEGER NOT NULL, `quantity` INTEGER NOT NULL, PRIMARY KEY(`inventory_id`))",
+        "fields": [
+          {
+            "fieldPath": "inventoryId",
+            "columnName": "inventory_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "quantity",
+            "columnName": "quantity",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "inventory_id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [
@@ -202,11 +228,15 @@
       {
         "viewName": "monthly_favorite",
         "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT product_sku FROM favorite WHERE type = 'MONTHLY'"
+      },
+      {
+        "viewName": "cart_item_detail_view",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT inv.id AS inventory_id,inv.stock_available,inv.quantity_label,inv.price,p.name,p.image_uri,cart.quantity\n        FROM cart_item AS cart\n        INNER JOIN inventory as inv ON cart.inventory_id=inv.id\n        INNER JOIN product AS p ON inv.product_sku=p.sku"
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '35b9a3acca87c439cedd1d1c2477e19d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '540033191909308fd70590c7f0bc7654')"
     ]
   }
 }

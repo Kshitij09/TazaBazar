@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="@dimen/product_item_card_radius"
-    app:cardElevation="8dp">
+    app:cardCornerRadius="12dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
 
         <ImageView
             android:id="@+id/iv_image"
@@ -22,20 +22,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.5"
             tools:srcCompat="@drawable/product_preview_placeholder" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_favorite"
-            style="@style/Widget.App.FavoriteButton"
-            android:layout_width="@dimen/product_item_favorite_btn_size"
-            android:layout_height="@dimen/product_item_favorite_btn_size"
-            android:layout_marginTop="@dimen/product_item_favorite_margin_top_end"
-            android:layout_marginEnd="@dimen/product_item_favorite_margin_top_end"
-            app:backgroundTint="@color/tzb_gray_100"
-            app:icon="@drawable/favorite_filled"
-            app:iconSize="@dimen/product_item_favorite_icon_size"
-            app:iconTint="@color/tzb_gray_200"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tv_name"
@@ -71,19 +57,42 @@
             tools:text="500 gm" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_cart"
-            style="@style/Widget.App.Button.TextButton.IconOnly"
-            android:layout_width="@dimen/cart_button_size"
-            android:layout_height="40dp"
-            app:backgroundTint="@color/tzb_orange"
+            android:id="@+id/btn_increment_quantity"
+            style="@style/Widget.App.Button.UnelevatedButton.IconOnly"
+            android:layout_width="@dimen/cart_quantity_button_size"
+            android:layout_height="@dimen/cart_quantity_button_size"
+            android:layout_marginEnd="8dp"
             app:icon="@drawable/ic_add"
-            app:iconGravity="start"
-            app:iconSize="24dp"
-            app:iconTint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:shapeAppearance="@style/ShapeAppearance.App.CartButton"
-            app:strokeColor="@color/tzb_orange" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
+
+        <TextView
+            android:id="@+id/txt_quantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/btn_increment_quantity"
+            app:layout_constraintEnd_toStartOf="@id/btn_increment_quantity"
+            app:layout_constraintTop_toTopOf="@id/btn_increment_quantity"
+            tools:text="2" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_decrement_quantity"
+            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+            android:layout_width="@dimen/cart_quantity_button_size"
+            android:layout_height="@dimen/cart_quantity_button_size"
+            android:layout_marginEnd="16dp"
+            app:icon="@drawable/ic_remove"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/txt_quantity"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5"
+            app:strokeColor="@color/tzb_green" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</com.google.android.material.card.MaterialCardView>
+</androidx.cardview.widget.CardView>

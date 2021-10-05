@@ -18,4 +18,18 @@
     <string name="title_my_monthly_list">My Monthly List</string>
     <string name="title_my_favorite_list">My Favorite List</string>
     <string name="label_add_all_items_to_cart">Add All Items to Cart</string>
+    <plurals name="info_no_of_items_added_to_cart">
+        <item quantity="one">Added %1$d item to the Cart</item>
+        <item quantity="other">Added %1$d items to the Cart</item>
+    </plurals>
+    <string name="info_already_carted_multi">Everything is already there 😀</string>
+    <string name="info_already_carted_single">Already in the cart 😀</string>
+    <string name="error_something_went_wrong">Something Went Wrong</string>
+    <string name="error_max_quantity_reached">Can\'t add more than %1$d items</string>
+    <string name="info_inventory_added_to_cart">%1$s - %2$s Added to cart</string>
+    <string name="title_product_cart">Product Cart</string>
+    <string name="label_subtotal">Subtotal</string>
+    <string name="label_discount">Discount</string>
+    <string name="label_delivery">Delivery</string>
+    <string name="label_total">Total</string>
 </resources>

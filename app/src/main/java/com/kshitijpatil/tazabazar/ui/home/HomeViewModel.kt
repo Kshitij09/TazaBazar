@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kshitijpatil.tazabazar.data.ProductRepository
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
+import com.kshitijpatil.tazabazar.domain.AddOrUpdateCartItemUseCase
+import com.kshitijpatil.tazabazar.domain.Result
+import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.model.ProductCategory
-import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
@@ -17,7 +19,7 @@ import timber.log.Timber
 class HomeViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val productRepository: ProductRepository,
-    private val dispatchers: AppCoroutineDispatchers
+    private val addOrUpdateCartItemUseCase: AddOrUpdateCartItemUseCase
 ) : ViewModel() {
     companion object {
         private const val KEY_QUERY = "query"
@@ -123,6 +125,10 @@ class HomeViewModel(
             productRepository.updateFavorites(productSku, favoriteChoices)
             updateProductList(_filter.value)
         }
+    }
+
+    suspend fun addToCart(inventory: Inventory): Result<Boolean> {
+        return addOrUpdateCartItemUseCase(AddOrUpdateCartItemUseCase.Params(inventory.id, 1))
     }
 
     fun clearAllFilters() {

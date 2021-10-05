@@ -17,6 +17,8 @@ class ViewModelFactory(
     private val productRepository =
         RepositoryModule.provideProductRepository(appContext, okhttpClient)
     private val appCoroutineDispatchers = AppModule.provideAppCoroutineDispatchers()
+    private val addToCartUseCase =
+        DomainModule.provideAddToCartUseCase(appContext, appCoroutineDispatchers.io)
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(
@@ -25,7 +27,7 @@ class ViewModelFactory(
         handle: SavedStateHandle
     ): T {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
-            return HomeViewModel(handle, productRepository, appCoroutineDispatchers) as T
+            return HomeViewModel(handle, productRepository, addToCartUseCase) as T
         }
         throw IllegalArgumentException()
     }

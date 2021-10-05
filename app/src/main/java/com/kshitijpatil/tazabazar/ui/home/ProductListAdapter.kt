@@ -6,8 +6,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.model.Product
+import com.kshitijpatil.tazabazar.ui.common.LoadImageDelegate
 
 class ProductListAdapter(
+    private val loadImageDelegate: LoadImageDelegate,
     private val layoutType: ProductLayoutType = ProductLayoutType.GRID,
     var onItemActionCallback: ProductViewHolder.OnItemActionCallback? = null
 ) : ListAdapter<Product, ProductViewHolder>(ProductDiffCallback()) {
@@ -18,7 +20,12 @@ class ProductListAdapter(
             ProductLayoutType.ROW -> R.layout.product_row_item_view
         }
         val view = LayoutInflater.from(parent.context).inflate(layoutResource, parent, false)
-        return ProductViewHolder(view, onItemActionCallback)
+        return ProductViewHolder(view, loadImageDelegate, onItemActionCallback)
+    }
+
+    override fun onViewDetachedFromWindow(holder: ProductViewHolder) {
+        holder.onItemActionCallback = null
+        super.onViewDetachedFromWindow(holder)
     }
 
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
