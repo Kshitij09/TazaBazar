@@ -12,14 +12,12 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentCartBinding
 import com.kshitijpatil.tazabazar.model.CartConfiguration
-import com.kshitijpatil.tazabazar.model.CartCost
 import com.kshitijpatil.tazabazar.model.CartItem
 import com.kshitijpatil.tazabazar.ui.common.CoilProductLoadImageDelegate
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
 import com.kshitijpatil.tazabazar.widget.FadingSnackbar
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
     companion object {
@@ -61,7 +59,12 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
         super.onViewCreated(view, savedInstanceState)
         cartItemListAdapter.itemActionCallback = this
         launchAndRepeatWithViewLifecycle {
-            launch { viewModel.cartConfiguration.collect { cartConfiguration = it } }
+            launch {
+                viewModel.cartConfiguration.collect {
+                    cartConfiguration = it
+                    cartCostFooterAdapter.updateDeliveryCharges(it.deliveryCharges)
+                }
+            }
             launch { observeCartItems() }
         }
         snackbar = view.findViewById(R.id.snackbar)
@@ -90,7 +93,7 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
                 cartCostFooterAdapter.isVisible = true
                 val subTotal =
                     cartItems.fold(0f) { acc, item -> acc + (item.price * item.quantity) }
-                cartCostFooterAdapter.costing = CartCost(subTotal = subTotal)
+                cartCostFooterAdapter.updateSubTotal(subTotal)
             } else {
                 cartCostFooterAdapter.isVisible = false
             }
