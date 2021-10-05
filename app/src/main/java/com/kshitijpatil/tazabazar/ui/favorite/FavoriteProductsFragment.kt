@@ -19,6 +19,7 @@ import com.kshitijpatil.tazabazar.domain.data
 import com.kshitijpatil.tazabazar.domain.succeeded
 import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
+import com.kshitijpatil.tazabazar.ui.cart.CartFragment
 import com.kshitijpatil.tazabazar.ui.common.CoilProductLoadImageDelegate
 import com.kshitijpatil.tazabazar.ui.home.HomeFragment
 import com.kshitijpatil.tazabazar.ui.home.ProductFilterFragment
@@ -84,6 +85,7 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
                     if (itemsCarted == 0) {
                         context.getString(R.string.info_already_carted_multi)
                     } else {
+                        notifyCartChanged()
                         context.resources.getQuantityString(
                             R.plurals.info_no_of_items_added_to_cart,
                             itemsCarted,
@@ -128,12 +130,18 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
 
     override fun onCartClicked(productName: String, inventory: Inventory) {
         lifecycleScope.launch {
-            if (viewModel.addToCart(inventory).succeeded) {
-                val cartMessage = requireContext().getString(
-                    R.string.info_inventory_added_to_cart,
-                    productName,
-                    inventory.quantityLabel
-                )
+            viewModel.addToCart(inventory).data?.let { itemAdded ->
+                val context = requireContext()
+                val cartMessage = if (itemAdded) {
+                    notifyCartChanged()
+                    context.getString(
+                        R.string.info_inventory_added_to_cart,
+                        productName,
+                        inventory.quantityLabel
+                    )
+                } else {
+                    context.getString(R.string.info_already_carted_single)
+                }
                 snackbar.show(messageText = cartMessage)
             }
         }
@@ -148,5 +156,9 @@ class FavoriteProductsFragment : Fragment(), ProductViewHolder.OnItemActionCallb
 
     private fun notifyProductsUpdated() {
         setFragmentResult(HomeFragment.PRODUCTS_UPDATED_RESULT_KEY, bundleOf())
+    }
+
+    private fun notifyCartChanged() {
+        setFragmentResult(CartFragment.CART_CHANGED_RESULT, bundleOf())
     }
 }

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -21,6 +22,11 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
+    companion object {
+        /** Result Key to notify cart items changed */
+        const val CART_CHANGED_RESULT = "com.kshitijpatil.tazabazar.ui.cart.cart-changed-result"
+    }
+
     private var _binding: FragmentCartBinding? = null
     private val binding: FragmentCartBinding get() = _binding!!
     private val loadImageDelegate = CoilProductLoadImageDelegate()
@@ -32,6 +38,11 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
     )
     private lateinit var cartConfiguration: CartConfiguration
     private lateinit var snackbar: FadingSnackbar
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        listenForCartItemChanges()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,6 +75,12 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
     override fun onDestroyView() {
         _binding = null
         super.onDestroyView()
+    }
+
+    private fun listenForCartItemChanges() {
+        setFragmentResultListener(CART_CHANGED_RESULT) { _, _ ->
+            viewModel.reloadCartItems()
+        }
     }
 
     private suspend fun observeCartItems() {
