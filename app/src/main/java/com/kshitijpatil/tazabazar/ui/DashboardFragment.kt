@@ -9,13 +9,17 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.badge.BadgeDrawable
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentDashboardBinding
 import com.kshitijpatil.tazabazar.di.ViewModelFactory
-import com.kshitijpatil.tazabazar.ui.cart.CartViewModel
-import com.kshitijpatil.tazabazar.ui.cart.CartViewModelFactory
 import com.kshitijpatil.tazabazar.ui.home.HomeViewModel
 import com.kshitijpatil.tazabazar.ui.home.ProductFilterFragment
+import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class DashboardFragment : Fragment() {
     private var _binding: FragmentDashboardBinding? = null
@@ -23,9 +27,11 @@ class DashboardFragment : Fragment() {
     private val homeViewModel: HomeViewModel by activityViewModels {
         ViewModelFactory(requireActivity(), requireContext().applicationContext, arguments)
     }
-    private val cartViewModel: CartViewModel by viewModels {
-        CartViewModelFactory(requireContext().applicationContext)
+    private val dashboardViewModel: DashboardViewModel by viewModels {
+        DashboardViewModelFactory(requireContext().applicationContext)
     }
+    private lateinit var bottomNavigation: BottomNavigationView
+    private lateinit var cartItemCountBadge: BadgeDrawable
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,11 +39,14 @@ class DashboardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
+        bottomNavigation = binding.bottomNavigation
+        cartItemCountBadge = bottomNavigation.getOrCreateBadge(R.id.navigation_cart)
+        cartItemCountBadge.isVisible = false
         val navHostFragment =
             childFragmentManager.findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
         navHostFragment?.let {
-            binding.bottomNavigation.setupWithNavController(it.navController)
-            binding.bottomNavigation.setOnItemReselectedListener { item ->
+            bottomNavigation.setupWithNavController(it.navController)
+            bottomNavigation.setOnItemReselectedListener { item ->
                 val reselectedDestinationId = item.itemId
                 if (reselectedDestinationId == R.id.navigation_home) {
                     notifyClearFilters()
@@ -47,6 +56,26 @@ class DashboardFragment : Fragment() {
             }
         }
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        launchAndRepeatWithViewLifecycle {
+            launch { updateCartItemCount() }
+        }
+    }
+
+    private suspend fun updateCartItemCount() {
+        dashboardViewModel.observeCartItemCount().collect { count ->
+            Timber.d("Cart Item Count Updated: $count")
+            if (count != 0) {
+                cartItemCountBadge.isVisible = true
+                cartItemCountBadge.number = count
+            } else {
+                cartItemCountBadge.isVisible = false
+                cartItemCountBadge.clearNumber()
+            }
+        }
     }
 
     /**
