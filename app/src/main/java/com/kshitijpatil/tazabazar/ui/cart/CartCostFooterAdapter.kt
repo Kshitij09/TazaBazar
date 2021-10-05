@@ -17,6 +17,19 @@ class CartCostFooterAdapter : RecyclerView.Adapter<CartCostViewHolder>() {
                 field = newCost
             }
         }
+
+    fun updateSubTotal(subTotal: Float) {
+        costing = costing.copy(subTotal = subTotal)
+    }
+
+    fun updateDeliveryCharges(deliveryCharges: Float) {
+        costing = costing.copy(delivery = deliveryCharges)
+    }
+
+    fun updateDiscount(discount: Float) {
+        costing = costing.copy(discount = discount)
+    }
+
     var isVisible: Boolean = false
         set(value) {
             if (field && !value) {
