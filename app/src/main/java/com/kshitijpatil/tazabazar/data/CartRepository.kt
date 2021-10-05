@@ -7,6 +7,7 @@ import com.kshitijpatil.tazabazar.data.mapper.CartItemDetailViewToCartItem
 import com.kshitijpatil.tazabazar.model.CartConfiguration
 import com.kshitijpatil.tazabazar.model.CartItem
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
 
 interface CartRepository {
@@ -23,6 +24,8 @@ interface CartRepository {
     suspend fun getAllCartItems(): List<CartItem>
 
     suspend fun getCartConfiguration(): CartConfiguration
+
+    fun observeCartItemCount(): Flow<Int>
 }
 
 class CartRepositoryImpl(
@@ -53,6 +56,10 @@ class CartRepositoryImpl(
             maxQuantityPerItem = 6,
             deliveryCharges = 15f
         )
+    }
+
+    override fun observeCartItemCount(): Flow<Int> {
+        return cartItemDao.observeCartItemCount()
     }
 
 }
