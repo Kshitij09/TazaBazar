@@ -21,11 +21,6 @@ class CartItemListAdapter(
         holder.bind(cartItem)
     }
 
-    override fun onViewDetachedFromWindow(holder: CartItemViewHolder) {
-        holder.onItemActionCallback = null
-        super.onViewDetachedFromWindow(holder)
-    }
-
     object CartItemDiffCallback : DiffUtil.ItemCallback<CartItem>() {
         override fun areItemsTheSame(oldItem: CartItem, newItem: CartItem): Boolean {
             return oldItem.inventoryId == newItem.inventoryId

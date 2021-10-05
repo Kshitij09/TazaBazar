@@ -4,7 +4,9 @@ import com.kshitijpatil.tazabazar.data.local.dao.CartItemDao
 import com.kshitijpatil.tazabazar.data.local.dao.upsert
 import com.kshitijpatil.tazabazar.data.local.entity.CartItemEntity
 import com.kshitijpatil.tazabazar.data.mapper.CartItemDetailViewToCartItem
+import com.kshitijpatil.tazabazar.model.CartConfiguration
 import com.kshitijpatil.tazabazar.model.CartItem
+import kotlinx.coroutines.delay
 import timber.log.Timber
 
 interface CartRepository {
@@ -19,6 +21,8 @@ interface CartRepository {
 
     /** Get all Cart Items stored in the local store */
     suspend fun getAllCartItems(): List<CartItem>
+
+    suspend fun getCartConfiguration(): CartConfiguration
 }
 
 class CartRepositoryImpl(
@@ -39,6 +43,16 @@ class CartRepositoryImpl(
 
     override suspend fun getAllCartItems(): List<CartItem> {
         return cartItemDao.getAllCartDetailViews().map(cartItemMapper::map)
+    }
+
+    // TODO: Fetch it from the server and cache in some preference store
+    override suspend fun getCartConfiguration(): CartConfiguration {
+        Timber.d("Fetching cart configuration")
+        delay(500) // Fake delay
+        return CartConfiguration(
+            maxQuantityPerItem = 6,
+            deliveryCharges = 15f
+        )
     }
 
 }

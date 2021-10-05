@@ -23,14 +23,10 @@ class CartItemViewHolder(
         binding.txtQuantity.text = item.quantity.toString()
         binding.tvQuantityLabel.text = item.quantityLabel
         binding.btnIncrementQuantity.setOnClickListener {
-            onItemActionCallback?.onQuantityIncrement(
-                item
-            )
+            onItemActionCallback?.onQuantityIncrement(item)
         }
         binding.btnDecrementQuantity.setOnClickListener {
-            onItemActionCallback?.onQuantityDecrement(
-                item
-            )
+            onItemActionCallback?.onQuantityDecrement(item)
         }
         loadImageDelegate.load(binding.ivImage, item.imageUri)
     }
