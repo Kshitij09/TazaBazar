@@ -32,4 +32,6 @@
     <string name="label_discount">Discount</string>
     <string name="label_delivery">Delivery</string>
     <string name="label_total">Total</string>
+    <string name="label_login">Login</string>
+    <string name="label_create_account">Create Account</string>
 </resources>
