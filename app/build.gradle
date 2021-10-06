@@ -72,6 +72,7 @@ dependencies {
     implementation libs.okhttp.loggingInterceptor
     implementation libs.threeTenAbp
     implementation libs.timber
+    kapt libs.moshi.kotlinCodegen
 
     testImplementation libs.junit
     // Needed for Tzdb

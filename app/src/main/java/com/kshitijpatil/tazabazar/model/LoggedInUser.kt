@@ -1,5 +1,8 @@
 package com.kshitijpatil.tazabazar.model
 
+import com.squareup.moshi.JsonClass
+
+@JsonClass(generateAdapter = true)
 data class LoggedInUser(
     val email: String,
     val fullName: String,
