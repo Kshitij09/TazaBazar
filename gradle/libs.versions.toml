@@ -3,6 +3,7 @@ androidx-fragment = "1.4.0-alpha07"
 androidx-navigation = "2.4.0-alpha07"
 androidx-lifecycle = "2.4.0-beta01"
 androidx-test = "1.4.0"
+androidx-datastore = "1.0.0"
 room = "2.4.0-alpha04"
 kotlin = "1.5.21"
 coroutines = "1.5.1"
@@ -58,6 +59,9 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
+
+androidx-datastore-datastore = { module = "androidx.datastore:datastore", version.ref = "androidx-datastore" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx-datastore" }
 
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test" }
 androidx-test-junit = "androidx.test.ext:junit-ktx:1.1.3"
