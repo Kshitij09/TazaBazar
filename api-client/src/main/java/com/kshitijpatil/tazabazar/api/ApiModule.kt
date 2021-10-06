@@ -9,21 +9,20 @@ object ApiModule {
     private const val baseUrl = "http://tazabazaar.ddns.net:8080"
     private val moshiConverterFactory = MoshiConverterFactory.create()
 
-    // defer calling `build` to share the same okHttpClient
-    // across all the instances of retrofit
-    private val retrofitBuilder: Retrofit.Builder by lazy {
-        Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .addConverterFactory(moshiConverterFactory)
-    }
+    private val defaultRetrofitBuilder = Retrofit.Builder()
+        .baseUrl(baseUrl)
+        .addConverterFactory(moshiConverterFactory)
 
-    // We decide to inject okttpClient from the app module
-    // Since cache requires Context
+
     fun provideRetrofitWith(client: OkHttpClient): Retrofit {
-        return retrofitBuilder.client(client).build()
+        return defaultRetrofitBuilder.client(client).build()
     }
 
     fun provideProductApi(client: OkHttpClient): ProductApi {
+        return provideRetrofitWith(client).create()
+    }
+
+    fun provideAuthApi(client: OkHttpClient): AuthApi {
         return provideRetrofitWith(client).create()
     }
 }
