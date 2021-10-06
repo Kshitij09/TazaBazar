@@ -11,7 +11,7 @@ import com.kshitijpatil.tazabazar.ui.DashboardFragmentDirections
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val btnLogin = view.findViewById<Button>(R.id.btn_login)
+        val btnLogin = view.findViewById<Button>(R.id.btn_action)
         btnLogin.setOnClickListener { openAuthNavigation() }
     }
 

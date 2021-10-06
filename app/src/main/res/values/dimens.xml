@@ -11,4 +11,5 @@
     <dimen name="product_item_favorite_margin_top_end">8dp</dimen>
     <dimen name="margin_medium">32dp</dimen>
     <dimen name="cart_quantity_button_size">28dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
 </resources>
