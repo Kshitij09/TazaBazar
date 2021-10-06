@@ -17,15 +17,15 @@ data class LoginResponse(
 ) {
     @JsonClass(generateAdapter = true)
     data class User(
-        @Json(name = "email_verified")
-        val emailVerified: Boolean,
-        @Json(name = "full_name")
-        val fullName: String,
+        @Json(name = "username")
+        val username: String,
         @Json(name = "phone")
         val phone: String,
+        @Json(name = "full_name")
+        val fullName: String,
+        @Json(name = "email_verified")
+        val emailVerified: Boolean,
         @Json(name = "phone_verified")
-        val phoneVerified: Boolean,
-        @Json(name = "username")
-        val username: String
+        val phoneVerified: Boolean
     )
 }
