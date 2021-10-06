@@ -9,6 +9,14 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+test {
+    if (project.hasProperty('prod')) {
+        filter {
+            excludeTestsMatching "com.kshitijpatil.tazabazar.api.TestAuthApi.register*"
+        }
+    }
+}
+
 dependencies {
     implementation project(":base")
     implementation libs.retrofit.retrofit
