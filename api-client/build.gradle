@@ -19,9 +19,9 @@ test {
 
 dependencies {
     implementation project(":base")
-    implementation libs.retrofit.retrofit
+    api libs.retrofit.retrofit
     implementation libs.retrofit.converterMoshi
-    implementation libs.moshi.moshi
+    api libs.moshi.moshi
     implementation libs.okhttp.okhttp
     implementation libs.okhttp.loggingInterceptor
     kapt libs.moshi.kotlinCodegen
