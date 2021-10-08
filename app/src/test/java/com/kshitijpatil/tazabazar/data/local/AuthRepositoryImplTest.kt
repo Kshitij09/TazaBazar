@@ -1,32 +1,37 @@
 package com.kshitijpatil.tazabazar.data.local
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
 import com.google.common.truth.Truth.assertThat
-import com.kshitijpatil.tazabazar.api.AuthApi
-import com.kshitijpatil.tazabazar.api.dto.*
+import com.kshitijpatil.tazabazar.api.dto.LoginRequest
+import com.kshitijpatil.tazabazar.api.dto.LoginResponse
+import com.kshitijpatil.tazabazar.data.ApiException
+import com.kshitijpatil.tazabazar.data.DataSourceException
+import com.kshitijpatil.tazabazar.data.InvalidCredentialsException
+import com.kshitijpatil.tazabazar.data.ValidationException
+import com.kshitijpatil.tazabazar.data.local.prefs.AuthPreferenceStoreImpl
+import com.kshitijpatil.tazabazar.data.local.prefs.PreferenceStorage
 import com.kshitijpatil.tazabazar.data.mapper.LoginResponseUserToLoggedInUser
-import com.kshitijpatil.tazabazar.domain.Result
+import com.kshitijpatil.tazabazar.data.network.AuthRemoteDataSource
+import com.kshitijpatil.tazabazar.data.util.DefaultLocalDateTimeSerializer
+import com.kshitijpatil.tazabazar.data.util.LoggedInUserSerializer
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.test.util.FakePreferenceStorage
 import com.kshitijpatil.tazabazar.test.util.MainCoroutineRule
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.adapter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runBlockingTest
-import okhttp3.ResponseBody.Companion.toResponseBody
+import okhttp3.ResponseBody
 import org.junit.Rule
 import org.junit.Test
-import retrofit2.Response
 import java.net.HttpURLConnection
 
-@ExperimentalStdlibApi
 class AuthRepositoryImplTest {
     @get:Rule
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    // Overrides Dispatchers.Main used in coroutines
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
@@ -35,80 +40,69 @@ class AuthRepositoryImplTest {
         testDispatcher, testDispatcher, testDispatcher
     )
     private val loggedInUserMapper = LoginResponseUserToLoggedInUser()
-    private val moshi = Moshi.Builder().build()
-
-    private val jsonAdapter: JsonAdapter<LoggedInUser> = moshi.adapter()
+    private val dateTimeSerializer = DefaultLocalDateTimeSerializer()
+    private val loggedInUserSerializer = FakeLoggedInUserSerializer()
     private lateinit var repo: AuthRepository
 
     @Test
     fun login_happyPath() {
-        // setup
         val preferenceStorage = FakePreferenceStorage()
         val expectedResponse = AuthSession1.loginResponse
-        val api = SucceedingAuthApi(loginResponse = expectedResponse)
-        repo = provideAuthRepoImpl(api, preferenceStorage)
+        val expectedSerializedUser = loggedInUserSerializer.serialize(AuthSession1.loggedInUser)
+        assert(expectedSerializedUser.isRight())
+        expectedSerializedUser as Either.Right
+        repo = provideRepo(
+            SucceedingAuthDataSource(expectedResponse),
+            preferenceStorage
+        )
 
         testDispatcher.runBlockingTest {
             val result = repo.login(AuthSession1.loginRequest)
-            assertThat(result).isInstanceOf(Result.Success::class.java)
-            result as Result.Success
-            assertThat(result.data).isEqualTo(AuthSession1.loggedInUser)
-            assertThat(preferenceStorage.userDetails.first()).isEqualTo(
-                jsonAdapter.toJson(
-                    AuthSession1.loggedInUser
-                )
-            )
-            assertThat(preferenceStorage.accessToken.first()).isEqualTo(expectedResponse.accessToken)
-            assertThat(preferenceStorage.refreshToken.first()).isEqualTo(expectedResponse.refreshToken)
+            assert(result is Either.Right)
+            result as Either.Right
+            assertThat(result.value).isEqualTo(AuthSession1.loggedInUser)
             assertThat(preferenceStorage.loggedInAt.first()).isNotEmpty()
+            assertThat(preferenceStorage.userDetails.first()).isEqualTo(expectedSerializedUser.value)
+            assertThat(preferenceStorage.refreshToken.first()).isEqualTo(expectedResponse.refreshToken)
+            assertThat(preferenceStorage.accessToken.first()).isEqualTo(expectedResponse.accessToken)
         }
     }
 
     @Test
-    fun login_InvalidCredentials() {
-        repo = provideAuthRepoImpl(UnauthorizedAuthApi())
+    fun login_invalidCredentials() {
+        repo = provideRepo(HttpFailureAuthDataSource(HttpURLConnection.HTTP_UNAUTHORIZED))
+
         testDispatcher.runBlockingTest {
             val result = repo.login(AuthSession1.loginRequest)
-            assertThat(result).isInstanceOf(Result.Error::class.java)
-            result as Result.Error
-            assertThat(result.exception).isInstanceOf(AuthRepository.InvalidCredentialsException::class.java)
+            assert(result.isLeft())
+            result as Either.Left
+            assert(result.value is InvalidCredentialsException)
         }
     }
 
     @Test
     fun login_ValidationError() {
-        repo = provideAuthRepoImpl(BadRequestAuthApi())
+        repo = provideRepo(HttpFailureAuthDataSource(HttpURLConnection.HTTP_BAD_REQUEST))
+
         testDispatcher.runBlockingTest {
             val result = repo.login(AuthSession1.loginRequest)
-            assertThat(result).isInstanceOf(Result.Error::class.java)
-            result as Result.Error
-            assertThat(result.exception).isInstanceOf(AuthRepository.ValidationException::class.java)
+            assert(result.isLeft())
+            result as Either.Left
+            assert(result.value is ValidationException)
         }
     }
 
-    @Test
-    fun login_unexpectedError() {
-        repo = provideAuthRepoImpl(FakeAuthApi())
-        testDispatcher.runBlockingTest {
-            val result = repo.login(AuthSession1.loginRequest)
-            assertThat(result).isInstanceOf(Result.Error::class.java)
-            result as Result.Error
-            assertThat(result.exception).hasCauseThat()
-                .isInstanceOf(NotImplementedError::class.java)
-        }
-    }
-
-    private fun provideAuthRepoImpl(
-        api: AuthApi,
-        _storage: FakePreferenceStorage? = null
+    private fun provideRepo(
+        authDataSource: AuthRemoteDataSource,
+        preferenceStorage: PreferenceStorage = FakePreferenceStorage()
     ): AuthRepositoryImpl {
-        val preferenceStorage = _storage ?: FakePreferenceStorage()
         return AuthRepositoryImpl(
-            api = api,
-            preferenceStorage = preferenceStorage,
-            dispatchers = testAppDispatchers,
-            jsonAdapter = jsonAdapter,
-            loggedInUserMapper = loggedInUserMapper
+            authDataSource,
+            dateTimeSerializer,
+            AuthPreferenceStoreImpl(preferenceStorage),
+            testAppDispatchers,
+            loggedInUserSerializer,
+            loggedInUserMapper
         )
     }
 }
@@ -123,61 +117,27 @@ object AuthSession1 {
         user.phoneVerified
     )
     val loginResponse = LoginResponse("access-token", emptyList(), "refresh-token", user)
-    val loginRequest = LoginRequest(AuthSession1.user.username, "anything")
+    val loginRequest = LoginRequest(user.username, "anything")
 }
 
-open class FakeAuthApi : AuthApi {
-    override suspend fun login(request: LoginRequest): Response<LoginResponse> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun register(request: RegisterRequest): Response<RegisterResponse> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun refreshToken(token: String): Response<RefreshTokenResponse> {
-        TODO("Not yet implemented")
-    }
-
-}
-
-class SucceedingAuthApi(
-    private val loginResponse: LoginResponse? = null,
-    private val registerResponse: RegisterResponse? = null,
-    private val tokenResponse: RefreshTokenResponse? = null
-) : FakeAuthApi() {
-    override suspend fun login(request: LoginRequest): Response<LoginResponse> {
-        if (loginResponse != null) return Response.success(loginResponse)
-        throw NotImplementedError("test")
-    }
-
-    override suspend fun register(request: RegisterRequest): Response<RegisterResponse> {
-        if (registerResponse != null) return Response.success(registerResponse)
-        throw NotImplementedError("test")
-    }
-
-    override suspend fun refreshToken(token: String): Response<RefreshTokenResponse> {
-        if (tokenResponse != null) return Response.success(tokenResponse)
-        throw NotImplementedError("test")
+class SucceedingAuthDataSource(private val loginResponse: LoginResponse) : AuthRemoteDataSource {
+    override suspend fun login(request: LoginRequest): Either<DataSourceException, LoginResponse> {
+        return loginResponse.right()
     }
 }
 
-class UnauthorizedAuthApi : FakeAuthApi() {
-    override suspend fun login(request: LoginRequest): Response<LoginResponse> {
-        return Response.error(HttpURLConnection.HTTP_UNAUTHORIZED, "".toResponseBody())
+class HttpFailureAuthDataSource(
+    private val statusCode: Int,
+    private val errorBody: ResponseBody? = null
+) : AuthRemoteDataSource {
+    override suspend fun login(request: LoginRequest): Either<DataSourceException, LoginResponse> {
+        return ApiException(statusCode, errorBody).left()
     }
 
-    override suspend fun register(request: RegisterRequest): Response<RegisterResponse> {
-        return Response.error(HttpURLConnection.HTTP_UNAUTHORIZED, "".toResponseBody())
-    }
 }
 
-class BadRequestAuthApi : FakeAuthApi() {
-    override suspend fun login(request: LoginRequest): Response<LoginResponse> {
-        return Response.error(HttpURLConnection.HTTP_BAD_REQUEST, "".toResponseBody())
-    }
-
-    override suspend fun register(request: RegisterRequest): Response<RegisterResponse> {
-        return Response.error(HttpURLConnection.HTTP_BAD_REQUEST, "".toResponseBody())
+class FakeLoggedInUserSerializer : LoggedInUserSerializer() {
+    override fun serialize(user: LoggedInUser): Either<DataSourceException, String> {
+        return user.toString().right()
     }
 }

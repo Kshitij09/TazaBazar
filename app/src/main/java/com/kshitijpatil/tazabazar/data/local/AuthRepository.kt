@@ -1,84 +1,75 @@
 package com.kshitijpatil.tazabazar.data.local
 
-import com.kshitijpatil.tazabazar.api.AuthApi
+import arrow.core.Either
+import arrow.core.computations.either
 import com.kshitijpatil.tazabazar.api.dto.LoginRequest
 import com.kshitijpatil.tazabazar.api.dto.RegisterRequest
-import com.kshitijpatil.tazabazar.data.local.prefs.PreferenceStorage
+import com.kshitijpatil.tazabazar.data.*
+import com.kshitijpatil.tazabazar.data.local.prefs.AuthPreferenceStore
 import com.kshitijpatil.tazabazar.data.mapper.LoginResponseUserToLoggedInUser
+import com.kshitijpatil.tazabazar.data.network.AuthRemoteDataSource
+import com.kshitijpatil.tazabazar.data.util.LocalDateTimeSerializer
+import com.kshitijpatil.tazabazar.data.util.LoggedInUserSerializer
 import com.kshitijpatil.tazabazar.domain.Result
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
-import com.kshitijpatil.tazabazar.util.LocalDateTimeConverter
-import com.squareup.moshi.JsonAdapter
 import kotlinx.coroutines.withContext
-import org.threeten.bp.DateTimeException
 import org.threeten.bp.LocalDateTime
-import timber.log.Timber
 import java.net.HttpURLConnection
 
 interface AuthRepository {
-    suspend fun login(request: LoginRequest): Result<LoggedInUser>
+    suspend fun login(request: LoginRequest): Either<LoginException, LoggedInUser>
     suspend fun register(request: RegisterRequest): Result<LoggedInUser>
     suspend fun refreshToken(): Result<Unit>
-
-    class ValidationException() : Exception()
-    class InvalidCredentialsException() : Exception()
-    class UnknownException() : Exception()
 }
 
 class AuthRepositoryImpl(
-    private val api: AuthApi,
-    private val preferenceStorage: PreferenceStorage,
+    private val authRemoteSource: AuthRemoteDataSource,
+    private val localDateTimeSerializer: LocalDateTimeSerializer,
+    private val authPreferenceStore: AuthPreferenceStore,
     private val dispatchers: AppCoroutineDispatchers,
-    private val jsonAdapter: JsonAdapter<LoggedInUser>,
+    private val loggedInUserSerializer: LoggedInUserSerializer,
     private val loggedInUserMapper: LoginResponseUserToLoggedInUser
 ) : AuthRepository {
-    override suspend fun login(request: LoginRequest): Result<LoggedInUser> {
+    companion object {
+        private const val EMAIL_EXISTS_ERROR_CODE = "userdetail-001"
+        private const val PHONE_EXISTS_ERROR_CODE = "userdetail-002"
+    }
+
+    private suspend fun performLoginWithDataSource(request: LoginRequest): Either<DataSourceException, LoggedInUser> {
         return withContext(dispatchers.io) {
-            try {
-                val apiResponse = api.login(request)
-                if (apiResponse.isSuccessful) {
-                    Timber.d("login: Login Successful")
-                    val now = LocalDateTime.now()
-                    val responseBody = apiResponse.body()
-                    if (responseBody == null) {
-                        Timber.e("login: Response body was null")
-                        Result.Error(AuthRepository.UnknownException())
-                    } else {
-                        Timber.d("login: Storing user details")
-                        val loggedInUser: LoggedInUser
-                        with(preferenceStorage) {
-                            setAccessToken(responseBody.accessToken)
-                            setRefreshToken(responseBody.refreshToken)
-                            setLastLoggedIn(LocalDateTimeConverter.fromLocalDateTime(now))
-                            loggedInUser = loggedInUserMapper.map(responseBody.user)
-                            setUserDetails(jsonAdapter.toJson(loggedInUser))
-                        }
-                        Result.Success(loggedInUser)
-                    }
-                } else {
-                    when {
-                        apiResponse.code() == HttpURLConnection.HTTP_UNAUTHORIZED -> {
-                            Result.Error(AuthRepository.InvalidCredentialsException())
-                        }
-                        apiResponse.code() == HttpURLConnection.HTTP_BAD_REQUEST -> {
-                            Result.Error(AuthRepository.ValidationException())
-                        }
-                        else -> {
-                            Timber.d("login: Unknown Error with api-response: $apiResponse")
-                            Result.Error(AuthRepository.UnknownException())
-                        }
-                    }
-                }
-            } catch (e: DateTimeException) {
-                Timber.e(e, "login: DateTimeException")
-                Result.Error(e)
-            } catch (e: Throwable) {
-                Timber.e(e, "login: UnhandledException")
-                Result.Error(Exception(e))
+            either {
+                val response = authRemoteSource.login(request).bind()
+                val now = LocalDateTime.now()
+                val serializedLoginTime = localDateTimeSerializer.serialize(now).bind()
+                val loggedInUser = loggedInUserMapper.map(response.user)
+                val serializedUser = loggedInUserSerializer(loggedInUser).bind()
+                authPreferenceStore.storeLoginDetails(
+                    response.accessToken,
+                    response.refreshToken,
+                    serializedLoginTime,
+                    serializedUser
+                )
+                loggedInUser
             }
         }
     }
+
+    override suspend fun login(request: LoginRequest): Either<LoginException, LoggedInUser> {
+        return performLoginWithDataSource(request).mapLeft {
+            when (it) {
+                is ApiException -> {
+                    when (it.statusCode) {
+                        HttpURLConnection.HTTP_UNAUTHORIZED -> InvalidCredentialsException
+                        HttpURLConnection.HTTP_BAD_REQUEST -> ValidationException
+                        else -> UnknownLoginException
+                    }
+                }
+                else -> UnknownLoginException
+            }
+        }
+    }
+
 
     override suspend fun register(request: RegisterRequest): Result<LoggedInUser> {
         TODO("Not yet implemented")
