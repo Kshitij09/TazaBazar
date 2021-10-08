@@ -70,3 +70,5 @@ androidx-test-runner = { module = "androidx.test:runner", version.ref = "android
 
 mockito-core = "org.mockito:mockito-core:3.12.4"
 mockito-kotlin = "org.mockito.kotlin:mockito-kotlin:3.2.0"
+
+arrowkt-arrowCore = "io.arrow-kt:arrow-core:1.0.0"

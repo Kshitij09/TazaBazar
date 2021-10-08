@@ -65,6 +65,7 @@ dependencies {
     implementation libs.androidx.datastore.preferences
     kapt libs.androidx.room.compiler
     implementation libs.androidx.navigation.navigationUiKtx
+    implementation libs.arrowkt.arrowCore
 
     // third-party
     implementation libs.coil
