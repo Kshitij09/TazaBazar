@@ -13,7 +13,9 @@ import com.kshitijpatil.tazabazar.data.mapper.LoginResponseUserToLoggedInUser
 import com.kshitijpatil.tazabazar.data.mapper.ResponseBodyToApiErrorMapper
 import com.kshitijpatil.tazabazar.data.network.AuthRemoteDataSource
 import com.kshitijpatil.tazabazar.model.LoggedInUser
+import com.kshitijpatil.tazabazar.test.util.HttpFailureAuthDataSource
 import com.kshitijpatil.tazabazar.test.util.MainCoroutineRule
+import com.kshitijpatil.tazabazar.test.util.SucceedingAuthDataSource
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
