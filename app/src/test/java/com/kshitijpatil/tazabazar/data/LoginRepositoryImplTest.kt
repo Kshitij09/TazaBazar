@@ -2,25 +2,19 @@ package com.kshitijpatil.tazabazar.data
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
 import com.google.common.truth.Truth.assertThat
 import com.kshitijpatil.tazabazar.api.dto.LoginRequest
 import com.kshitijpatil.tazabazar.api.dto.LoginResponse
-import com.kshitijpatil.tazabazar.api.dto.RegisterRequest
 import com.kshitijpatil.tazabazar.data.local.prefs.AuthPreferenceStoreImpl
 import com.kshitijpatil.tazabazar.data.local.prefs.PreferenceStorage
 import com.kshitijpatil.tazabazar.data.mapper.LocalDateTimeSerializer
 import com.kshitijpatil.tazabazar.data.mapper.LoginResponseUserToLoggedInUser
 import com.kshitijpatil.tazabazar.data.network.AuthRemoteDataSource
 import com.kshitijpatil.tazabazar.model.LoggedInUser
-import com.kshitijpatil.tazabazar.test.util.FakeLoggedInUserSerializer
-import com.kshitijpatil.tazabazar.test.util.FakePreferenceStorage
-import com.kshitijpatil.tazabazar.test.util.MainCoroutineRule
+import com.kshitijpatil.tazabazar.test.util.*
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runBlockingTest
-import okhttp3.ResponseBody
 import org.junit.Rule
 import org.junit.Test
 import java.net.HttpURLConnection
@@ -120,28 +114,3 @@ object AuthSession1 {
     val loginResponse = LoginResponse("access-token", emptyList(), "refresh-token", user)
     val loginRequest = LoginRequest(user.username, "anything")
 }
-
-class SucceedingAuthDataSource(private val loginResponse: LoginResponse?) : AuthRemoteDataSource {
-    override suspend fun login(request: LoginRequest): Either<DataSourceException, LoginResponse> {
-        return loginResponse?.right() ?: UnknownException(NotImplementedError()).left()
-    }
-
-    override suspend fun register(request: RegisterRequest): Either<DataSourceException, LoginResponse.User> {
-        TODO("Not yet implemented")
-    }
-
-}
-
-class HttpFailureAuthDataSource(
-    private val statusCode: Int,
-    private val errorBody: ResponseBody? = null
-) : AuthRemoteDataSource {
-    override suspend fun login(request: LoginRequest): Either<DataSourceException, LoginResponse> {
-        return ApiException(statusCode, errorBody).left()
-    }
-
-    override suspend fun register(request: RegisterRequest): Either<DataSourceException, LoginResponse.User> {
-        TODO("Not yet implemented")
-    }
-}
-
