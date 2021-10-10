@@ -1,39 +1,49 @@
 package com.kshitijpatil.tazabazar.data.network
 
 import arrow.core.Either
-import arrow.core.getOrElse
 import arrow.core.left
 import arrow.core.rightIfNotNull
 import com.kshitijpatil.tazabazar.api.AuthApi
 import com.kshitijpatil.tazabazar.api.dto.LoginRequest
 import com.kshitijpatil.tazabazar.api.dto.LoginResponse
-import com.kshitijpatil.tazabazar.data.*
+import com.kshitijpatil.tazabazar.api.dto.RegisterRequest
+import com.kshitijpatil.tazabazar.data.ApiException
+import com.kshitijpatil.tazabazar.data.DataSourceException
+import com.kshitijpatil.tazabazar.data.EmptyBodyException
+import com.kshitijpatil.tazabazar.data.UnknownException
+import retrofit2.Response
 import timber.log.Timber
 
 interface AuthRemoteDataSource {
     suspend fun login(request: LoginRequest): Either<DataSourceException, LoginResponse>
+    suspend fun register(request: RegisterRequest): Either<DataSourceException, LoginResponse.User>
 }
 
 class AuthRemoteDataSourceImpl(private val api: AuthApi) : AuthRemoteDataSource {
 
-    override suspend fun login(request: LoginRequest): Either<DataSourceException, LoginResponse> {
+    override suspend fun login(request: LoginRequest) = getResponseBody { api.login(request) }
+
+    override suspend fun register(request: RegisterRequest) =
+        getResponseBody { api.register(request) }
+
+    private suspend fun <T> getResponseBody(func: suspend () -> Response<T>): Either<DataSourceException, T> {
         return Either.catch {
-            val response = api.login(request)
+            val response = func()
             return if (response.isSuccessful) {
                 response.body().rightIfNotNull {
-                    Timber.d("login: Response body was null")
+                    Timber.d("Response body was null")
                     EmptyBodyException
                 }
             } else {
                 ApiException(response.code(), response.errorBody()).left()
             }
         }.mapLeft {
-            it.mapCommonNetworkExceptions("login").getOrElse {
-                // You can continue handling more errors here
-                Timber.e(it, "login: Unhandled exception")
+            val ex = mapCommonNetworkExceptions(it)
+            if (ex != null) ex
+            else {
+                Timber.e(it)
                 UnknownException(it)
             }
-
         }
     }
 }
