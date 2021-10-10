@@ -2,12 +2,15 @@ package com.kshitijpatil.tazabazar.data.local.prefs
 
 import arrow.core.Either
 import arrow.core.computations.either
+import arrow.core.rightIfNotNull
 import com.kshitijpatil.tazabazar.data.DataSourceException
+import com.kshitijpatil.tazabazar.data.NoDataFoundException
 import com.kshitijpatil.tazabazar.data.PreferenceStorageException
 import com.kshitijpatil.tazabazar.data.UnknownException
 import com.kshitijpatil.tazabazar.data.mapper.EitherStringSerializer
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.threeten.bp.LocalDateTime
 import timber.log.Timber
@@ -20,6 +23,10 @@ interface AuthPreferenceStore {
         loggedInAt: LocalDateTime,
         user: LoggedInUser
     ): Either<DataSourceException, Unit>
+
+    suspend fun getRefreshToken(): Either<DataSourceException, String>
+    suspend fun clearRefreshToken()
+    suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit>
 }
 
 class AuthPreferenceStoreImpl(
@@ -43,15 +50,17 @@ class AuthPreferenceStoreImpl(
                     setLastLoggedIn(serializedLoginTime)
                     setUserDetails(serializedUser)
                 }
-            }.mapLeft {
-                if (it is IOException) {
-                    Timber.d(it, "I/O Error while storing the details")
-                    PreferenceStorageException
-                } else {
-                    Timber.e(it)
-                    UnknownException(it)
-                }
-            }
+            }.mapLeft { it.toDataSourceException() }
+        }
+    }
+
+    private fun Throwable.toDataSourceException(): DataSourceException {
+        return if (this is IOException) {
+            Timber.d(this, "I/O Error while storing the details")
+            PreferenceStorageException
+        } else {
+            Timber.e(this)
+            UnknownException(this)
         }
     }
 
@@ -71,5 +80,27 @@ class AuthPreferenceStoreImpl(
                 serializedUser
             )
         }
+    }
+
+    override suspend fun getRefreshToken(): Either<DataSourceException, String> {
+        return withContext(dispatcher) {
+            Either.catch {
+                return@withContext preferenceStorage.refreshToken.first().rightIfNotNull {
+                    NoDataFoundException
+                }
+            }.mapLeft { it.toDataSourceException() }
+        }
+    }
+
+    override suspend fun clearRefreshToken() {
+        preferenceStorage.setRefreshToken(null)
+    }
+
+    override suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit> {
+        return Either.catch {
+            withContext(dispatcher) {
+                preferenceStorage.setAccessToken(token)
+            }
+        }.mapLeft { it.toDataSourceException() }
     }
 }

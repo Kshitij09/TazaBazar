@@ -17,6 +17,7 @@ import timber.log.Timber
 interface AuthRemoteDataSource {
     suspend fun login(request: LoginRequest): Either<DataSourceException, LoginResponse>
     suspend fun register(request: RegisterRequest): Either<DataSourceException, LoginResponse.User>
+    suspend fun refreshToken(token: String): Either<DataSourceException, String>
 }
 
 class AuthRemoteDataSourceImpl(private val api: AuthApi) : AuthRemoteDataSource {
@@ -25,6 +26,10 @@ class AuthRemoteDataSourceImpl(private val api: AuthApi) : AuthRemoteDataSource 
 
     override suspend fun register(request: RegisterRequest) =
         getResponseBody { api.register(request) }
+
+    override suspend fun refreshToken(token: String): Either<DataSourceException, String> {
+        return getResponseBody { api.refreshToken(token) }.map { it.accessToken }
+    }
 
     private suspend fun <T> getResponseBody(func: suspend () -> Response<T>): Either<DataSourceException, T> {
         return Either.catch {

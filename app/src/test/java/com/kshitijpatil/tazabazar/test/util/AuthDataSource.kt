@@ -14,7 +14,8 @@ import okhttp3.ResponseBody
 
 class SucceedingAuthDataSource(
     private val loginResponse: LoginResponse? = null,
-    private val registerResponse: LoginResponse.User? = null
+    private val registerResponse: LoginResponse.User? = null,
+    private val accessToken: String? = null
 ) : AuthRemoteDataSource {
     override suspend fun login(request: LoginRequest): Either<DataSourceException, LoginResponse> {
         return loginResponse?.right() ?: UnknownException(NotImplementedError()).left()
@@ -22,6 +23,10 @@ class SucceedingAuthDataSource(
 
     override suspend fun register(request: RegisterRequest): Either<DataSourceException, LoginResponse.User> {
         return registerResponse?.right() ?: UnknownException(NotImplementedError()).left()
+    }
+
+    override suspend fun refreshToken(token: String): Either<DataSourceException, String> {
+        return accessToken?.right() ?: UnknownException(NotImplementedError()).left()
     }
 
 }
@@ -35,6 +40,10 @@ class HttpFailureAuthDataSource(
     }
 
     override suspend fun register(request: RegisterRequest): Either<DataSourceException, LoginResponse.User> {
+        return ApiException(statusCode, errorBody).left()
+    }
+
+    override suspend fun refreshToken(token: String): Either<DataSourceException, String> {
         return ApiException(statusCode, errorBody).left()
     }
 }

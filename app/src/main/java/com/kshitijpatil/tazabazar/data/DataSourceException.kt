@@ -7,6 +7,7 @@ sealed interface RemoteSourceException : DataSourceException
 sealed interface DatabaseException : DataSourceException
 object PreferenceStorageException : DataSourceException
 object SerializationException : DataSourceException
+object NoDataFoundException : DataSourceException
 
 object ConnectivityException : DataSourceException, RemoteSourceException
 data class UnknownException(val ex: Throwable) : DataSourceException
