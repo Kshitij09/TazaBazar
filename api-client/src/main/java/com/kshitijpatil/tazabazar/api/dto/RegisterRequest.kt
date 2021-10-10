@@ -14,7 +14,6 @@ data class RegisterRequest(
     val fullName: String,
     @Json(name = "phone")
     val phone: String,
-    //TODO: Change default to emptyList when supported by the Server
     @Json(name = "authorities")
-    val authorities: List<String> = listOf("ROLE_USER"),
+    val authorities: List<String> = emptyList(),
 )
