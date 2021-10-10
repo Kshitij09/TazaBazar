@@ -8,9 +8,10 @@ import com.squareup.moshi.JsonAdapter
 import okhttp3.ResponseBody
 import timber.log.Timber
 
+typealias ResponseBodyToApiErrorMapper = Mapper<ResponseBody, Either<SerializationException, ApiError>>
 
 class ErrorBodyDecoder(private val jsonAdapter: JsonAdapter<ApiError>) :
-    Mapper<ResponseBody, Either<SerializationException, ApiError>> {
+    ResponseBodyToApiErrorMapper {
     override fun map(from: ResponseBody): Either<SerializationException, ApiError> {
         return Either.catch {
             return jsonAdapter.fromJson(from.source())
