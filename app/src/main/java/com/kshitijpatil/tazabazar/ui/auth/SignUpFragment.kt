@@ -8,6 +8,7 @@ import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.navGraphViewModels
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentSigninSignupBinding
 import com.kshitijpatil.tazabazar.ui.MainActivityViewModel
@@ -16,6 +17,10 @@ class SignUpFragment : Fragment() {
     private var _binding: FragmentSigninSignupBinding? = null
     private val binding: FragmentSigninSignupBinding get() = _binding!!
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
+    private val authViewModel: AuthViewModel by navGraphViewModels(R.id.navigation_auth) {
+        AuthViewModelFactory(this, requireContext().applicationContext, arguments)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

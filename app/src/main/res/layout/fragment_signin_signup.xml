@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <ImageView
@@ -114,6 +116,36 @@
                 android:layout_marginTop="24dp"
                 android:text="@string/label_login"
                 app:cornerRadius="6dp" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progress_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/btn_action"
+                android:layout_alignStart="@id/btn_action"
+                android:indeterminate="true"
+                app:indicatorColor="@color/tzb_green"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/progress_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/btn_action"
+                android:layout_alignTop="@id/progress_indicator"
+                android:layout_alignBottom="@id/progress_indicator"
+                android:layout_marginStart="8dp"
+                android:layout_toEndOf="@id/progress_indicator"
+                android:gravity="center"
+                tools:text="Logging you in..." />
+
+            <com.kshitijpatil.tazabazar.widget.FadingSnackbar
+                android:id="@+id/snackbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:visibility="gone"
+                tools:visibility="visible" />
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

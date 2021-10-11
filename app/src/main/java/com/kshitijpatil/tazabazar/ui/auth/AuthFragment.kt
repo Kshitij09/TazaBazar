@@ -5,9 +5,14 @@ import android.view.View
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navGraphViewModels
 import com.kshitijpatil.tazabazar.R
 
 class AuthFragment : Fragment(R.layout.fragment_auth) {
+    private val viewModel: AuthViewModel by navGraphViewModels(R.id.navigation_auth) {
+        AuthViewModelFactory(this, requireContext().applicationContext, arguments)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.findViewById<Button>(R.id.btn_login).setOnClickListener { navigateSignIn() }

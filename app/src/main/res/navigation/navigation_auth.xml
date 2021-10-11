@@ -5,6 +5,11 @@
     android:id="@+id/navigation_auth"
     app:startDestination="@id/fragment_auth">
 
+    <action
+        android:id="@+id/action_pop_out_of_auth"
+        app:popUpTo="@id/navigation_auth"
+        app:popUpToInclusive="true" />
+
     <fragment
         android:id="@id/fragment_auth"
         android:name="com.kshitijpatil.tazabazar.ui.auth.AuthFragment"
