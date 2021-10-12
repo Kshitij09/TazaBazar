@@ -64,6 +64,13 @@ class SignUpFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         mainActivityViewModel.disableClearFocus()
         launchTextFieldObservers()
+        restoreFieldStates()
+    }
+
+    private fun restoreFieldStates() {
+        val viewState = authViewModel.viewState.value
+        binding.textFieldName.editText?.setText(viewState.fullName)
+        binding.textFieldPhone.editText?.setText(viewState.phone)
     }
 
     private fun launchTextFieldObservers() {
