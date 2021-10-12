@@ -43,7 +43,8 @@
                 android:layout_below="@id/txt_header"
                 android:layout_marginTop="@dimen/margin_normal"
                 android:hint="@string/label_name"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
@@ -54,11 +55,30 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/text_field_email"
+                android:id="@+id/text_field_phone"
                 style="@style/Widget.App.TextInputLayout.Filled.White"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/text_field_name"
+                android:layout_marginTop="@dimen/margin_normal"
+                android:hint="@string/label_phone_number"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionNext"
+                    android:inputType="phone"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/text_field_email"
+                style="@style/Widget.App.TextInputLayout.Filled.White"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/text_field_phone"
                 android:layout_marginTop="@dimen/margin_normal"
                 app:endIconMode="clear_text"
                 app:endIconTint="@android:color/darker_gray"
@@ -122,11 +142,12 @@
 
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/progress_indicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_below="@id/btn_action"
                 android:layout_alignStart="@id/btn_action"
                 android:indeterminate="true"
+                android:visibility="gone"
                 app:indicatorColor="@color/tzb_green"
                 tools:visibility="visible" />
 
@@ -140,7 +161,9 @@
                 android:layout_marginStart="8dp"
                 android:layout_toEndOf="@id/progress_indicator"
                 android:gravity="center"
-                tools:text="Logging you in..." />
+                android:visibility="gone"
+                tools:text="Logging you in..."
+                tools:visibility="visible" />
 
             <com.kshitijpatil.tazabazar.widget.FadingSnackbar
                 android:id="@+id/snackbar"

@@ -96,6 +96,5 @@
         <item name="boxCornerRadiusBottomStart">@dimen/product_search_input_corner_radius</item>
         <item name="boxCornerRadiusBottomEnd">@dimen/product_search_input_corner_radius</item>
         <item name="hintTextColor">@android:color/darker_gray</item>
-        <item name="boxStrokeColor">@null</item>
     </style>
 </resources>
