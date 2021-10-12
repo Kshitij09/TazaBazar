@@ -123,6 +123,12 @@ class SignInFragment : Fragment() {
                 textInputLayout = binding.textFieldPassword,
                 fieldState = passwordState,
                 onTextChanged = { authViewModel.updatePassword(it) },
+                getErrorFor = {
+                    with(resources) {
+                        val passwordLabel = getString(R.string.label_password)
+                        getString(R.string.error_field_must_not_be_empty, passwordLabel)
+                    }
+                }
             )
         }
     }
