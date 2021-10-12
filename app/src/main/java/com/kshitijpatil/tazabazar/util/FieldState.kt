@@ -16,7 +16,7 @@ class FieldState(val validator: (CharSequence?) -> Boolean) {
     val isValid: StateFlow<Boolean>
         get() = _isValid.asStateFlow()
     val showErrors: Boolean
-        get() = !isValid.value && isFocusedDirty && !currentText.isNullOrEmpty()
+        get() = !isValid.value && isFocusedDirty
 
     fun onFocusChanged(focused: Boolean) {
         isFocusedDirty = isFocusedDirty || focused
