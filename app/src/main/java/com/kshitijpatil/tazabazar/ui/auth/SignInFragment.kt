@@ -5,11 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.kshitijpatil.tazabazar.R
@@ -21,8 +19,9 @@ import com.kshitijpatil.tazabazar.ui.common.ResourceMessage
 import com.kshitijpatil.tazabazar.ui.common.TextMessage
 import com.kshitijpatil.tazabazar.util.*
 import com.kshitijpatil.tazabazar.widget.FadingSnackbar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class SignInFragment : Fragment() {
@@ -58,15 +57,15 @@ class SignInFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mainActivityViewModel.disableClearFocus()
-        launchTextFieldObservers()
         viewLifecycleOwner.lifecycle.addObserver(loginJobManager)
         binding.btnAction.setOnClickListener {
             loginJobManager.handleCancellation { authViewModel.login() }
         }
-
+        launchTextFieldObservers()
         launchAndRepeatWithViewLifecycle {
             launch { observeLoginState() }
             launch { observeSnackbarMessages() }
+            launch { observeEnableActionButton() }
         }
         restoreFieldState()
     }
@@ -113,56 +112,19 @@ class SignInFragment : Fragment() {
 
     private fun launchTextFieldObservers() {
         launchAndRepeatWithViewLifecycle {
-            binding.textFieldEmail.editText?.let { textField ->
-                launchEmailFieldObservers(textField)
-                textField.setOnFocusChangeListener { _, focused -> emailState.onFocusChanged(focused) }
-            }
-            binding.textFieldPassword.editText?.let { textField ->
-                launchPasswordFieldObservers(textField)
-                textField.setOnFocusChangeListener { _, focused ->
-                    passwordState.onFocusChanged(
-                        focused
-                    )
-                }
-            }
-            launch { observeEnableActionButton() }
+            launchTextInputLayoutObservers(
+                textInputLayout = binding.textFieldEmail,
+                fieldState = emailState,
+                onTextChanged = { authViewModel.updateUsername(it) },
+                getErrorFor = { resources.getString(R.string.error_must_be_valid_email) }
+            )
+
+            launchTextInputLayoutObservers(
+                textInputLayout = binding.textFieldPassword,
+                fieldState = passwordState,
+                onTextChanged = { authViewModel.updatePassword(it) },
+            )
         }
-    }
-
-    private fun CoroutineScope.launchPasswordFieldObservers(textField: EditText) {
-        val textChanges = textField.textChanges()
-            .debounce(500)
-            .shareIn(viewLifecycleOwner.lifecycleScope, SharingStarted.WhileSubscribed())
-        launch { textChanges.collect { authViewModel.updatePassword(it.toString()) } }
-        launch { textChanges.collect { passwordState.onTextChanged(it) } }
-    }
-
-    private fun CoroutineScope.launchEmailFieldObservers(textField: EditText) {
-        val textChanges = textField.textChanges()
-            .debounce(500)
-            .shareIn(viewLifecycleOwner.lifecycleScope, SharingStarted.WhileSubscribed())
-
-        with(textChanges) {
-            launch { updateEmailState() }
-            launch { setEmailFieldError() }
-            launch { updateUsername() }
-        }
-    }
-
-    private suspend fun Flow<CharSequence?>.setEmailFieldError() {
-        collect {
-            binding.textFieldEmail.error = if (emailState.showErrors) {
-                resources.getString(R.string.error_must_be_valid_email)
-            } else null
-        }
-    }
-
-    private suspend fun Flow<CharSequence?>.updateUsername() {
-        collect { authViewModel.updateUsername(it.toString()) }
-    }
-
-    private suspend fun Flow<CharSequence?>.updateEmailState() {
-        collect { emailState.onTextChanged(it) }
     }
 
     private suspend fun observeEnableActionButton() {
