@@ -55,7 +55,7 @@ class AuthViewModel(
         Channel<SnackbarMessage>(capacity = 3, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     val snackbarMessages: Flow<SnackbarMessage> =
-        _snackbarMessages.consumeAsFlow()
+        _snackbarMessages.receiveAsFlow()
             .shareIn(viewModelScope, WhileSubscribed(5000))
 
     private var _lastLoggedInUsername: String? = null
