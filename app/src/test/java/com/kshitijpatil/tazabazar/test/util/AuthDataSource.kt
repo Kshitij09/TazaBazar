@@ -21,6 +21,10 @@ class SucceedingAuthDataSource(
         return loginResponse?.right() ?: UnknownException(NotImplementedError()).left()
     }
 
+    override suspend fun logout(accessToken: String): Either<DataSourceException, Unit> {
+        return Either.Right(Unit)
+    }
+
     override suspend fun register(request: RegisterRequest): Either<DataSourceException, LoginResponse.User> {
         return registerResponse?.right() ?: UnknownException(NotImplementedError()).left()
     }
@@ -36,6 +40,10 @@ class HttpFailureAuthDataSource(
     private val errorBody: ResponseBody? = null
 ) : AuthRemoteDataSource {
     override suspend fun login(request: LoginRequest): Either<DataSourceException, LoginResponse> {
+        return ApiException(statusCode, errorBody).left()
+    }
+
+    override suspend fun logout(accessToken: String): Either<DataSourceException, Unit> {
         return ApiException(statusCode, errorBody).left()
     }
 
