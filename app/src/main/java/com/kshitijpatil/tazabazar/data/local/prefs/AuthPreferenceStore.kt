@@ -16,7 +16,11 @@ import org.threeten.bp.LocalDateTime
 import timber.log.Timber
 import java.io.IOException
 
-interface AuthPreferenceStore {
+interface UsernamePreference {
+    suspend fun getLastLoggedInUsername(): String?
+}
+
+interface AuthPreferenceStore : UsernamePreference {
     suspend fun storeLoginDetails(
         accessToken: String,
         refreshToken: String,
@@ -29,8 +33,6 @@ interface AuthPreferenceStore {
     suspend fun clearUserDetails()
     suspend fun getAccessToken(): String?
     suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit>
-    suspend fun getLastLoggedInUsername(): String?
-    suspend fun clearLastLoggedInUsername()
 }
 
 class AuthPreferenceStoreImpl(
@@ -106,7 +108,6 @@ class AuthPreferenceStoreImpl(
         preferenceStorage.setAccessToken(null)
         preferenceStorage.setUserDetails(null)
         preferenceStorage.setLastLoggedIn(null)
-        clearLastLoggedInUsername()
     }
 
     override suspend fun getAccessToken() = preferenceStorage.accessToken.first()
@@ -117,10 +118,6 @@ class AuthPreferenceStoreImpl(
 
     override suspend fun getLastLoggedInUsername(): String? {
         return preferenceStorage.lastLoggedInUsername.first()
-    }
-
-    override suspend fun clearLastLoggedInUsername() {
-        preferenceStorage.setLastLoggedInUsername(null)
     }
 
     private suspend fun storeCatching(setter: suspend PreferenceStorage.() -> Unit): Either<DataSourceException, Unit> {

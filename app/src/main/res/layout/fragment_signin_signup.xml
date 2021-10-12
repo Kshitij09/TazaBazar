@@ -60,6 +60,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/text_field_name"
                 android:layout_marginTop="@dimen/margin_normal"
+                app:endIconMode="clear_text"
+                app:endIconTint="@android:color/darker_gray"
                 android:hint="@string/label_email">
 
                 <com.google.android.material.textfield.TextInputEditText

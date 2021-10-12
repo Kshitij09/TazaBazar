@@ -54,6 +54,18 @@ class AuthViewModel(
         _snackbarMessages.consumeAsFlow()
             .shareIn(viewModelScope, WhileSubscribed(5000))
 
+    init {
+        updateUsernameFromPreferencesIfNull()
+    }
+
+    private fun updateUsernameFromPreferencesIfNull() {
+        if (viewState.value.username == null) {
+            viewModelScope.launch {
+                updateUsername(repository.getLastLoggedInUsername())
+            }
+        }
+    }
+
     fun updateUsername(username: String?) {
         savedStateHandle[KEY_USERNAME] = username
         setState { copy(username = username) }

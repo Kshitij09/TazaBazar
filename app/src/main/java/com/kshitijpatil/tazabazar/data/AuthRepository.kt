@@ -5,6 +5,7 @@ import arrow.core.computations.either
 import com.kshitijpatil.tazabazar.api.dto.LoginRequest
 import com.kshitijpatil.tazabazar.api.dto.RegisterRequest
 import com.kshitijpatil.tazabazar.data.local.prefs.AuthPreferenceStore
+import com.kshitijpatil.tazabazar.data.local.prefs.UsernamePreference
 import com.kshitijpatil.tazabazar.data.network.AuthRemoteDataSource
 import com.kshitijpatil.tazabazar.domain.Result
 import com.kshitijpatil.tazabazar.model.LoggedInUser
@@ -13,10 +14,8 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.net.HttpURLConnection
 
-interface AuthRepository {
-    suspend fun login(request: LoginRequest): Either<LoginException, LoggedInUser>
+interface AuthRepository : LoginRepository, RegisterRepository, UsernamePreference {
     suspend fun logout()
-    suspend fun register(request: RegisterRequest): Either<RegisterException, LoggedInUser>
     suspend fun refreshToken(): Result<Unit>
 }
 
@@ -26,7 +25,7 @@ class AuthRepositoryImpl(
     private val authRemoteDataSource: AuthRemoteDataSource,
     private val authPreferenceStore: AuthPreferenceStore,
     private val dispatchers: AppCoroutineDispatchers
-) : AuthRepository {
+) : AuthRepository, UsernamePreference by authPreferenceStore {
     override suspend fun login(request: LoginRequest): Either<LoginException, LoggedInUser> {
         return loginRepository.login(request)
     }
