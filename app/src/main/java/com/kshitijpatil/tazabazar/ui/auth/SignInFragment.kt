@@ -144,14 +144,14 @@ class SignInFragment : Fragment() {
 
         with(textChanges) {
             launch { updateEmailState() }
-            launch { setEmailFieldError(textField) }
+            launch { setEmailFieldError() }
             launch { updateUsername() }
         }
     }
 
-    private suspend fun Flow<CharSequence?>.setEmailFieldError(textField: EditText) {
+    private suspend fun Flow<CharSequence?>.setEmailFieldError() {
         collect {
-            textField.error = if (emailState.showErrors) {
+            binding.textFieldEmail.error = if (emailState.showErrors) {
                 resources.getString(R.string.error_must_be_valid_email)
             } else null
         }

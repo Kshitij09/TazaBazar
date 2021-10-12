@@ -62,6 +62,7 @@
                 android:layout_marginTop="@dimen/margin_normal"
                 app:endIconMode="clear_text"
                 app:endIconTint="@android:color/darker_gray"
+                app:errorIconDrawable="@null"
                 android:hint="@string/label_email">
 
                 <com.google.android.material.textfield.TextInputEditText

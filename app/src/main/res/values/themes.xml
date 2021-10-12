@@ -95,8 +95,7 @@
         <item name="boxCornerRadiusTopEnd">@dimen/product_search_input_corner_radius</item>
         <item name="boxCornerRadiusBottomStart">@dimen/product_search_input_corner_radius</item>
         <item name="boxCornerRadiusBottomEnd">@dimen/product_search_input_corner_radius</item>
-        <item name="boxStrokeWidth">0dp</item>
-        <item name="boxStrokeWidthFocused">0dp</item>
         <item name="hintTextColor">@android:color/darker_gray</item>
+        <item name="boxStrokeColor">@null</item>
     </style>
 </resources>
