@@ -11,7 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 class FieldState(val validator: (CharSequence?) -> Boolean) {
     /** Whether EditText was focused at least once */
     private var isFocusedDirty: Boolean = false
-    private var currentText: CharSequence? = null
+    private var text: CharSequence? = null
+    val currentText: CharSequence? get() = text
     private val _isValid = MutableStateFlow(false)
     val isValid: StateFlow<Boolean>
         get() = _isValid.asStateFlow()
@@ -24,6 +25,6 @@ class FieldState(val validator: (CharSequence?) -> Boolean) {
 
     fun onTextChanged(newText: CharSequence?) {
         _isValid.value = validator(newText)
-        currentText = newText
+        text = newText
     }
 }
