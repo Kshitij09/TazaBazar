@@ -143,7 +143,10 @@ class SignInFragment : Fragment() {
 
     private fun restoreFieldState() {
         val viewState = authViewModel.viewState.value
-        viewState.username?.let { binding.textFieldEmail.editText?.setText(it) }
+        var username: String? = viewState.username
+        if (username.isNullOrEmpty())
+            username = authViewModel.lastLoggedInUsername
+        username?.let { binding.textFieldEmail.editText?.setText(it) }
     }
 
     override fun onDestroyView() {

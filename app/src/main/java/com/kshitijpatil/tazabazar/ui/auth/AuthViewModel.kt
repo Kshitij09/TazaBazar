@@ -18,12 +18,14 @@ import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.ui.common.ResourceMessage
 import com.kshitijpatil.tazabazar.ui.common.SnackbarMessage
 import com.kshitijpatil.tazabazar.util.UiState
+import com.kshitijpatil.tazabazar.util.launchWithMutex
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import timber.log.Timber
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -56,15 +58,17 @@ class AuthViewModel(
         _snackbarMessages.consumeAsFlow()
             .shareIn(viewModelScope, WhileSubscribed(5000))
 
+    private var _lastLoggedInUsername: String? = null
+    private val mutex = Mutex()
+    val lastLoggedInUsername: String? get() = _lastLoggedInUsername
+
     init {
-        updateUsernameFromPreferencesIfNull()
+        loadLastLoggedInUsername()
     }
 
-    private fun updateUsernameFromPreferencesIfNull() {
-        if (viewState.value.username == null) {
-            viewModelScope.launch {
-                updateUsername(repository.getLastLoggedInUsername())
-            }
+    private fun loadLastLoggedInUsername() {
+        viewModelScope.launchWithMutex(mutex) {
+            _lastLoggedInUsername = repository.getLastLoggedInUsername()
         }
     }
 
