@@ -19,7 +19,7 @@ class LifecycleAwareJobManager(var cancelOnBackPressed: Boolean = false) :
     private var job: Job? = null
     private var jobCompletionHandle: DisposableHandle? = null
     val backPressCallback: OnBackPressedCallback =
-        object : OnBackPressedCallback(cancelOnBackPressed) {
+        object : OnBackPressedCallback(false) {
             override fun handleOnBackPressed() {
                 job?.cancel()
             }
