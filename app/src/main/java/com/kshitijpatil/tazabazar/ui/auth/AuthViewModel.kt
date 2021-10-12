@@ -14,6 +14,7 @@ import com.kshitijpatil.tazabazar.api.dto.LoginRequest
 import com.kshitijpatil.tazabazar.data.*
 import com.kshitijpatil.tazabazar.di.AppModule
 import com.kshitijpatil.tazabazar.di.RepositoryModule
+import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.ui.common.ResourceMessage
 import com.kshitijpatil.tazabazar.ui.common.SnackbarMessage
 import com.kshitijpatil.tazabazar.util.UiState
@@ -76,21 +77,9 @@ class AuthViewModel(
             if (currentState.username == null) return@launch
             if (currentState.password == null) return@launch
             setState { copy(loginState = UiState.Loading(R.string.progress_login)) }
-            val response =
+            val result =
                 repository.login(LoginRequest(currentState.username, currentState.password))
-            when (response) {
-                is Either.Right -> {
-                    setState { copy(loginState = UiState.Success(response.value)) }
-                }
-                is Either.Left -> {
-                    setState { copy(loginState = UiState.Error) }
-                    when (response.value) {
-                        InvalidCredentialsException -> sendResourceMessageToSnackbar(R.string.error_invalid_credentials)
-                        ValidationException -> sendResourceMessageToSnackbar(R.string.error_validation_failed)
-                        UnknownLoginException -> sendResourceMessageToSnackbar(R.string.error_something_went_wrong)
-                    }
-                }
-            }
+            handleLoginResult(result)
         }
         loginJob.invokeOnCompletion {
             if (it is CancellationException) {
@@ -99,6 +88,29 @@ class AuthViewModel(
             setState { copy(loginState = UiState.Idle) }
         }
         return loginJob
+    }
+
+    private fun handleLoginResult(result: Either<LoginException, LoggedInUser>) {
+        when (result) {
+            is Either.Right -> {
+                setState { copy(loginState = UiState.Success(result.value)) }
+            }
+            is Either.Left -> {
+                setState { copy(loginState = UiState.Error) }
+                notifyLoginExceptions(result.value)
+            }
+        }
+    }
+
+    private fun notifyLoginExceptions(ex: LoginException) {
+        val msgId = when (ex) {
+            InvalidCredentialsException -> R.string.error_invalid_credentials
+            ValidationException -> R.string.error_validation_failed
+            UnknownLoginException -> R.string.error_something_went_wrong
+        }
+        viewModelScope.launch {
+            sendResourceMessageToSnackbar(msgId)
+        }
     }
 
     private suspend fun sendResourceMessageToSnackbar(@StringRes resId: Int) {
