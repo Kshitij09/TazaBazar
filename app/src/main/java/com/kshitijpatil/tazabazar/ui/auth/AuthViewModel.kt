@@ -35,13 +35,15 @@ class AuthViewModel(
         const val KEY_USERNAME = "com.kshitijpatil.tazabazar.ui.auth.AuthViewModel.username"
         const val KEY_PASSWORD = "com.kshitijpatil.tazabazar.ui.auth.AuthViewModel.password"
         const val KEY_FULL_NAME = "com.kshitijpatil.tazabazar.ui.auth.AuthViewModel.fullName"
+        const val KEY_PHONE = "com.kshitijpatil.tazabazar.ui.auth.AuthViewModel.phone"
     }
 
     private val _viewState = MutableStateFlow(
         AuthViewState(
             username = savedStateHandle[KEY_USERNAME],
             password = savedStateHandle[KEY_PASSWORD],
-            fullName = savedStateHandle[KEY_FULL_NAME]
+            fullName = savedStateHandle[KEY_FULL_NAME],
+            phone = savedStateHandle[KEY_PHONE]
         )
     )
     val viewState: StateFlow<AuthViewState>
@@ -79,6 +81,11 @@ class AuthViewModel(
     fun updateFullName(fullName: String?) {
         savedStateHandle[KEY_FULL_NAME] = fullName
         setState { copy(fullName = fullName) }
+    }
+
+    fun updatePhone(phone: String?) {
+        savedStateHandle[KEY_PHONE] = phone
+        setState { copy(phone = phone) }
     }
 
     fun login(): Job {
