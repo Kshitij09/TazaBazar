@@ -46,4 +46,6 @@
     <string name="error_must_be_valid_email">Must be a valid email</string>
     <string name="info_welcome_back_user">Welcome back %1$s 👋</string>
     <string name="loading">Loading</string>
+    <string name="title_profile">Profile</string>
+    <string name="action_logout">Logout</string>
 </resources>

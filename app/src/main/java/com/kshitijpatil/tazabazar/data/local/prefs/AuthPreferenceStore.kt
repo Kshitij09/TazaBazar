@@ -26,6 +26,8 @@ interface AuthPreferenceStore {
 
     suspend fun getRefreshToken(): Either<DataSourceException, String>
     suspend fun clearRefreshToken()
+    suspend fun clearUserDetails()
+    suspend fun getAccessToken(): String?
     suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit>
 }
 
@@ -95,6 +97,15 @@ class AuthPreferenceStoreImpl(
     override suspend fun clearRefreshToken() {
         preferenceStorage.setRefreshToken(null)
     }
+
+    override suspend fun clearUserDetails() {
+        clearRefreshToken()
+        preferenceStorage.setAccessToken(null)
+        preferenceStorage.setUserDetails(null)
+        preferenceStorage.setLastLoggedIn(null)
+    }
+
+    override suspend fun getAccessToken() = preferenceStorage.accessToken.first()
 
     override suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit> {
         return Either.catch {

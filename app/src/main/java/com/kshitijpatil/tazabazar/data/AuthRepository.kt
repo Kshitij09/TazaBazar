@@ -15,6 +15,7 @@ import java.net.HttpURLConnection
 
 interface AuthRepository {
     suspend fun login(request: LoginRequest): Either<LoginException, LoggedInUser>
+    suspend fun logout()
     suspend fun register(request: RegisterRequest): Either<RegisterException, LoggedInUser>
     suspend fun refreshToken(): Result<Unit>
 }
@@ -28,6 +29,25 @@ class AuthRepositoryImpl(
 ) : AuthRepository {
     override suspend fun login(request: LoginRequest): Either<LoginException, LoggedInUser> {
         return loginRepository.login(request)
+    }
+
+    override suspend fun logout() {
+        Timber.d("logout called")
+        withContext(dispatchers.io) {
+            val accessToken = authPreferenceStore.getAccessToken()
+            if (accessToken == null) {
+                Timber.d("Access token not found, returning..")
+                return@withContext
+            }
+            when (val response = authRemoteDataSource.logout(accessToken)) {
+                is Either.Left -> {
+                    throw Exception("Internal DataSource Error: ${response.value}")
+                }
+                is Either.Right -> {
+                    authPreferenceStore.clearUserDetails()
+                }
+            }
+        }
     }
 
     override suspend fun register(request: RegisterRequest): Either<RegisterException, LoggedInUser> {

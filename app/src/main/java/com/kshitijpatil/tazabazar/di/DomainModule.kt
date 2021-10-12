@@ -2,8 +2,11 @@ package com.kshitijpatil.tazabazar.di
 
 import android.content.Context
 import com.kshitijpatil.tazabazar.domain.AddOrUpdateCartItemUseCase
+import com.kshitijpatil.tazabazar.domain.LogoutUseCase
 import com.kshitijpatil.tazabazar.domain.ObserveCartItemCountUseCase
+import com.kshitijpatil.tazabazar.domain.ObserveLoggedInUserUseCase
 import kotlinx.coroutines.CoroutineDispatcher
+import okhttp3.OkHttpClient
 
 object DomainModule {
     fun provideAddToCartUseCase(
@@ -20,5 +23,23 @@ object DomainModule {
     ): ObserveCartItemCountUseCase {
         val repo = RepositoryModule.provideCartItemRepository(context)
         return ObserveCartItemCountUseCase(repo, dispatcher)
+    }
+
+    fun provideObserveLoggedInUserUseCase(
+        context: Context,
+        dispatcher: CoroutineDispatcher
+    ): ObserveLoggedInUserUseCase {
+        val preferenceStorage = PreferenceStorageModule.providePreferenceStorage(context)
+        val serializer = RepositoryModule.provideLoggedInUserSerializer()
+        return ObserveLoggedInUserUseCase(dispatcher, preferenceStorage, serializer)
+    }
+
+    fun provideLogoutUseCase(
+        dispatcher: CoroutineDispatcher,
+        context: Context,
+        client: OkHttpClient
+    ): LogoutUseCase {
+        val repo = RepositoryModule.provideAuthRepository(context, client)
+        return LogoutUseCase(dispatcher, repo)
     }
 }
