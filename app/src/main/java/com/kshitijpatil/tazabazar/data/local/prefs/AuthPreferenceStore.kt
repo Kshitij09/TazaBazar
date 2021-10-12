@@ -29,6 +29,8 @@ interface AuthPreferenceStore {
     suspend fun clearUserDetails()
     suspend fun getAccessToken(): String?
     suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit>
+    suspend fun getLastLoggedInUsername(): String?
+    suspend fun clearLastLoggedInUsername()
 }
 
 class AuthPreferenceStoreImpl(
@@ -41,18 +43,18 @@ class AuthPreferenceStoreImpl(
     private suspend fun storeDetailsToPreferenceStorage(
         accessToken: String,
         refreshToken: String,
+        username: String,
         serializedLoginTime: String,
         serializedUser: String
     ): Either<DataSourceException, Unit> {
         return withContext(dispatcher) {
-            Either.catch {
-                with(preferenceStorage) {
-                    setAccessToken(accessToken)
-                    setRefreshToken(refreshToken)
-                    setLastLoggedIn(serializedLoginTime)
-                    setUserDetails(serializedUser)
-                }
-            }.mapLeft { it.toDataSourceException() }
+            storeCatching {
+                setAccessToken(accessToken)
+                setRefreshToken(refreshToken)
+                setLastLoggedIn(serializedLoginTime)
+                setUserDetails(serializedUser)
+                setLastLoggedInUsername(username)
+            }
         }
     }
 
@@ -78,8 +80,9 @@ class AuthPreferenceStoreImpl(
             storeDetailsToPreferenceStorage(
                 accessToken,
                 refreshToken,
+                user.email,
                 serializedLoginTime,
-                serializedUser
+                serializedUser,
             )
         }
     }
@@ -103,15 +106,30 @@ class AuthPreferenceStoreImpl(
         preferenceStorage.setAccessToken(null)
         preferenceStorage.setUserDetails(null)
         preferenceStorage.setLastLoggedIn(null)
+        clearLastLoggedInUsername()
     }
 
     override suspend fun getAccessToken() = preferenceStorage.accessToken.first()
 
     override suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit> {
-        return Either.catch {
-            withContext(dispatcher) {
-                preferenceStorage.setAccessToken(token)
-            }
-        }.mapLeft { it.toDataSourceException() }
+        return storeCatching { setAccessToken(token) }
+    }
+
+    override suspend fun getLastLoggedInUsername(): String? {
+        return preferenceStorage.lastLoggedInUsername.first()
+    }
+
+    override suspend fun clearLastLoggedInUsername() {
+        preferenceStorage.setLastLoggedInUsername(null)
+    }
+
+    private suspend fun storeCatching(setter: suspend PreferenceStorage.() -> Unit): Either<DataSourceException, Unit> {
+        return withContext(dispatcher) {
+            Either.catch {
+                withContext(dispatcher) {
+                    setter(preferenceStorage)
+                }
+            }.mapLeft { it.toDataSourceException() }
+        }
     }
 }

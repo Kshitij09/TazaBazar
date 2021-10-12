@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.kshitijpatil.tazabazar.api.dto.LoginResponse
 import com.kshitijpatil.tazabazar.data.local.prefs.DataStorePreferenceStorage.PreferenceKeys.PREF_ACCESS_TOKEN
+import com.kshitijpatil.tazabazar.data.local.prefs.DataStorePreferenceStorage.PreferenceKeys.PREF_LAST_LOGGED_IN_USERNAME
 import com.kshitijpatil.tazabazar.data.local.prefs.DataStorePreferenceStorage.PreferenceKeys.PREF_LOGGED_IN_AT
 import com.kshitijpatil.tazabazar.data.local.prefs.DataStorePreferenceStorage.PreferenceKeys.PREF_REFRESH_TOKEN
 import com.kshitijpatil.tazabazar.data.local.prefs.DataStorePreferenceStorage.PreferenceKeys.PREF_USER_DETAILS
@@ -32,6 +33,9 @@ interface PreferenceStorage {
      * keeping timestamp of last successful login
      */
     val loggedInAt: Flow<String?>
+
+    val lastLoggedInUsername: Flow<String?>
+    suspend fun setLastLoggedInUsername(username: String?)
 }
 
 class DataStorePreferenceStorage(
@@ -46,6 +50,7 @@ class DataStorePreferenceStorage(
         val PREF_ACCESS_TOKEN = stringPreferencesKey("pref_access_token")
         val PREF_USER_DETAILS = stringPreferencesKey("pref_user_details")
         val PREF_LOGGED_IN_AT = stringPreferencesKey("pref_logged_in_at")
+        val PREF_LAST_LOGGED_IN_USERNAME = stringPreferencesKey("pref_last_logged_in_username")
     }
 
     override suspend fun setRefreshToken(refreshToken: String?) {
@@ -76,6 +81,13 @@ class DataStorePreferenceStorage(
     override val loggedInAt: Flow<String?> =
         dataStore.data.map { mapEmptyToNull(it[PREF_LOGGED_IN_AT]) }
 
+
+    override val lastLoggedInUsername: Flow<String?> =
+        dataStore.data.map { mapEmptyToNull(it[PREF_LAST_LOGGED_IN_USERNAME]) }
+
+    override suspend fun setLastLoggedInUsername(username: String?) {
+        dataStore.edit { it[PREF_LAST_LOGGED_IN_USERNAME] = username ?: "" }
+    }
 
     private fun mapEmptyToNull(value: String?): String? {
         return if (value != null && value.isEmpty())

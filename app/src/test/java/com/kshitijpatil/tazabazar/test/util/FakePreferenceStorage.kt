@@ -8,7 +8,8 @@ class FakePreferenceStorage(
     refreshToken: String? = null,
     accessToken: String? = null,
     userDetailsJson: String? = null,
-    loggedInAt: String? = null
+    loggedInAt: String? = null,
+    lastLoggedInUsername: String? = null
 ) : PreferenceStorage {
     private val _refreshToken = MutableStateFlow(refreshToken)
     override val refreshToken: Flow<String?> = _refreshToken
@@ -36,5 +37,12 @@ class FakePreferenceStorage(
 
     override suspend fun setLastLoggedIn(serializedDateTime: String?) {
         _loggedInAt.value = serializedDateTime
+    }
+
+    private val _lastLoggedInUsername = MutableStateFlow(lastLoggedInUsername)
+    override val lastLoggedInUsername: Flow<String?> = _lastLoggedInUsername
+
+    override suspend fun setLastLoggedInUsername(username: String?) {
+        _lastLoggedInUsername.value = username
     }
 }

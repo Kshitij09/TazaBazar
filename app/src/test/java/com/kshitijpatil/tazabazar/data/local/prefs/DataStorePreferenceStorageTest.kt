@@ -72,4 +72,12 @@ class DataStorePreferenceStorageTest {
         val reloaded = preferenceStorage.loggedInAt.first()
         assertThat(reloaded).isEqualTo(loggedInAt)
     }
+
+    @Test
+    fun storeAndGetLastLoggedInUsername() = scope.runBlockingTest {
+        val loggedInUsername = "loggedin@test.com"
+        preferenceStorage.setLastLoggedInUsername(loggedInUsername)
+        val reloaded = preferenceStorage.lastLoggedInUsername.first()
+        assertThat(reloaded).isEqualTo(loggedInUsername)
+    }
 }
