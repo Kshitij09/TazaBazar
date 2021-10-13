@@ -21,8 +21,6 @@ import com.kshitijpatil.tazabazar.ui.common.SnackbarMessage
 import com.kshitijpatil.tazabazar.util.UiState
 import com.kshitijpatil.tazabazar.util.launchWithMutex
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.launch
@@ -52,12 +50,10 @@ class AuthViewModel(
     val viewState: StateFlow<AuthViewState>
         get() = _viewState.asStateFlow()
 
-    private val _snackbarMessages =
-        Channel<SnackbarMessage>(capacity = 3, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    private val _snackbarMessages = MutableSharedFlow<SnackbarMessage>()
 
     val snackbarMessages: Flow<SnackbarMessage> =
-        _snackbarMessages.receiveAsFlow()
-            .shareIn(viewModelScope, WhileSubscribed(5000))
+        _snackbarMessages.shareIn(viewModelScope, WhileSubscribed(5000))
 
     private var _lastLoggedInUsername: String? = null
     private val mutex = Mutex()
@@ -186,7 +182,7 @@ class AuthViewModel(
 
     private fun sendResourceMessageToSnackbar(@StringRes resId: Int) {
         viewModelScope.launch {
-            _snackbarMessages.send(ResourceMessage(resId))
+            _snackbarMessages.emit(ResourceMessage(resId))
         }
     }
 
