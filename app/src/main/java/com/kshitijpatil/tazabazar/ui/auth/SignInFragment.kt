@@ -11,7 +11,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.kshitijpatil.tazabazar.R
-import com.kshitijpatil.tazabazar.databinding.FragmentSigninSignupBinding
+import com.kshitijpatil.tazabazar.databinding.FragmentSigninBinding
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.ui.MainActivityViewModel
 import com.kshitijpatil.tazabazar.ui.common.LifecycleAwareJobManager
@@ -25,8 +25,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class SignInFragment : Fragment() {
-    private var _binding: FragmentSigninSignupBinding? = null
-    private val binding: FragmentSigninSignupBinding get() = _binding!!
+    private var _binding: FragmentSigninBinding? = null
+    private val binding: FragmentSigninBinding get() = _binding!!
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private val authViewModel: AuthViewModel by navGraphViewModels(R.id.navigation_auth) {
         AuthViewModelFactory(this, requireContext().applicationContext, arguments)
@@ -49,7 +49,7 @@ class SignInFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentSigninSignupBinding.inflate(inflater, container, false)
+        _binding = FragmentSigninBinding.inflate(inflater, container, false)
         snackbar = binding.snackbar
         return binding.root
     }

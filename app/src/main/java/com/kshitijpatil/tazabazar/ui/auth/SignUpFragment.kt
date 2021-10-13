@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import androidx.annotation.StringRes
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -13,18 +12,20 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.kshitijpatil.tazabazar.R
-import com.kshitijpatil.tazabazar.databinding.FragmentSigninSignupBinding
+import com.kshitijpatil.tazabazar.databinding.FragmentSignupBinding
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.ui.MainActivityViewModel
 import com.kshitijpatil.tazabazar.ui.common.LifecycleAwareJobManager
+import com.kshitijpatil.tazabazar.ui.common.ResourceMessage
+import com.kshitijpatil.tazabazar.ui.common.TextMessage
 import com.kshitijpatil.tazabazar.util.*
 import com.kshitijpatil.tazabazar.widget.FadingSnackbar
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class SignUpFragment : Fragment() {
-    private var _binding: FragmentSigninSignupBinding? = null
-    private val binding: FragmentSigninSignupBinding get() = _binding!!
+    private var _binding: FragmentSignupBinding? = null
+    private val binding: FragmentSignupBinding get() = _binding!!
     private val mainActivityViewModel: MainActivityViewModel by activityViewModels()
     private val authViewModel: AuthViewModel by navGraphViewModels(R.id.navigation_auth) {
         AuthViewModelFactory(this, requireContext().applicationContext, arguments)
@@ -53,13 +54,7 @@ class SignUpFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentSigninSignupBinding.inflate(inflater, container, false)
-        binding.textFieldName.isVisible = true
-        binding.textFieldPhone.isVisible = true
-        binding.textFieldConfirmPassword.isVisible = true
-        binding.txtHeader.text = resources.getString(R.string.label_sign_up)
-        binding.btnAction.text = resources.getText(R.string.label_create_account)
-        binding.textFieldPassword.editText?.imeOptions = EditorInfo.IME_ACTION_NEXT
+        _binding = FragmentSignupBinding.inflate(inflater, container, false)
         snackbar = binding.snackbar
         return binding.root
     }
@@ -74,9 +69,20 @@ class SignUpFragment : Fragment() {
         launchAndRepeatWithViewLifecycle {
             launch { observeStateAggregatorForActionButton() }
             launch { observeRegisterState() }
+            launch { observeSnackbarMessages() }
             launch { observeLoginState() }
         }
         restoreFieldStates()
+    }
+
+    private suspend fun observeSnackbarMessages() {
+        authViewModel.snackbarMessages
+            .collect { message ->
+                when (message) {
+                    is ResourceMessage -> snackbar?.show(message.resId)
+                    is TextMessage -> snackbar?.show(messageText = message.text)
+                }
+            }
     }
 
     private suspend fun observeRegisterState() {
@@ -106,7 +112,7 @@ class SignUpFragment : Fragment() {
     private fun showWelcomeMessage(user: LoggedInUser) {
         snackbar?.show(
             messageText = resources.getString(
-                R.string.info_welcome_back_user,
+                R.string.info_welcome_new_user,
                 user.fullName
             ),
             longDuration = false,

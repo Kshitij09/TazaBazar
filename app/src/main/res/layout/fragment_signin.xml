@@ -36,49 +36,11 @@
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/text_field_name"
-                style="@style/Widget.App.TextInputLayout.Filled.White"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/txt_header"
-                android:layout_marginTop="@dimen/margin_normal"
-                android:hint="@string/label_name"
-                android:visibility="gone"
-                tools:visibility="visible">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:imeOptions="actionNext"
-                    android:inputType="textPersonName"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/text_field_phone"
-                style="@style/Widget.App.TextInputLayout.Filled.White"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/text_field_name"
-                android:layout_marginTop="@dimen/margin_normal"
-                android:hint="@string/label_phone_number"
-                android:visibility="gone"
-                tools:visibility="visible">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:imeOptions="actionNext"
-                    android:inputType="phone"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/text_field_email"
                 style="@style/Widget.App.TextInputLayout.Filled.White"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/text_field_phone"
+                android:layout_below="@id/txt_header"
                 android:layout_marginTop="@dimen/margin_normal"
                 app:endIconMode="clear_text"
                 app:endIconTint="@android:color/darker_gray"
@@ -112,30 +74,11 @@
                     android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/text_field_confirm_password"
-                style="@style/Widget.App.TextInputLayout.Filled.White"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/text_field_password"
-                android:layout_marginTop="@dimen/margin_small"
-                android:hint="@string/label_confirm_password"
-                android:visibility="gone"
-                app:endIconTint="@android:color/darker_gray">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:imeOptions="actionDone"
-                    android:inputType="textVisiblePassword"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_action"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_below="@id/text_field_confirm_password"
+                android:layout_below="@id/text_field_password"
                 android:layout_marginTop="24dp"
                 android:text="@string/label_login"
                 app:cornerRadius="6dp" />
@@ -161,6 +104,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_toEndOf="@id/progress_indicator"
                 android:gravity="center"
+                android:textStyle="bold"
                 android:visibility="gone"
                 tools:text="Logging you in..."
                 tools:visibility="visible" />
