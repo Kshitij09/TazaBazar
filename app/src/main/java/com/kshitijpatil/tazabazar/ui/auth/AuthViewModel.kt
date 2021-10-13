@@ -11,6 +11,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import arrow.core.Either
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.api.dto.LoginRequest
+import com.kshitijpatil.tazabazar.api.dto.RegisterRequest
 import com.kshitijpatil.tazabazar.data.*
 import com.kshitijpatil.tazabazar.di.AppModule
 import com.kshitijpatil.tazabazar.di.RepositoryModule
@@ -131,13 +132,62 @@ class AuthViewModel(
             ValidationException -> R.string.error_validation_failed
             UnknownLoginException -> R.string.error_something_went_wrong
         }
-        viewModelScope.launch {
-            sendResourceMessageToSnackbar(msgId)
+        sendResourceMessageToSnackbar(msgId)
+    }
+
+    fun register(): Job {
+        setState { copy(registerState = UiState.Idle) }
+        val registerJob = viewModelScope.launch {
+            val currentState = viewState.value
+            if (currentState.fullName == null) return@launch
+            if (currentState.username == null) return@launch
+            if (currentState.phone == null) return@launch
+            if (currentState.password == null) return@launch
+            setState { copy(registerState = UiState.Loading(R.string.progress_register)) }
+            val request = RegisterRequest(
+                currentState.username,
+                currentState.password,
+                currentState.fullName,
+                currentState.phone
+            )
+            val result = repository.register(request)
+            handleRegisterResult(result)
+        }
+        registerJob.invokeOnCompletion {
+            if (it is CancellationException) {
+                Timber.d("register: Job Canceled")
+            }
+            setState { copy(registerState = UiState.Idle) }
+        }
+
+        return registerJob
+    }
+
+    private fun handleRegisterResult(result: Either<RegisterException, LoggedInUser>) {
+        when (result) {
+            is Either.Left -> {
+                setState { copy(registerState = UiState.Error) }
+                notifyRegisterExceptions(result.value)
+            }
+            is Either.Right -> {
+                setState { copy(registerState = UiState.Success(result.value)) }
+            }
         }
     }
 
-    private suspend fun sendResourceMessageToSnackbar(@StringRes resId: Int) {
-        _snackbarMessages.send(ResourceMessage(resId))
+    private fun notifyRegisterExceptions(exception: RegisterException) {
+        val errorMsgId = when (exception) {
+            PhoneExistsException -> R.string.error_phone_exists
+            UsernameExistsException -> R.string.error_email_exists
+            UnknownRegisterException -> R.string.error_something_went_wrong
+        }
+        sendResourceMessageToSnackbar(errorMsgId)
+    }
+
+    private fun sendResourceMessageToSnackbar(@StringRes resId: Int) {
+        viewModelScope.launch {
+            _snackbarMessages.send(ResourceMessage(resId))
+        }
     }
 
 

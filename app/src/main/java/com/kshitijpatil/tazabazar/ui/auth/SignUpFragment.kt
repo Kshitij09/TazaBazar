@@ -10,15 +10,17 @@ import androidx.annotation.StringRes
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentSigninSignupBinding
+import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.ui.MainActivityViewModel
 import com.kshitijpatil.tazabazar.ui.common.LifecycleAwareJobManager
-import com.kshitijpatil.tazabazar.util.FieldState
-import com.kshitijpatil.tazabazar.util.isValidEmail
-import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
-import com.kshitijpatil.tazabazar.util.launchTextInputLayoutObservers
+import com.kshitijpatil.tazabazar.util.*
+import com.kshitijpatil.tazabazar.widget.FadingSnackbar
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class SignUpFragment : Fragment() {
     private var _binding: FragmentSigninSignupBinding? = null
@@ -39,6 +41,7 @@ class SignUpFragment : Fragment() {
         FieldState { it.toString() == passwordState.currentText.toString() }
 
     private val signupJobManager = LifecycleAwareJobManager(cancelOnBackPressed = true)
+    private var snackbar: FadingSnackbar? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -57,14 +60,104 @@ class SignUpFragment : Fragment() {
         binding.txtHeader.text = resources.getString(R.string.label_sign_up)
         binding.btnAction.text = resources.getText(R.string.label_create_account)
         binding.textFieldPassword.editText?.imeOptions = EditorInfo.IME_ACTION_NEXT
+        snackbar = binding.snackbar
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mainActivityViewModel.disableClearFocus()
+        binding.btnAction.setOnClickListener {
+            signupJobManager.handleCancellation { authViewModel.register() }
+        }
         launchTextFieldObservers()
+        launchAndRepeatWithViewLifecycle {
+            launch { observeStateAggregatorForActionButton() }
+            launch { observeRegisterState() }
+            launch { observeLoginState() }
+        }
         restoreFieldStates()
+    }
+
+    private suspend fun observeRegisterState() {
+        getRegisterStateFlow().collect {
+            setProgressComponents(it)
+            if (it is UiState.Success) {
+                signupJobManager.handleCancellation { authViewModel.login() }
+            }
+        }
+    }
+
+    private suspend fun observeLoginState() {
+        authViewModel.viewState.map { it.loginState }
+            .collect {
+                binding.progressIndicator.isVisible = it is UiState.Loading
+                binding.progressMessage.isVisible = it is UiState.Loading
+                if (it is UiState.Loading) {
+                    binding.progressMessage.text =
+                        resources.getString(it.msgResId ?: R.string.loading)
+                }
+                if (it is UiState.Success) {
+                    showWelcomeMessage(it.value)
+                }
+            }
+    }
+
+    private fun showWelcomeMessage(user: LoggedInUser) {
+        snackbar?.show(
+            messageText = resources.getString(
+                R.string.info_welcome_back_user,
+                user.fullName
+            ),
+            longDuration = false,
+            dismissListener = { popOutOfAuthNavigation() }
+        )
+    }
+
+    private fun popOutOfAuthNavigation() {
+        findNavController().navigate(R.id.action_pop_out_of_auth)
+    }
+
+    private fun <T> setProgressComponents(targetState: UiState<T>) {
+        binding.progressIndicator.isVisible = targetState is UiState.Loading
+        binding.progressMessage.isVisible = targetState is UiState.Loading
+        if (targetState is UiState.Loading) {
+            binding.progressMessage.text =
+                resources.getString(targetState.msgResId ?: R.string.loading)
+        }
+    }
+
+    private fun getRegisterStateFlow(): Flow<UiState<LoggedInUser>> {
+        return authViewModel.viewState
+            .map { it.registerState }
+            .distinctUntilChanged()
+    }
+
+    private suspend fun observeStateAggregatorForActionButton() {
+        getActionEnabledAggregatorFlow().collect {
+            binding.btnAction.isEnabled = it
+        }
+    }
+
+    private fun getActionEnabledAggregatorFlow(): Flow<Boolean> {
+        val fieldValidationFlow = combine(
+            fullNameState.isValid,
+            emailState.isValid,
+            phoneState.isValid,
+            passwordState.isValid,
+            confirmPasswordState.isValid,
+        ) { fullName, email, phone, password, confirmPassword ->
+            fullName && email && phone && password && confirmPassword
+        }
+        val registerStateCheckFlow =
+            getRegisterStateFlow().map { it is UiState.Idle || it is UiState.Error }
+
+        return combine(
+            fieldValidationFlow,
+            registerStateCheckFlow
+        ) { fieldsValid, registerStateValid ->
+            fieldsValid && registerStateValid
+        }
     }
 
     private fun restoreFieldStates() {

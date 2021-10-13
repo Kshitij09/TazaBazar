@@ -9,5 +9,5 @@ data class AuthViewState(
     val fullName: String? = null,
     val phone: String? = null,
     val loginState: UiState<LoggedInUser> = UiState.Idle,
-    val registerState: UiState<Unit> = UiState.Idle
+    val registerState: UiState<LoggedInUser> = UiState.Idle
 )

@@ -45,6 +45,7 @@
     <string name="error_passwords_must_be_same">Passwords must be same</string>
     <string name="error_invalid_phone_number">Phone Number Invalid</string>
     <string name="progress_login">Logging you in…</string>
+    <string name="progress_register">Creating new account…</string>
     <string name="error_must_be_valid_email">Must be a valid email</string>
     <string name="error_field_must_not_be_empty">%1$s Must not be empty</string>
     <string name="info_welcome_back_user">Welcome back %1$s 👋</string>
@@ -52,4 +53,6 @@
     <string name="title_profile">Profile</string>
     <string name="action_logout">Logout</string>
     <string name="label_phone_number">Phone Number</string>
+    <string name="error_email_exists">An account with this email address already exists</string>
+    <string name="error_phone_exists">An account with this phone number already exists</string>
 </resources>
