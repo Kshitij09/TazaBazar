@@ -5,18 +5,20 @@ import arrow.core.computations.either
 import com.kshitijpatil.tazabazar.api.dto.LoginRequest
 import com.kshitijpatil.tazabazar.api.dto.RegisterRequest
 import com.kshitijpatil.tazabazar.data.local.prefs.AuthPreferenceStore
-import com.kshitijpatil.tazabazar.data.local.prefs.UsernamePreference
 import com.kshitijpatil.tazabazar.data.network.AuthRemoteDataSource
 import com.kshitijpatil.tazabazar.domain.Result
+import com.kshitijpatil.tazabazar.model.AuthConfiguration
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.net.HttpURLConnection
 
-interface AuthRepository : LoginRepository, RegisterRepository, UsernamePreference {
+interface AuthRepository : LoginRepository, RegisterRepository, AuthPreferenceStore {
     suspend fun logout()
     suspend fun refreshToken(): Result<Unit>
+    suspend fun getAuthConfiguration(): AuthConfiguration
 }
 
 class AuthRepositoryImpl(
@@ -25,7 +27,7 @@ class AuthRepositoryImpl(
     private val authRemoteDataSource: AuthRemoteDataSource,
     private val authPreferenceStore: AuthPreferenceStore,
     private val dispatchers: AppCoroutineDispatchers
-) : AuthRepository, UsernamePreference by authPreferenceStore {
+) : AuthRepository, AuthPreferenceStore by authPreferenceStore {
     override suspend fun login(request: LoginRequest): Either<LoginException, LoggedInUser> {
         return loginRepository.login(request)
     }
@@ -73,6 +75,12 @@ class AuthRepositoryImpl(
                 ifRight = { Result.Success(Unit) }
             )
         }
+    }
+
+    override suspend fun getAuthConfiguration(): AuthConfiguration {
+        // TODO: Fetch these from remote APIs once supported
+        delay(500)
+        return AuthConfiguration(tokenExpiryMinutes = 15)
     }
 
     private fun DataSourceException.logExceptionsForRefreshToken() {
