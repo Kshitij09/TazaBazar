@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentCartBinding
+import com.kshitijpatil.tazabazar.di.CartViewModelFactory
 import com.kshitijpatil.tazabazar.model.CartConfiguration
 import com.kshitijpatil.tazabazar.model.CartItem
 import com.kshitijpatil.tazabazar.ui.common.CoilProductLoadImageDelegate

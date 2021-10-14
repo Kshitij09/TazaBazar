@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.kshitijpatil.tazabazar.R
+import com.kshitijpatil.tazabazar.di.AuthViewModelFactory
 
 class AuthFragment : Fragment(R.layout.fragment_auth) {
     private val viewModel: AuthViewModel by navGraphViewModels(R.id.navigation_auth) {

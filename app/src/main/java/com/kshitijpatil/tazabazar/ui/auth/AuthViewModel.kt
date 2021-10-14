@@ -1,19 +1,14 @@
 package com.kshitijpatil.tazabazar.ui.auth
 
-import android.content.Context
-import android.os.Bundle
 import androidx.annotation.StringRes
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.savedstate.SavedStateRegistryOwner
 import arrow.core.Either
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.api.dto.LoginRequest
 import com.kshitijpatil.tazabazar.api.dto.RegisterRequest
 import com.kshitijpatil.tazabazar.data.*
-import com.kshitijpatil.tazabazar.di.RepositoryModule
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.ui.common.ResourceMessage
 import com.kshitijpatil.tazabazar.ui.common.SnackbarMessage
@@ -194,22 +189,5 @@ class AuthViewModel(
 
     fun clearPassword() {
         setState { copy(password = null) }
-    }
-}
-
-class AuthViewModelFactory(
-    owner: SavedStateRegistryOwner,
-    appContext: Context,
-    defaultArgs: Bundle?
-) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
-    private val repository = RepositoryModule.provideAuthRepository(appContext)
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(
-        key: String,
-        modelClass: Class<T>,
-        handle: SavedStateHandle
-    ): T {
-        return AuthViewModel(handle, repository) as T
     }
 }

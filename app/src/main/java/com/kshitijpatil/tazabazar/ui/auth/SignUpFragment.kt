@@ -14,6 +14,7 @@ import androidx.navigation.navGraphViewModels
 import com.fredporciuncula.phonemoji.PhonemojiTextInputEditText
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentSignupBinding
+import com.kshitijpatil.tazabazar.di.AuthViewModelFactory
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.ui.MainActivityViewModel
 import com.kshitijpatil.tazabazar.ui.common.LifecycleAwareJobManager

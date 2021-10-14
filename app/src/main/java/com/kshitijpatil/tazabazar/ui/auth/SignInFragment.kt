@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentSigninBinding
+import com.kshitijpatil.tazabazar.di.AuthViewModelFactory
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.ui.MainActivityViewModel
 import com.kshitijpatil.tazabazar.ui.common.LifecycleAwareJobManager

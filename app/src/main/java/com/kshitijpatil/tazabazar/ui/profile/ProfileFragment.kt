@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentProfileBinding
+import com.kshitijpatil.tazabazar.di.ProfileViewModelFactory
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.ui.DashboardFragmentDirections
 import com.kshitijpatil.tazabazar.util.UiState

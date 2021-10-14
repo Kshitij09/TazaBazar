@@ -1,11 +1,7 @@
 package com.kshitijpatil.tazabazar.ui.profile
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.kshitijpatil.tazabazar.di.AppModule
-import com.kshitijpatil.tazabazar.di.DomainModule
 import com.kshitijpatil.tazabazar.domain.LogoutUseCase
 import com.kshitijpatil.tazabazar.domain.ObserveLoggedInUserUseCase
 import com.kshitijpatil.tazabazar.domain.succeeded
@@ -67,22 +63,4 @@ class ProfileViewModel(
     fun <A> selectSubscribe(prop: KProperty1<ProfileViewState, A>): Flow<A> {
         return _viewState.map { prop.get(it) }.distinctUntilChanged()
     }
-}
-
-class ProfileViewModelFactory(appContext: Context) : ViewModelProvider.Factory {
-    private val dispatchers = AppModule.provideAppCoroutineDispatchers()
-    private val observeLoggedInUserUseCase = DomainModule.provideObserveLoggedInUserUseCase(
-        appContext,
-        dispatchers.io
-    )
-    private val logoutUseCase = DomainModule.provideLogoutUseCase(dispatchers.io, appContext)
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ProfileViewModel::class.java)) {
-            return ProfileViewModel(observeLoggedInUserUseCase, logoutUseCase) as T
-        }
-        throw IllegalArgumentException("Invalid ViewModel")
-    }
-
 }
