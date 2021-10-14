@@ -171,7 +171,9 @@ class SignUpFragment : Fragment() {
     private fun restoreFieldStates() {
         val viewState = authViewModel.viewState.value
         binding.textFieldName.editText?.setText(viewState.fullName)
-        binding.textFieldPhone.editText?.setText(viewState.phone)
+        if (!viewState.phone.isNullOrEmpty()) {
+            binding.textFieldPhone.editText?.setText(viewState.phone)
+        }
     }
 
     private fun launchTextFieldObservers() {
