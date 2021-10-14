@@ -11,7 +11,7 @@ object WorkerModule {
         appContext: Context,
         workerParams: WorkerParameters
     ): RefreshTokenWorker {
-        val ioDispatcher = AppModule.provideAppCoroutineDispatchers().io
+        val ioDispatcher = AppModule.provideIoDispatcher()
         val refreshTokenUseCase = DomainModule.provideRefreshTokenUseCase(ioDispatcher, appContext)
         return RefreshTokenWorker(appContext, workerParams, refreshTokenUseCase)
     }

@@ -23,9 +23,8 @@ class HomeViewModelFactory(
 ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
     private val productRepository =
         RepositoryModule.provideProductRepository(appContext)
-    private val appCoroutineDispatchers = AppModule.provideAppCoroutineDispatchers()
-    private val addToCartUseCase =
-        DomainModule.provideAddToCartUseCase(appContext, appCoroutineDispatchers.io)
+    private val ioDispatcher = AppModule.provideIoDispatcher()
+    private val addToCartUseCase = DomainModule.provideAddToCartUseCase(appContext, ioDispatcher)
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(
@@ -76,8 +75,8 @@ class FavoriteProductsViewModelFactory(
 ) : ViewModelProvider.Factory {
     private val productRepository =
         RepositoryModule.provideProductRepository(appContext)
-    private val dispatchers = AppModule.provideAppCoroutineDispatchers()
-    private val addToCartUseCase = DomainModule.provideAddToCartUseCase(appContext, dispatchers.io)
+    private val ioDispatcher = AppModule.provideIoDispatcher()
+    private val addToCartUseCase = DomainModule.provideAddToCartUseCase(appContext, ioDispatcher)
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -90,12 +89,12 @@ class FavoriteProductsViewModelFactory(
 }
 
 class ProfileViewModelFactory(appContext: Context) : ViewModelProvider.Factory {
-    private val dispatchers = AppModule.provideAppCoroutineDispatchers()
+    private val ioDispatcher = AppModule.provideIoDispatcher()
     private val observeLoggedInUserUseCase = DomainModule.provideObserveLoggedInUserUseCase(
         appContext,
-        dispatchers.io
+        ioDispatcher
     )
-    private val logoutUseCase = DomainModule.provideLogoutUseCase(dispatchers.io, appContext)
+    private val logoutUseCase = DomainModule.provideLogoutUseCase(ioDispatcher, appContext)
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -113,7 +112,7 @@ class DashboardViewModelFactory(private val application: Application) :
         application.applicationContext,
         null // should be decided later
     )
-    private val ioDispatcher = AppModule.provideAppCoroutineDispatchers().io
+    private val ioDispatcher = AppModule.provideIoDispatcher()
     private val isSessionExpiredUseCase = DomainModule.provideIsSessionExpiredUseCase(
         ioDispatcher,
         application.applicationContext
