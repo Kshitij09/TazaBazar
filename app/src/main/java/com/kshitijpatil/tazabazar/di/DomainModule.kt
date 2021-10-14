@@ -1,10 +1,7 @@
 package com.kshitijpatil.tazabazar.di
 
 import android.content.Context
-import com.kshitijpatil.tazabazar.domain.AddOrUpdateCartItemUseCase
-import com.kshitijpatil.tazabazar.domain.LogoutUseCase
-import com.kshitijpatil.tazabazar.domain.ObserveCartItemCountUseCase
-import com.kshitijpatil.tazabazar.domain.ObserveLoggedInUserUseCase
+import com.kshitijpatil.tazabazar.domain.*
 import kotlinx.coroutines.CoroutineDispatcher
 
 object DomainModule {
@@ -39,5 +36,38 @@ object DomainModule {
     ): LogoutUseCase {
         val repo = RepositoryModule.provideAuthRepository(context)
         return LogoutUseCase(dispatcher, repo)
+    }
+
+    fun provideIsSessionExpiredUseCase(
+        dispatcher: CoroutineDispatcher,
+        context: Context
+    ): IsSessionExpiredUseCase {
+        val repo = RepositoryModule.provideAuthRepository(context)
+        val serializer = RepositoryModule.provideLocalDateTimeSerializer()
+        return IsSessionExpiredUseCase(dispatcher, repo, serializer)
+    }
+
+    fun provideRefreshTokenUseCase(
+        dispatcher: CoroutineDispatcher,
+        context: Context
+    ): RefreshTokenUseCase {
+        val repo = RepositoryModule.provideAuthRepository(context)
+        return RefreshTokenUseCase(dispatcher, repo)
+    }
+
+    fun provideGetAuthConfigurationUseCase(
+        dispatcher: CoroutineDispatcher,
+        context: Context
+    ): GetAuthConfigurationUseCase {
+        val repo = RepositoryModule.provideAuthRepository(context)
+        return GetAuthConfigurationUseCase(dispatcher, repo)
+    }
+
+    fun provideObserveAccessTokenChangedUseCase(
+        dispatcher: CoroutineDispatcher,
+        context: Context
+    ): ObserveAccessTokenChangedUseCase {
+        val preferenceStorage = PreferenceStorageModule.providePreferenceStorage(context)
+        return ObserveAccessTokenChangedUseCase(dispatcher, preferenceStorage)
     }
 }
