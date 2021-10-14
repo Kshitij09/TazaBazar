@@ -65,7 +65,7 @@ dependencies {
     implementation libs.androidx.datastore.preferences
     kapt libs.androidx.room.compiler
     implementation libs.androidx.navigation.navigationUiKtx
-    implementation libs.arrowkt.arrowCore
+    implementation libs.androidx.work.workKtx
 
     // third-party
     implementation libs.coil
@@ -74,6 +74,7 @@ dependencies {
     implementation libs.threeTenAbp
     implementation libs.timber
     implementation libs.phonemoji
+    implementation libs.arrowkt.arrowCore
     kapt libs.moshi.kotlinCodegen
 
     testImplementation libs.junit

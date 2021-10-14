@@ -1,5 +1,6 @@
 package com.kshitijpatil.tazabazar.di
 
+import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
@@ -106,16 +107,37 @@ class ProfileViewModelFactory(appContext: Context) : ViewModelProvider.Factory {
 
 }
 
-class DashboardViewModelFactory(appContext: Context) : ViewModelProvider.Factory {
+class DashboardViewModelFactory(private val application: Application) :
+    ViewModelProvider.AndroidViewModelFactory(application) {
     private val observeCartItemCountUseCase = DomainModule.provideObserveCartItemCountUseCase(
-        appContext,
+        application.applicationContext,
         null // should be decided later
     )
+    private val ioDispatcher = AppModule.provideAppCoroutineDispatchers().io
+    private val isSessionExpiredUseCase = DomainModule.provideIsSessionExpiredUseCase(
+        ioDispatcher,
+        application.applicationContext
+    )
+    private val getAuthConfigurationUseCase = DomainModule.provideGetAuthConfigurationUseCase(
+        ioDispatcher,
+        application.applicationContext
+    )
+    private val observeAccessTokenChangedUseCase =
+        DomainModule.provideObserveAccessTokenChangedUseCase(
+            ioDispatcher,
+            application.applicationContext
+        )
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(DashboardViewModel::class.java)) {
-            return DashboardViewModel(observeCartItemCountUseCase) as T
+            return DashboardViewModel(
+                application,
+                observeCartItemCountUseCase,
+                isSessionExpiredUseCase,
+                getAuthConfigurationUseCase,
+                observeAccessTokenChangedUseCase
+            ) as T
         }
         throw IllegalArgumentException("ViewModel not found")
     }

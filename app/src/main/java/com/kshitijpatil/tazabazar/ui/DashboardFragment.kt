@@ -29,7 +29,7 @@ class DashboardFragment : Fragment() {
         HomeViewModelFactory(requireActivity(), requireContext().applicationContext, arguments)
     }
     private val dashboardViewModel: DashboardViewModel by viewModels {
-        DashboardViewModelFactory(requireContext().applicationContext)
+        DashboardViewModelFactory(requireActivity().application)
     }
     private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var cartItemCountBadge: BadgeDrawable
