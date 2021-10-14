@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
+import com.fredporciuncula.phonemoji.PhonemojiTextInputEditText
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentSignupBinding
 import com.kshitijpatil.tazabazar.model.LoggedInUser
@@ -35,14 +36,14 @@ class SignUpFragment : Fragment() {
     private val passwordState = FieldState { !it.isNullOrEmpty() }
     private val fullNameState = FieldState { !it.isNullOrEmpty() }
     private val phoneState = FieldState {
-        // regex reference: https://stackoverflow.com/a/5933940/6738702
-        !it.isNullOrEmpty() && it.matches("""^\+[1-9]{1}[0-9]{3,14}${'$'}""".toRegex())
+        phoneEditText?.isTextValidInternationalPhoneNumber() == true
     }
     private val confirmPasswordState =
         FieldState { it.toString() == passwordState.currentText.toString() }
 
     private val signupJobManager = LifecycleAwareJobManager(cancelOnBackPressed = true)
     private var snackbar: FadingSnackbar? = null
+    private var phoneEditText: PhonemojiTextInputEditText? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -56,6 +57,7 @@ class SignUpFragment : Fragment() {
     ): View? {
         _binding = FragmentSignupBinding.inflate(inflater, container, false)
         snackbar = binding.snackbar
+        phoneEditText = binding.textFieldPhone.editText as? PhonemojiTextInputEditText
         return binding.root
     }
 

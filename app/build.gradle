@@ -73,6 +73,7 @@ dependencies {
     implementation libs.okhttp.loggingInterceptor
     implementation libs.threeTenAbp
     implementation libs.timber
+    implementation libs.phonemoji
     kapt libs.moshi.kotlinCodegen
 
     testImplementation libs.junit

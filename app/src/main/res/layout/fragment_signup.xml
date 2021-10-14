@@ -51,7 +51,7 @@
                     android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
+            <com.fredporciuncula.phonemoji.PhonemojiTextInputLayout
                 android:id="@+id/text_field_phone"
                 style="@style/Widget.App.TextInputLayout.Filled.White"
                 android:layout_width="match_parent"
@@ -60,13 +60,13 @@
                 android:layout_marginTop="@dimen/margin_normal"
                 android:hint="@string/label_phone_number">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <com.fredporciuncula.phonemoji.PhonemojiTextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:imeOptions="actionNext"
-                    android:inputType="phone"
+                    android:maxLength="20"
                     android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
+            </com.fredporciuncula.phonemoji.PhonemojiTextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/text_field_email"
