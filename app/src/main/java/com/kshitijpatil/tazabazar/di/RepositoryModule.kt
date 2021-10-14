@@ -57,15 +57,16 @@ object RepositoryModule {
         @VisibleForTesting set
 
 
-    fun provideProductRepository(context: Context, okhttpClient: OkHttpClient): ProductRepository {
+    fun provideProductRepository(context: Context): ProductRepository {
         synchronized(lock) {
-            return productRepository ?: createProductRepository(context, okhttpClient)
+            return productRepository ?: createProductRepository(context)
         }
     }
 
-    fun createProductRepository(context: Context, okhttpClient: OkHttpClient): ProductRepository {
+    private fun createProductRepository(context: Context): ProductRepository {
         val appDatabase = database ?: createDatabase(context)
-        val api = ApiModule.provideProductApi(okhttpClient)
+        val client = OkhttpModule.provideOkHttpClient(context)
+        val api = ApiModule.provideProductApi(client)
         val networkUtils = provideNetworkUtils(context)
         val newRepo = ProductRepositoryImpl(
             provideRemoteDataSource(api),
@@ -87,7 +88,7 @@ object RepositoryModule {
         }
     }
 
-    fun createCartRepository(context: Context): CartRepository {
+    private fun createCartRepository(context: Context): CartRepository {
         val appDatabase = database ?: createDatabase(context)
         val mapper = MapperModule.cartItemDetailViewToCartItem
         val repo = CartRepositoryImpl(appDatabase.cartItemDao, mapper)
@@ -111,7 +112,7 @@ object RepositoryModule {
         )
     }
 
-    fun createDatabase(context: Context): AppDatabase {
+    private fun createDatabase(context: Context): AppDatabase {
         val result =
             Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.databaseName)
                 .fallbackToDestructiveMigration()
@@ -124,28 +125,29 @@ object RepositoryModule {
 
     fun provideProductCacheExpiryMillis(): Long = 30 * 60 * 1000L // 30 minutes
 
-    fun provideAuthRepository(context: Context, client: OkHttpClient): AuthRepository {
+    fun provideAuthRepository(context: Context): AuthRepository {
         synchronized(lock) {
-            return authRepository ?: createAuthRepository(context, client)
+            return authRepository ?: createAuthRepository(context)
         }
     }
 
-    fun provideRegisterRepository(client: OkHttpClient): RegisterRepository {
+    fun provideRegisterRepository(context: Context): RegisterRepository {
         synchronized(lock) {
-            return registerRepository ?: createRegisterRepository(client)
+            return registerRepository ?: createRegisterRepository(context)
         }
     }
 
-    fun provideLoginRepository(context: Context, client: OkHttpClient): LoginRepository {
+    fun provideLoginRepository(context: Context): LoginRepository {
         synchronized(lock) {
-            return loginRepository ?: createLoginRepository(context, client)
+            return loginRepository ?: createLoginRepository(context)
         }
     }
 
-    private fun createAuthRepository(context: Context, client: OkHttpClient): AuthRepository {
+    private fun createAuthRepository(context: Context): AuthRepository {
+        val client = OkhttpModule.provideOkHttpClient(context)
         val newRepo = AuthRepositoryImpl(
-            provideRegisterRepository(client),
-            provideLoginRepository(context, client),
+            provideRegisterRepository(context),
+            provideLoginRepository(context),
             provideAuthRemoteDataSource(client),
             provideAuthPreferenceStore(context),
             appDispatchers
@@ -154,7 +156,8 @@ object RepositoryModule {
         return newRepo
     }
 
-    private fun createRegisterRepository(client: OkHttpClient): RegisterRepository {
+    private fun createRegisterRepository(context: Context): RegisterRepository {
+        val client = OkhttpModule.provideOkHttpClient(context)
         val authRemoteDataSource = provideAuthRemoteDataSource(client)
         val newRepo = RegisterRepositoryImpl(
             authRemoteDataSource,
@@ -166,7 +169,8 @@ object RepositoryModule {
         return newRepo
     }
 
-    private fun createLoginRepository(context: Context, client: OkHttpClient): LoginRepository {
+    private fun createLoginRepository(context: Context): LoginRepository {
+        val client = OkhttpModule.provideOkHttpClient(context)
         val authRemoteDataSource = provideAuthRemoteDataSource(client)
         val newRepo = LoginRepositoryImpl(
             authRemoteDataSource,

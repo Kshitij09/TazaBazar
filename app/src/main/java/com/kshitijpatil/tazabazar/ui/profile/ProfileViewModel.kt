@@ -75,9 +75,7 @@ class ProfileViewModelFactory(appContext: Context) : ViewModelProvider.Factory {
         appContext,
         dispatchers.io
     )
-    private val client = AppModule.provideOkHttpClient(appContext)
-    private val logoutUseCase =
-        DomainModule.provideLogoutUseCase(dispatchers.io, appContext, client)
+    private val logoutUseCase = DomainModule.provideLogoutUseCase(dispatchers.io, appContext)
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {

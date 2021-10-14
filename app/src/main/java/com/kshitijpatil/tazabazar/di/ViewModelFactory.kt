@@ -13,9 +13,8 @@ class ViewModelFactory(
     appContext: Context,
     defaultArgs: Bundle?
 ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
-    private val okhttpClient = AppModule.provideOkHttpClient(appContext)
     private val productRepository =
-        RepositoryModule.provideProductRepository(appContext, okhttpClient)
+        RepositoryModule.provideProductRepository(appContext)
     private val appCoroutineDispatchers = AppModule.provideAppCoroutineDispatchers()
     private val addToCartUseCase =
         DomainModule.provideAddToCartUseCase(appContext, appCoroutineDispatchers.io)

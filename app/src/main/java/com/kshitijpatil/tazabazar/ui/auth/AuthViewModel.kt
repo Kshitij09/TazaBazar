@@ -13,7 +13,6 @@ import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.api.dto.LoginRequest
 import com.kshitijpatil.tazabazar.api.dto.RegisterRequest
 import com.kshitijpatil.tazabazar.data.*
-import com.kshitijpatil.tazabazar.di.AppModule
 import com.kshitijpatil.tazabazar.di.RepositoryModule
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.ui.common.ResourceMessage
@@ -203,8 +202,7 @@ class AuthViewModelFactory(
     appContext: Context,
     defaultArgs: Bundle?
 ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
-    private val client = AppModule.provideOkHttpClient(appContext)
-    private val repository = RepositoryModule.provideAuthRepository(appContext, client)
+    private val repository = RepositoryModule.provideAuthRepository(appContext)
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(

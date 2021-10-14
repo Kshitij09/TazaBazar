@@ -6,7 +6,6 @@ import com.kshitijpatil.tazabazar.domain.LogoutUseCase
 import com.kshitijpatil.tazabazar.domain.ObserveCartItemCountUseCase
 import com.kshitijpatil.tazabazar.domain.ObserveLoggedInUserUseCase
 import kotlinx.coroutines.CoroutineDispatcher
-import okhttp3.OkHttpClient
 
 object DomainModule {
     fun provideAddToCartUseCase(
@@ -36,10 +35,9 @@ object DomainModule {
 
     fun provideLogoutUseCase(
         dispatcher: CoroutineDispatcher,
-        context: Context,
-        client: OkHttpClient
+        context: Context
     ): LogoutUseCase {
-        val repo = RepositoryModule.provideAuthRepository(context, client)
+        val repo = RepositoryModule.provideAuthRepository(context)
         return LogoutUseCase(dispatcher, repo)
     }
 }

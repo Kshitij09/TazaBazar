@@ -89,9 +89,8 @@ class FavoriteProductsViewModelFactory(
     appContext: Context,
     private val favoriteType: FavoriteType
 ) : ViewModelProvider.Factory {
-    private val okhttpClient = AppModule.provideOkHttpClient(appContext)
     private val productRepository =
-        RepositoryModule.provideProductRepository(appContext, okhttpClient)
+        RepositoryModule.provideProductRepository(appContext)
     private val dispatchers = AppModule.provideAppCoroutineDispatchers()
     private val addToCartUseCase = DomainModule.provideAddToCartUseCase(appContext, dispatchers.io)
 
