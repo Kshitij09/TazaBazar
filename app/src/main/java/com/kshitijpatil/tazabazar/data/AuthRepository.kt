@@ -2,11 +2,11 @@ package com.kshitijpatil.tazabazar.data
 
 import arrow.core.Either
 import arrow.core.computations.either
+import arrow.core.handleError
 import com.kshitijpatil.tazabazar.api.dto.LoginRequest
 import com.kshitijpatil.tazabazar.api.dto.RegisterRequest
 import com.kshitijpatil.tazabazar.data.local.prefs.AuthPreferenceStore
 import com.kshitijpatil.tazabazar.data.network.AuthRemoteDataSource
-import com.kshitijpatil.tazabazar.domain.Result
 import com.kshitijpatil.tazabazar.model.AuthConfiguration
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
@@ -17,7 +17,7 @@ import java.net.HttpURLConnection
 
 interface AuthRepository : LoginRepository, RegisterRepository, AuthPreferenceStore {
     suspend fun logout()
-    suspend fun refreshToken(): Result<Unit>
+    suspend fun refreshToken()
     suspend fun getAuthConfiguration(): AuthConfiguration
 }
 
@@ -55,25 +55,22 @@ class AuthRepositoryImpl(
         return registerRepository.register(request)
     }
 
-    override suspend fun refreshToken(): Result<Unit> {
-        return withContext(dispatchers.io) {
+    override suspend fun refreshToken() {
+        withContext(dispatchers.io) {
             either<DataSourceException, String> {
                 val token = authPreferenceStore.getRefreshToken().bind()
                 val accessToken = authRemoteDataSource.refreshToken(token).bind()
                 authPreferenceStore.storeAccessToken(accessToken)
                 accessToken
-            }.fold(
-                ifLeft = {
-                    if (it is ApiException && it.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                        Timber.d("Stored refreshToken was invalid")
-                        authPreferenceStore.clearRefreshToken()
-                    }
-                    it.logExceptionsForRefreshToken()
-                    // Map any exception as generic error for Presentation Layer
-                    Result.Error(Exception("Session Expired!"))
-                },
-                ifRight = { Result.Success(Unit) }
-            )
+            }.handleError {
+                if (it is ApiException && it.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                    Timber.d("Stored refreshToken was invalid")
+                    authPreferenceStore.clearRefreshToken()
+                }
+                it.logExceptionsForRefreshToken()
+                // Map any exception as generic error for Presentation Layer
+                throw Exception("Failed to refresh the access token")
+            }
         }
     }
 
