@@ -10,7 +10,7 @@ object LocalDateTimeConverter {
         return formatter.parse(value, LocalDateTime::from)
     }
 
-    fun fromLocalDateTime(dateTime: LocalDateTime): String {
+    fun toString(dateTime: LocalDateTime): String {
         return dateTime.format(formatter)
     }
 }
