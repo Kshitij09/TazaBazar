@@ -3,6 +3,7 @@ package com.kshitijpatil.tazabazar.di
 import android.content.Context
 import com.kshitijpatil.tazabazar.domain.*
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 
 object DomainModule {
     fun provideAddToCartUseCase(
@@ -65,9 +66,10 @@ object DomainModule {
 
     fun provideObserveAccessTokenChangedUseCase(
         dispatcher: CoroutineDispatcher,
+        applicationScope: CoroutineScope,
         context: Context
     ): ObserveAccessTokenChangedUseCase {
         val preferenceStorage = PreferenceStorageModule.providePreferenceStorage(context)
-        return ObserveAccessTokenChangedUseCase(dispatcher, preferenceStorage)
+        return ObserveAccessTokenChangedUseCase(dispatcher, applicationScope, preferenceStorage)
     }
 }

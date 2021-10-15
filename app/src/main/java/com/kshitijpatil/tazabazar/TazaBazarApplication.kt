@@ -6,9 +6,11 @@ import androidx.work.Configuration
 import androidx.work.DelegatingWorkerFactory
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.kshitijpatil.tazabazar.di.WorkerModule
+import kotlinx.coroutines.MainScope
 import timber.log.Timber
 
 class TazaBazarApplication : Application(), Configuration.Provider {
+    val coroutineScope = MainScope()
     override fun onCreate() {
         super.onCreate()
         AndroidThreeTen.init(this)

@@ -12,6 +12,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.kshitijpatil.tazabazar.R
+import com.kshitijpatil.tazabazar.TazaBazarApplication
 import com.kshitijpatil.tazabazar.databinding.FragmentDashboardBinding
 import com.kshitijpatil.tazabazar.di.DashboardViewModelFactory
 import com.kshitijpatil.tazabazar.di.HomeViewModelFactory
@@ -29,7 +30,8 @@ class DashboardFragment : Fragment() {
         HomeViewModelFactory(requireActivity(), requireContext().applicationContext, arguments)
     }
     private val dashboardViewModel: DashboardViewModel by viewModels {
-        DashboardViewModelFactory(requireContext())
+        val application = requireActivity().application as TazaBazarApplication
+        DashboardViewModelFactory(application)
     }
     private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var cartItemCountBadge: BadgeDrawable

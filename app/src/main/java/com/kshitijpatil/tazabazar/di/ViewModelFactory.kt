@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.savedstate.SavedStateRegistryOwner
+import com.kshitijpatil.tazabazar.TazaBazarApplication
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.ui.DashboardViewModel
 import com.kshitijpatil.tazabazar.ui.auth.AuthViewModel
@@ -106,26 +107,27 @@ class ProfileViewModelFactory(appContext: Context) : ViewModelProvider.Factory {
 
 }
 
-class DashboardViewModelFactory(context: Context) : ViewModelProvider.Factory {
+class DashboardViewModelFactory(application: TazaBazarApplication) : ViewModelProvider.Factory {
     private val observeCartItemCountUseCase = DomainModule.provideObserveCartItemCountUseCase(
-        context.applicationContext,
+        application.applicationContext,
         null // should be decided later
     )
     private val ioDispatcher = AppModule.provideIoDispatcher()
     private val isSessionExpiredUseCase = DomainModule.provideIsSessionExpiredUseCase(
         ioDispatcher,
-        context.applicationContext
+        application.applicationContext
     )
     private val getAuthConfigurationUseCase = DomainModule.provideGetAuthConfigurationUseCase(
         ioDispatcher,
-        context.applicationContext
+        application.applicationContext
     )
     private val observeAccessTokenChangedUseCase =
         DomainModule.provideObserveAccessTokenChangedUseCase(
             ioDispatcher,
-            context.applicationContext
+            application.coroutineScope,
+            application.applicationContext
         )
-    private val contextRef = WeakReference(context)
+    private val contextRef = WeakReference(application.applicationContext)
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
