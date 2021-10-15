@@ -16,6 +16,10 @@ android {
         versionName "0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // The following argument makes the Android Test Orchestrator run its
+        // "pm clear" command after each test invocation. This command ensures
+        // that the app's state is completely cleared between tests.
+        testInstrumentationRunnerArguments clearPackageData: 'true'
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -41,6 +45,18 @@ android {
             includeAndroidResources = true
         }
     }
+    // workaround for compilation errors when using kotlinx-coroutines-test in androidTest
+    // ref: https://github.com/Kotlin/kotlinx.coroutines/issues/2023#issuecomment-858644393
+    packagingOptions {
+        // for JNA and JNA-platform
+        exclude "META-INF/AL2.0"
+        exclude "META-INF/LGPL2.1"
+        // for byte-buddy
+        exclude "META-INF/licenses/ASM"
+        pickFirst "win32-x86-64/attach_hotspot_windows.dll"
+        pickFirst "win32-x86/attach_hotspot_windows.dll"
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -95,5 +111,12 @@ dependencies {
     androidTestImplementation libs.androidx.test.junit
     androidTestImplementation libs.androidx.test.rules
     androidTestImplementation libs.androidx.test.runner
+    androidTestImplementation libs.androidx.archCoreKtx
     androidTestImplementation libs.androidx.fragment.fragmentTesting
+    androidTestImplementation libs.androidx.work.testing
+    androidTestImplementation libs.truth
+
+    androidTestImplementation libs.dexmaker.mockito.inline
+    androidTestImplementation libs.mockito.kotlin
+    androidTestImplementation libs.kotlin.coroutines.test
 }
