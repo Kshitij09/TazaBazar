@@ -89,4 +89,11 @@ dependencies {
     testImplementation libs.turbine
     testImplementation libs.mockito.core
     testImplementation libs.mockito.kotlin
+
+    androidTestImplementation libs.espresso.contrib
+    androidTestImplementation libs.espresso.core
+    androidTestImplementation libs.androidx.test.junit
+    androidTestImplementation libs.androidx.test.rules
+    androidTestImplementation libs.androidx.test.runner
+    androidTestImplementation libs.androidx.fragment.fragmentTesting
 }
