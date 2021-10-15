@@ -1,7 +1,7 @@
 package com.kshitijpatil.tazabazar.ui
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.*
 import com.kshitijpatil.tazabazar.domain.*
@@ -20,7 +20,7 @@ class DashboardViewModel(
     private val isSessionExpiredUseCase: IsSessionExpiredUseCase,
     private val getAuthConfigurationUseCase: GetAuthConfigurationUseCase,
     private val observeAccessTokenChangedUseCase: ObserveAccessTokenChangedUseCase
-) : AndroidViewModel(application) {
+) : ViewModel() {
     companion object {
         const val REFRESH_TOKEN_WORK = "refresh-token-work"
     }

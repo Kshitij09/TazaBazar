@@ -106,8 +106,7 @@ class ProfileViewModelFactory(appContext: Context) : ViewModelProvider.Factory {
 
 }
 
-class DashboardViewModelFactory(private val application: Application) :
-    ViewModelProvider.AndroidViewModelFactory(application) {
+class DashboardViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
     private val observeCartItemCountUseCase = DomainModule.provideObserveCartItemCountUseCase(
         application.applicationContext,
         null // should be decided later
