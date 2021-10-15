@@ -8,6 +8,7 @@ import org.threeten.bp.LocalDateTime
 import org.threeten.bp.temporal.ChronoUnit
 
 
+/** Returns `true` if the session was expired, `false` otherwise */
 class IsSessionExpiredUseCase(
     dispatcher: CoroutineDispatcher,
     private val authRepository: AuthRepository,
@@ -20,7 +21,7 @@ class IsSessionExpiredUseCase(
 
     override suspend fun execute(parameters: Unit): Boolean {
         val config = authRepository.getAuthConfiguration()
-        val lastLoggedInRaw = authRepository.getLoggedInAt() ?: return false
+        val lastLoggedInRaw = authRepository.getLoggedInAt() ?: return true
         val lastLoggedInTime = dateTimeSerializer.deserialize(lastLoggedInRaw).getOrHandle {
             throw Exception("Failed to deserialize stored time")
         }

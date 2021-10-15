@@ -83,4 +83,21 @@ class IsSessionExpiredUseCaseTest {
             assert(sessionsExpired is Result.Error)
         }
     }
+
+    @Test
+    fun checkSessionExpired_whenLoggedInAtIsNull_ShouldReturnFalse() {
+        val repo: AuthRepository = mock {
+            onBlocking { getAuthConfiguration() } doReturn FakeSession.config
+            onBlocking { getLoggedInAt() } doReturn null
+        }
+        isSessionExpiredUseCase =
+            IsSessionExpiredUseCase(testDispatcher, repo, localDateTimeSerializer)
+
+        testDispatcher.runBlockingTest {
+            val sessionsExpired = isSessionExpiredUseCase(Unit)
+            assert(sessionsExpired is Result.Success)
+            sessionsExpired as Result.Success
+            assertTrue(sessionsExpired.data)
+        }
+    }
 }
