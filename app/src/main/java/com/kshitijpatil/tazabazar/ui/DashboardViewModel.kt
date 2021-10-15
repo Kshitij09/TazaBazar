@@ -1,6 +1,6 @@
 package com.kshitijpatil.tazabazar.ui
 
-import android.app.Application
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.*
@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 class DashboardViewModel(
-    application: Application,
+    context: Context,
     private val observeCartItemCountUseCase: ObserveCartItemCountUseCase,
     private val isSessionExpiredUseCase: IsSessionExpiredUseCase,
     private val getAuthConfigurationUseCase: GetAuthConfigurationUseCase,
@@ -25,7 +25,7 @@ class DashboardViewModel(
         const val REFRESH_TOKEN_WORK = "refresh-token-work"
     }
 
-    private val workManager = WorkManager.getInstance(application)
+    private val workManager = WorkManager.getInstance(context)
     private val networkConnectedConstraint = Constraints.Builder()
         .setRequiredNetworkType(NetworkType.CONNECTED)
         .build()

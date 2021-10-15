@@ -1,6 +1,5 @@
 package com.kshitijpatil.tazabazar.di
 
-import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
@@ -15,6 +14,7 @@ import com.kshitijpatil.tazabazar.ui.cart.CartViewModel
 import com.kshitijpatil.tazabazar.ui.favorite.FavoriteProductsViewModel
 import com.kshitijpatil.tazabazar.ui.home.HomeViewModel
 import com.kshitijpatil.tazabazar.ui.profile.ProfileViewModel
+import java.lang.ref.WeakReference
 
 class HomeViewModelFactory(
     owner: SavedStateRegistryOwner,
@@ -106,31 +106,35 @@ class ProfileViewModelFactory(appContext: Context) : ViewModelProvider.Factory {
 
 }
 
-class DashboardViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
+class DashboardViewModelFactory(context: Context) : ViewModelProvider.Factory {
     private val observeCartItemCountUseCase = DomainModule.provideObserveCartItemCountUseCase(
-        application.applicationContext,
+        context.applicationContext,
         null // should be decided later
     )
     private val ioDispatcher = AppModule.provideIoDispatcher()
     private val isSessionExpiredUseCase = DomainModule.provideIsSessionExpiredUseCase(
         ioDispatcher,
-        application.applicationContext
+        context.applicationContext
     )
     private val getAuthConfigurationUseCase = DomainModule.provideGetAuthConfigurationUseCase(
         ioDispatcher,
-        application.applicationContext
+        context.applicationContext
     )
     private val observeAccessTokenChangedUseCase =
         DomainModule.provideObserveAccessTokenChangedUseCase(
             ioDispatcher,
-            application.applicationContext
+            context.applicationContext
         )
+    private val contextRef = WeakReference(context)
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        if (contextRef.get() == null)
+            throw IllegalStateException("No Context available to initialize the ViewModel")
+        val context = contextRef.get()!!
         if (modelClass.isAssignableFrom(DashboardViewModel::class.java)) {
             return DashboardViewModel(
-                application,
+                context,
                 observeCartItemCountUseCase,
                 isSessionExpiredUseCase,
                 getAuthConfigurationUseCase,
