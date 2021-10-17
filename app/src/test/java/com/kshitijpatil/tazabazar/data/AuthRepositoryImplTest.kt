@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
 import com.kshitijpatil.tazabazar.data.local.prefs.AuthPreferenceStoreImpl
 import com.kshitijpatil.tazabazar.data.local.prefs.PreferenceStorage
+import com.kshitijpatil.tazabazar.data.mapper.LocalDateTimeSerializer
 import com.kshitijpatil.tazabazar.data.network.AuthRemoteDataSource
 import com.kshitijpatil.tazabazar.domain.Result
 import com.kshitijpatil.tazabazar.test.util.FakePreferenceStorage
@@ -11,12 +12,14 @@ import com.kshitijpatil.tazabazar.test.util.HttpFailureAuthDataSource
 import com.kshitijpatil.tazabazar.test.util.MainCoroutineRule
 import com.kshitijpatil.tazabazar.test.util.SucceedingAuthDataSource
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
+import com.kshitijpatil.tazabazar.util.LocalDateTimeConverter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
+import org.threeten.bp.LocalDateTime
 import java.net.HttpURLConnection
 
 class AuthRepositoryImplTest {
@@ -32,20 +35,26 @@ class AuthRepositoryImplTest {
     )
     private lateinit var repo: AuthRepository
 
+    private val localDateTimeSerializer = LocalDateTimeSerializer()
+
     @Test
-    fun refreshToken_happyPath() {
+    fun refreshToken_happyPath_shouldUpdateAccessTokenAndLoggedInAt() {
         // setup
         val preferenceStorage = FakePreferenceStorage()
-        runBlocking { preferenceStorage.setRefreshToken(AuthSession.refreshToken) }
+        runBlocking {
+            preferenceStorage.setRefreshToken(AuthSession.refreshToken)
+            preferenceStorage.setLastLoggedIn(AuthSession.initialLoginTimeRaw)
+        }
         val authRemoteDataSource =
             SucceedingAuthDataSource(accessToken = AuthSession.fetchedAccessToken)
         repo = provideRepo(authRemoteDataSource, preferenceStorage)
 
         // test
         testDispatcher.runBlockingTest {
-            val result = repo.refreshToken()
-            assertThat(result).isInstanceOf(Result.Success::class.java)
+            assertThat(repo.getLoggedInAt()).isEqualTo(AuthSession.initialLoginTimeRaw)
+            repo.refreshToken()
             assertThat(preferenceStorage.accessToken.first()).isEqualTo(AuthSession.fetchedAccessToken)
+            assertThat(preferenceStorage.loggedInAt.first()).isNotEqualTo(AuthSession.initialLoginTimeRaw)
         }
     }
 
@@ -82,7 +91,7 @@ class AuthRepositoryImplTest {
     ): AuthRepository {
         val authPreferenceStore = AuthPreferenceStoreImpl(
             preferenceStorage,
-            mock(),
+            localDateTimeSerializer,
             mock(),
             testDispatcher
         )
@@ -98,5 +107,7 @@ class AuthRepositoryImplTest {
 
 object AuthSession {
     const val refreshToken = "secret-token"
+    val initialLoginTime = LocalDateTime.now().minusHours(4)
+    val initialLoginTimeRaw = LocalDateTimeConverter.toString(initialLoginTime)
     const val fetchedAccessToken = "brand-new-access-token"
 }

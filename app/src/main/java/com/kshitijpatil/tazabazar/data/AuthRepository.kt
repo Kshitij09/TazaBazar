@@ -12,6 +12,7 @@ import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.threeten.bp.LocalDateTime
 import timber.log.Timber
 import java.net.HttpURLConnection
 
@@ -60,7 +61,9 @@ class AuthRepositoryImpl(
             either<DataSourceException, String> {
                 val token = authPreferenceStore.getRefreshToken().bind()
                 val accessToken = authRemoteDataSource.refreshToken(token).bind()
-                authPreferenceStore.storeAccessToken(accessToken)
+                val now = LocalDateTime.now()
+                authPreferenceStore.storeAccessToken(accessToken).bind()
+                authPreferenceStore.updateLoggedInAt(now)
                 accessToken
             }.handleError {
                 if (it is ApiException && it.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {

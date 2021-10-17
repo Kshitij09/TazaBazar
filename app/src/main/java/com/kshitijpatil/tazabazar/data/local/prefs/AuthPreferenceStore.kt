@@ -31,6 +31,7 @@ interface AuthPreferenceStore {
     suspend fun clearUserDetails()
     suspend fun getAccessToken(): String?
     suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit>
+    suspend fun updateLoggedInAt(loginTime: LocalDateTime): Either<DataSourceException, Unit>
 }
 
 class AuthPreferenceStoreImpl(
@@ -113,6 +114,13 @@ class AuthPreferenceStoreImpl(
 
     override suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit> {
         return storeCatching { setAccessToken(token) }
+    }
+
+    override suspend fun updateLoggedInAt(loginTime: LocalDateTime): Either<DataSourceException, Unit> {
+        return either {
+            val serializedLoginTime = localDateTimeSerializer.serialize(loginTime).bind()
+            storeCatching { setLastLoggedIn(serializedLoginTime) }.bind()
+        }
     }
 
     override suspend fun getLastLoggedInUsername(): String? {
