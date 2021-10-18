@@ -6,7 +6,6 @@ import com.kshitijpatil.tazabazar.data.local.prefs.AuthPreferenceStoreImpl
 import com.kshitijpatil.tazabazar.data.local.prefs.PreferenceStorage
 import com.kshitijpatil.tazabazar.data.mapper.LocalDateTimeSerializer
 import com.kshitijpatil.tazabazar.data.network.AuthRemoteDataSource
-import com.kshitijpatil.tazabazar.domain.Result
 import com.kshitijpatil.tazabazar.test.util.FakePreferenceStorage
 import com.kshitijpatil.tazabazar.test.util.HttpFailureAuthDataSource
 import com.kshitijpatil.tazabazar.test.util.MainCoroutineRule
@@ -16,6 +15,7 @@ import com.kshitijpatil.tazabazar.util.LocalDateTimeConverter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
+import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -65,8 +65,8 @@ class AuthRepositoryImplTest {
         repo = provideRepo(authRemoteDataSource)
 
         testDispatcher.runBlockingTest {
-            val result = repo.refreshToken()
-            assertThat(result).isInstanceOf(Result.Error::class.java)
+            val e = assertThrows(Exception::class.java) { runBlocking { repo.refreshToken() } }
+            assertThat(e).hasMessageThat().contains("token not found")
         }
     }
 
@@ -79,8 +79,8 @@ class AuthRepositoryImplTest {
         repo = provideRepo(authRemoteDataSource, preferenceStorage)
 
         testDispatcher.runBlockingTest {
-            val result = repo.refreshToken()
-            assertThat(result).isInstanceOf(Result.Error::class.java)
+            val e = assertThrows(Exception::class.java) { runBlocking { repo.refreshToken() } }
+            assertThat(e).hasMessageThat().contains("Failed to refresh")
             assertThat(preferenceStorage.refreshToken.first()).isNull()
         }
     }
