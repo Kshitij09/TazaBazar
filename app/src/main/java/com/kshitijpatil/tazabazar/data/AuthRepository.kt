@@ -2,6 +2,7 @@ package com.kshitijpatil.tazabazar.data
 
 import arrow.core.Either
 import arrow.core.computations.either
+import arrow.core.getOrHandle
 import arrow.core.handleError
 import com.kshitijpatil.tazabazar.api.dto.LoginRequest
 import com.kshitijpatil.tazabazar.api.dto.RegisterRequest
@@ -36,8 +37,7 @@ class AuthRepositoryImpl(
     override suspend fun logout() {
         Timber.d("logout called")
         withContext(dispatchers.io) {
-            val accessToken = authPreferenceStore.getAccessToken()
-            if (accessToken == null) {
+            val accessToken = authPreferenceStore.getAccessToken().getOrHandle {
                 Timber.d("Access token not found, returning..")
                 return@withContext
             }

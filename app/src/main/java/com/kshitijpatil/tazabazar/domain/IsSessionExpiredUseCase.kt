@@ -21,9 +21,10 @@ class IsSessionExpiredUseCase(
 
     override suspend fun execute(parameters: Unit): Boolean {
         val config = authRepository.getAuthConfiguration()
-        val lastLoggedInRaw = authRepository.getLoggedInAt() ?: return true
-        val lastLoggedInTime = dateTimeSerializer.deserialize(lastLoggedInRaw).getOrHandle {
-            throw Exception("Failed to deserialize stored time")
+        val lastLoggedInTime = authRepository.getLoggedInAt().getOrHandle {
+            // if there was any exception while getting login-time
+            // we treat it as session expired
+            return true
         }
         val now = LocalDateTime.now()
         return ChronoUnit.MINUTES.between(

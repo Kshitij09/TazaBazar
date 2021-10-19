@@ -13,6 +13,7 @@ import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.ui.common.ResourceMessage
 import com.kshitijpatil.tazabazar.ui.common.SnackbarMessage
 import com.kshitijpatil.tazabazar.util.UiState
+import com.kshitijpatil.tazabazar.util.getOrNull
 import com.kshitijpatil.tazabazar.util.launchWithMutex
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -59,7 +60,7 @@ class AuthViewModel(
 
     private fun loadLastLoggedInUsername() {
         viewModelScope.launchWithMutex(mutex) {
-            _lastLoggedInUsername = repository.getLastLoggedInUsername()
+            _lastLoggedInUsername = repository.getLastLoggedInUsername().getOrNull()
         }
     }
 

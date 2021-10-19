@@ -2,7 +2,8 @@ package com.kshitijpatil.tazabazar.data.local.prefs
 
 import arrow.core.Either
 import arrow.core.computations.either
-import arrow.core.rightIfNotNull
+import arrow.core.flatten
+import arrow.core.leftIfNull
 import com.kshitijpatil.tazabazar.data.DataSourceException
 import com.kshitijpatil.tazabazar.data.NoDataFoundException
 import com.kshitijpatil.tazabazar.data.PreferenceStorageException
@@ -24,12 +25,13 @@ interface AuthPreferenceStore {
         user: LoggedInUser
     ): Either<DataSourceException, Unit>
 
-    suspend fun getLoggedInAt(): String?
-    suspend fun getLastLoggedInUsername(): String?
+    suspend fun getLoggedInAt(): Either<DataSourceException, LocalDateTime>
+    suspend fun getLastLoggedInUsername(): Either<DataSourceException, String>
     suspend fun getRefreshToken(): Either<DataSourceException, String>
     suspend fun clearRefreshToken()
     suspend fun clearUserDetails()
-    suspend fun getAccessToken(): String?
+    suspend fun getAccessToken(): Either<DataSourceException, String>
+    suspend fun getLoggedInUser(): Either<DataSourceException, LoggedInUser>
     suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit>
     suspend fun updateLoggedInAt(loginTime: LocalDateTime): Either<DataSourceException, Unit>
 }
@@ -59,16 +61,6 @@ class AuthPreferenceStoreImpl(
         }
     }
 
-    private fun Throwable.toDataSourceException(): DataSourceException {
-        return if (this is IOException) {
-            Timber.d(this, "I/O Error while storing the details")
-            PreferenceStorageException
-        } else {
-            Timber.e(this)
-            UnknownException(this)
-        }
-    }
-
     override suspend fun storeLoginDetails(
         accessToken: String,
         refreshToken: String,
@@ -90,11 +82,7 @@ class AuthPreferenceStoreImpl(
 
     override suspend fun getRefreshToken(): Either<DataSourceException, String> {
         return withContext(dispatcher) {
-            Either.catch {
-                return@withContext preferenceStorage.refreshToken.first().rightIfNotNull {
-                    NoDataFoundException
-                }
-            }.mapLeft { it.toDataSourceException() }
+            getNullableCatching { refreshToken.first() }
         }
     }
 
@@ -109,8 +97,27 @@ class AuthPreferenceStoreImpl(
         preferenceStorage.setLastLoggedIn(null)
     }
 
-    override suspend fun getAccessToken() = preferenceStorage.accessToken.first()
-    override suspend fun getLoggedInAt() = preferenceStorage.loggedInAt.first()
+    override suspend fun getAccessToken(): Either<DataSourceException, String> {
+        return withContext(dispatcher) {
+            getNullableCatching { accessToken.first() }
+        }
+    }
+
+    override suspend fun getLoggedInAt(): Either<DataSourceException, LocalDateTime> {
+        return withContext(dispatcher) {
+            getNullableCatching { loggedInAt.first() }
+                .map { localDateTimeSerializer.deserialize(it) }
+                .flatten()
+        }
+    }
+
+    override suspend fun getLoggedInUser(): Either<DataSourceException, LoggedInUser> {
+        return withContext(dispatcher) {
+            getNullableCatching { userDetails.first() }
+                .map { loggedInUserSerializer.deserialize(it) }
+                .flatten()
+        }
+    }
 
     override suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit> {
         return storeCatching { setAccessToken(token) }
@@ -123,16 +130,38 @@ class AuthPreferenceStoreImpl(
         }
     }
 
-    override suspend fun getLastLoggedInUsername(): String? {
-        return preferenceStorage.lastLoggedInUsername.first()
+    override suspend fun getLastLoggedInUsername(): Either<DataSourceException, String> {
+        return withContext(dispatcher) {
+            getNullableCatching { lastLoggedInUsername.first() }
+        }
+    }
+
+    private fun Throwable.toDataSourceException(): DataSourceException {
+        return if (this is IOException) {
+            Timber.d(this, "I/O Error while storing the details")
+            PreferenceStorageException
+        } else {
+            Timber.e(this)
+            UnknownException(this)
+        }
+    }
+
+    /**
+     * Maps any nullable getter when returns null to [NoDataFoundException]
+     * while mapping caught exceptions to [DataSourceException]
+     * */
+    private suspend fun <T> getNullableCatching(
+        getter: suspend PreferenceStorage.() -> T?
+    ): Either<DataSourceException, T> {
+        return Either.catch { getter(preferenceStorage) }
+            .mapLeft { it.toDataSourceException() }
+            .leftIfNull { NoDataFoundException }
     }
 
     private suspend fun storeCatching(setter: suspend PreferenceStorage.() -> Unit): Either<DataSourceException, Unit> {
         return withContext(dispatcher) {
             Either.catch {
-                withContext(dispatcher) {
-                    setter(preferenceStorage)
-                }
+                setter(preferenceStorage)
             }.mapLeft { it.toDataSourceException() }
         }
     }
