@@ -19,8 +19,10 @@ import com.kshitijpatil.tazabazar.data.network.AuthRemoteDataSource
 import com.kshitijpatil.tazabazar.data.network.AuthRemoteDataSourceImpl
 import com.kshitijpatil.tazabazar.data.network.ProductRemoteDataSource
 import com.kshitijpatil.tazabazar.model.LoggedInUser
+import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
 import com.kshitijpatil.tazabazar.util.NetworkUtils
 import com.squareup.moshi.Moshi
+import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import org.threeten.bp.LocalDateTime
 
@@ -56,6 +58,9 @@ object RepositoryModule {
     var authRepository: AuthRepository? = null
         @VisibleForTesting set
 
+    @Volatile
+    var orderRepository: OrderRepository? = null
+        @VisibleForTesting set
 
     fun provideProductRepository(context: Context): ProductRepository {
         synchronized(lock) {
@@ -143,6 +148,14 @@ object RepositoryModule {
         }
     }
 
+    fun provideOrderRepository(
+        context: Context,
+        externalScope: CoroutineScope,
+        dispatchers: AppCoroutineDispatchers
+    ): OrderRepository {
+        return orderRepository ?: createOrderRepository(context, externalScope, dispatchers)
+    }
+
     private fun createAuthRepository(context: Context): AuthRepository {
         val client = OkhttpModule.provideOkHttpClient(context)
         val newRepo = AuthRepositoryImpl(
@@ -180,6 +193,23 @@ object RepositoryModule {
         )
         loginRepository = newRepo
         return newRepo
+    }
+
+    private fun createOrderRepository(
+        context: Context,
+        externalScope: CoroutineScope,
+        dispatchers: AppCoroutineDispatchers
+    ): OrderRepository {
+        val client = OkhttpModule.provideOkHttpClient(context)
+        val authPreferenceStore = provideAuthPreferenceStore(context)
+        val repo = OrderRepositoryImpl(
+            externalScope,
+            dispatchers,
+            client,
+            authPreferenceStore
+        )
+        orderRepository = repo
+        return repo
     }
 
     fun provideAuthRemoteDataSource(client: OkHttpClient): AuthRemoteDataSource {
