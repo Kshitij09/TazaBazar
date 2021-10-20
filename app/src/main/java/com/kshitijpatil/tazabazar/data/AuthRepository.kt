@@ -79,8 +79,10 @@ class AuthRepositoryImpl(
 
     override suspend fun getAuthConfiguration(): AuthConfiguration {
         // TODO: Fetch these from remote APIs once supported
-        delay(500)
-        return AuthConfiguration(tokenExpiryMinutes = 15)
+        return withContext(dispatchers.io) {
+            delay(500)
+            AuthConfiguration(tokenExpiryMinutes = 15)
+        }
     }
 
     private fun DataSourceException.logExceptionsForRefreshToken() {
