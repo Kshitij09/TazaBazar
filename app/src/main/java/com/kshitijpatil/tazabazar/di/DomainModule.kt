@@ -22,30 +22,12 @@ object DomainModule {
         return ObserveCartItemCountUseCase(repo, dispatcher)
     }
 
-    fun provideObserveLoggedInUserUseCase(
-        context: Context,
-        dispatcher: CoroutineDispatcher
-    ): ObserveLoggedInUserUseCase {
-        val preferenceStorage = PreferenceStorageModule.providePreferenceStorage(context)
-        val serializer = RepositoryModule.provideLoggedInUserSerializer()
-        return ObserveLoggedInUserUseCase(dispatcher, preferenceStorage, serializer)
-    }
-
     fun provideLogoutUseCase(
         dispatcher: CoroutineDispatcher,
         context: Context
     ): LogoutUseCase {
         val repo = RepositoryModule.provideAuthRepository(context)
         return LogoutUseCase(dispatcher, repo)
-    }
-
-    fun provideIsSessionExpiredUseCase(
-        dispatcher: CoroutineDispatcher,
-        context: Context
-    ): IsSessionExpiredUseCase {
-        val repo = RepositoryModule.provideAuthRepository(context)
-        val serializer = RepositoryModule.provideLocalDateTimeSerializer()
-        return IsSessionExpiredUseCase(dispatcher, repo, serializer)
     }
 
     fun provideRefreshTokenUseCase(
@@ -56,20 +38,12 @@ object DomainModule {
         return RefreshTokenUseCase(dispatcher, repo)
     }
 
-    fun provideGetAuthConfigurationUseCase(
-        dispatcher: CoroutineDispatcher,
-        context: Context
-    ): GetAuthConfigurationUseCase {
-        val repo = RepositoryModule.provideAuthRepository(context)
-        return GetAuthConfigurationUseCase(dispatcher, repo)
-    }
-
-    fun provideObserveAccessTokenChangedUseCase(
+    fun provideObserveSessionStateUseCase(
         dispatcher: CoroutineDispatcher,
         applicationScope: CoroutineScope,
         context: Context
-    ): ObserveAccessTokenChangedUseCase {
-        val preferenceStorage = PreferenceStorageModule.providePreferenceStorage(context)
-        return ObserveAccessTokenChangedUseCase(dispatcher, applicationScope, preferenceStorage)
+    ): ObserveSessionStateUseCase {
+        val repo = RepositoryModule.provideAuthRepository(context)
+        return ObserveSessionStateUseCase(applicationScope, dispatcher, repo)
     }
 }

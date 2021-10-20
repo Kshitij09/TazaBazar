@@ -3,7 +3,8 @@ package com.kshitijpatil.tazabazar.ui.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kshitijpatil.tazabazar.domain.LogoutUseCase
-import com.kshitijpatil.tazabazar.domain.ObserveLoggedInUserUseCase
+import com.kshitijpatil.tazabazar.domain.ObserveSessionStateUseCase
+import com.kshitijpatil.tazabazar.domain.SessionState
 import com.kshitijpatil.tazabazar.domain.succeeded
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.util.UiState
@@ -20,7 +21,7 @@ data class ProfileViewState(
 )
 
 class ProfileViewModel(
-    observeLoggedInUserUseCase: ObserveLoggedInUserUseCase,
+    private val observeSessionStateUseCase: ObserveSessionStateUseCase,
     private val logoutUseCase: LogoutUseCase
 ) : ViewModel() {
     private val _viewState = MutableStateFlow(ProfileViewState())
@@ -28,11 +29,13 @@ class ProfileViewModel(
         get() = _viewState.asStateFlow()
 
     init {
-        viewModelScope.launch { collectLoggedInState(observeLoggedInUserUseCase()) }
+        viewModelScope.launch { observeSessionForLoggedInUser() }
     }
 
-    private suspend fun collectLoggedInState(upstream: Flow<LoggedInUser?>) {
-        upstream.collect { setState { copy(loggedInUser = it) } }
+    private suspend fun observeSessionForLoggedInUser() {
+        observeSessionStateUseCase()
+            .map { if (it is SessionState.LoggedIn) it.user else null }
+            .collect { setState { copy(loggedInUser = it) } }
     }
 
     private fun setState(mutator: ProfileViewState.() -> ProfileViewState) {

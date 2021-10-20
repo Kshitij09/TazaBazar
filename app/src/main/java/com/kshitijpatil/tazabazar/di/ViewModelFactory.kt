@@ -89,18 +89,20 @@ class FavoriteProductsViewModelFactory(
 
 }
 
-class ProfileViewModelFactory(appContext: Context) : ViewModelProvider.Factory {
+class ProfileViewModelFactory(application: TazaBazarApplication) : ViewModelProvider.Factory {
     private val ioDispatcher = AppModule.provideIoDispatcher()
-    private val observeLoggedInUserUseCase = DomainModule.provideObserveLoggedInUserUseCase(
-        appContext,
-        ioDispatcher
+    private val observeSessionStateUseCase = DomainModule.provideObserveSessionStateUseCase(
+        ioDispatcher, application.coroutineScope, application.applicationContext
     )
-    private val logoutUseCase = DomainModule.provideLogoutUseCase(ioDispatcher, appContext)
+    private val logoutUseCase = DomainModule.provideLogoutUseCase(
+        ioDispatcher,
+        application.applicationContext
+    )
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ProfileViewModel::class.java)) {
-            return ProfileViewModel(observeLoggedInUserUseCase, logoutUseCase) as T
+            return ProfileViewModel(observeSessionStateUseCase, logoutUseCase) as T
         }
         throw IllegalArgumentException("Invalid ViewModel")
     }
@@ -113,20 +115,10 @@ class DashboardViewModelFactory(application: TazaBazarApplication) : ViewModelPr
         null // should be decided later
     )
     private val ioDispatcher = AppModule.provideIoDispatcher()
-    private val isSessionExpiredUseCase = DomainModule.provideIsSessionExpiredUseCase(
-        ioDispatcher,
-        application.applicationContext
+
+    private val observeSessionStateUseCase = DomainModule.provideObserveSessionStateUseCase(
+        ioDispatcher, application.coroutineScope, application.applicationContext
     )
-    private val getAuthConfigurationUseCase = DomainModule.provideGetAuthConfigurationUseCase(
-        ioDispatcher,
-        application.applicationContext
-    )
-    private val observeAccessTokenChangedUseCase =
-        DomainModule.provideObserveAccessTokenChangedUseCase(
-            ioDispatcher,
-            application.coroutineScope,
-            application.applicationContext
-        )
     private val contextRef = WeakReference(application.applicationContext)
 
     @Suppress("UNCHECKED_CAST")
@@ -138,9 +130,7 @@ class DashboardViewModelFactory(application: TazaBazarApplication) : ViewModelPr
             return DashboardViewModel(
                 context,
                 observeCartItemCountUseCase,
-                isSessionExpiredUseCase,
-                getAuthConfigurationUseCase,
-                observeAccessTokenChangedUseCase
+                observeSessionStateUseCase
             ) as T
         }
         throw IllegalArgumentException("ViewModel not found")

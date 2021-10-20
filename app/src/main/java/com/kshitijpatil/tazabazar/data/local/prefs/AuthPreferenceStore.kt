@@ -11,6 +11,7 @@ import com.kshitijpatil.tazabazar.data.UnknownException
 import com.kshitijpatil.tazabazar.data.mapper.EitherStringSerializer
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.threeten.bp.LocalDateTime
@@ -30,6 +31,7 @@ interface AuthPreferenceStore {
     suspend fun getRefreshToken(): Either<DataSourceException, String>
     suspend fun clearRefreshToken()
     suspend fun clearUserDetails()
+    fun observeAccessToken(): Flow<String?>
     suspend fun getAccessToken(): Either<DataSourceException, String>
     suspend fun getLoggedInUser(): Either<DataSourceException, LoggedInUser>
     suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit>
@@ -118,6 +120,8 @@ class AuthPreferenceStoreImpl(
                 .flatten()
         }
     }
+
+    override fun observeAccessToken() = preferenceStorage.accessToken
 
     override suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit> {
         return storeCatching { setAccessToken(token) }
