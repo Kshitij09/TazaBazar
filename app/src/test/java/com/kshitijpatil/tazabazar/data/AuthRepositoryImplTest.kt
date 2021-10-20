@@ -1,6 +1,7 @@
 package com.kshitijpatil.tazabazar.data
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import arrow.core.right
 import com.google.common.truth.Truth.assertThat
 import com.kshitijpatil.tazabazar.data.local.prefs.AuthPreferenceStoreImpl
 import com.kshitijpatil.tazabazar.data.local.prefs.PreferenceStorage
@@ -51,7 +52,7 @@ class AuthRepositoryImplTest {
 
         // test
         testDispatcher.runBlockingTest {
-            assertThat(repo.getLoggedInAt()).isEqualTo(AuthSession.initialLoginTimeRaw)
+            assertThat(repo.getLoggedInAt()).isEqualTo(AuthSession.initialLoginTime.right())
             repo.refreshToken()
             assertThat(preferenceStorage.accessToken.first()).isEqualTo(AuthSession.fetchedAccessToken)
             assertThat(preferenceStorage.loggedInAt.first()).isNotEqualTo(AuthSession.initialLoginTimeRaw)
@@ -63,11 +64,7 @@ class AuthRepositoryImplTest {
         val authRemoteDataSource =
             SucceedingAuthDataSource(accessToken = AuthSession.fetchedAccessToken)
         repo = provideRepo(authRemoteDataSource)
-
-        testDispatcher.runBlockingTest {
-            val e = assertThrows(Exception::class.java) { runBlocking { repo.refreshToken() } }
-            assertThat(e).hasMessageThat().contains("token not found")
-        }
+        assertThrows(Exception::class.java) { runBlocking { repo.refreshToken() } }
     }
 
     @Test
