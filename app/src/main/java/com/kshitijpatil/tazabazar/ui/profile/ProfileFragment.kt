@@ -16,6 +16,7 @@ import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.ui.DashboardFragmentDirections
 import com.kshitijpatil.tazabazar.util.UiState
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
+import com.kshitijpatil.tazabazar.util.tazabazarApplication
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -25,7 +26,7 @@ class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding: FragmentProfileBinding get() = _binding!!
     private val viewModel: ProfileViewModel by activityViewModels {
-        ProfileViewModelFactory(requireContext().applicationContext)
+        ProfileViewModelFactory(tazabazarApplication)
     }
 
     override fun onCreateView(

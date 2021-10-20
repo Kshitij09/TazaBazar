@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.textfield.TextInputLayout
+import com.kshitijpatil.tazabazar.TazaBazarApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
@@ -70,3 +71,5 @@ inline fun CoroutineScope.launchTextInputLayoutObservers(
         }
     }
 }
+
+val Fragment.tazabazarApplication get() = requireActivity().application as TazaBazarApplication
