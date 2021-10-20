@@ -1,11 +1,8 @@
 package com.kshitijpatil.tazabazar.ui.cart
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.kshitijpatil.tazabazar.data.CartRepository
-import com.kshitijpatil.tazabazar.di.RepositoryModule
 import com.kshitijpatil.tazabazar.model.CartConfiguration
 import com.kshitijpatil.tazabazar.model.CartItem
 import kotlinx.coroutines.flow.*
@@ -48,17 +45,4 @@ class CartViewModel(private val cartRepository: CartRepository) : ViewModel() {
             reloadCartItems()
         }
     }
-}
-
-class CartViewModelFactory(appContext: Context) : ViewModelProvider.Factory {
-    private val cartRepository = RepositoryModule.provideCartItemRepository(appContext)
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(CartViewModel::class.java)) {
-            return CartViewModel(cartRepository) as T
-        }
-        throw IllegalArgumentException("ViewModel not found")
-    }
-
 }

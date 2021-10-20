@@ -22,4 +22,5 @@ object MapperModule {
     val productCategoryDtoToProductCategory = ProductCategoryDtoToProductCategory()
 
     val cartItemDetailViewToCartItem = CartItemDetailViewToCartItem()
+    val loggedInUserMapper = LoginResponseUserToLoggedInUser()
 }

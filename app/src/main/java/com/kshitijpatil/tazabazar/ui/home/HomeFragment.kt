@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.databinding.FragmentHomeBinding
-import com.kshitijpatil.tazabazar.di.ViewModelFactory
+import com.kshitijpatil.tazabazar.di.HomeViewModelFactory
 import com.kshitijpatil.tazabazar.domain.data
 import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
@@ -52,7 +52,7 @@ class HomeFragment : Fragment(), ProductViewHolder.OnItemActionCallback {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by activityViewModels {
-        ViewModelFactory(requireActivity(), requireContext().applicationContext, arguments)
+        HomeViewModelFactory(requireActivity(), requireContext().applicationContext, arguments)
     }
     private val loadImageDelegate = CoilProductLoadImageDelegate()
     private val productListAdapter = ProductListAdapter(loadImageDelegate)

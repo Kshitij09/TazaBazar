@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.databinding.FragmentFavoriteProductsBinding
+import com.kshitijpatil.tazabazar.di.FavoriteProductsViewModelFactory
 import com.kshitijpatil.tazabazar.domain.data
 import com.kshitijpatil.tazabazar.domain.succeeded
 import com.kshitijpatil.tazabazar.model.Inventory

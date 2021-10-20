@@ -18,5 +18,10 @@
     <fragment
         android:id="@id/fragment_dashboard"
         android:name="com.kshitijpatil.tazabazar.ui.DashboardFragment"
-        android:label="DashboardFragment" />
+        android:label="DashboardFragment">
+        <action
+            android:id="@+id/action_fragment_dashboard_to_navigation_auth"
+            app:destination="@id/navigation_auth" />
+    </fragment>
+    <include app:graph="@navigation/navigation_auth" />
 </navigation>

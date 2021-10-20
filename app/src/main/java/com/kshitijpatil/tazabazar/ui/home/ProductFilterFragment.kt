@@ -11,7 +11,7 @@ import androidx.fragment.app.activityViewModels
 import com.google.android.material.chip.Chip
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentProductFilterBinding
-import com.kshitijpatil.tazabazar.di.ViewModelFactory
+import com.kshitijpatil.tazabazar.di.HomeViewModelFactory
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
 import com.kshitijpatil.tazabazar.util.textChanges
 import kotlinx.coroutines.flow.collect
@@ -29,7 +29,7 @@ class ProductFilterFragment : Fragment() {
     private var _binding: FragmentProductFilterBinding? = null
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by activityViewModels {
-        ViewModelFactory(requireActivity(), requireContext().applicationContext, arguments)
+        HomeViewModelFactory(requireActivity(), requireContext().applicationContext, arguments)
     }
 
     override fun onCreateView(

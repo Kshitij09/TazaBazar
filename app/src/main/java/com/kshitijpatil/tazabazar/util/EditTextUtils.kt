@@ -2,6 +2,7 @@ package com.kshitijpatil.tazabazar.util
 
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Patterns
 import android.widget.EditText
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -23,3 +24,6 @@ fun EditText.textChanges(): Flow<CharSequence?> {
         awaitClose { removeTextChangedListener(listener) }
     }.onStart { emit(text) }
 }
+
+fun CharSequence?.isValidEmail() =
+    !isNullOrEmpty() && Patterns.EMAIL_ADDRESS.matcher(this).matches()

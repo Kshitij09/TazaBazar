@@ -1,14 +1,9 @@
 package com.kshitijpatil.tazabazar.ui.favorite
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.kshitijpatil.tazabazar.data.ProductRepository
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
-import com.kshitijpatil.tazabazar.di.AppModule
-import com.kshitijpatil.tazabazar.di.DomainModule
-import com.kshitijpatil.tazabazar.di.RepositoryModule
 import com.kshitijpatil.tazabazar.domain.AddOrUpdateCartItemUseCase
 import com.kshitijpatil.tazabazar.domain.Result
 import com.kshitijpatil.tazabazar.domain.data
@@ -83,24 +78,4 @@ class FavoriteProductsViewModel(
             _productList.emit(newList)
         }
     }
-}
-
-class FavoriteProductsViewModelFactory(
-    appContext: Context,
-    private val favoriteType: FavoriteType
-) : ViewModelProvider.Factory {
-    private val okhttpClient = AppModule.provideOkHttpClient(appContext)
-    private val productRepository =
-        RepositoryModule.provideProductRepository(appContext, okhttpClient)
-    private val dispatchers = AppModule.provideAppCoroutineDispatchers()
-    private val addToCartUseCase = DomainModule.provideAddToCartUseCase(appContext, dispatchers.io)
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(FavoriteProductsViewModel::class.java)) {
-            return FavoriteProductsViewModel(favoriteType, productRepository, addToCartUseCase) as T
-        }
-        throw IllegalArgumentException()
-    }
-
 }

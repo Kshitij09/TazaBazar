@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_auth"
+    app:startDestination="@id/fragment_auth">
+
+    <action
+        android:id="@+id/action_pop_out_of_auth"
+        app:popUpTo="@id/navigation_auth"
+        app:popUpToInclusive="true" />
+
+    <fragment
+        android:id="@id/fragment_auth"
+        android:name="com.kshitijpatil.tazabazar.ui.auth.AuthFragment"
+        android:label="AuthFragment"
+        tools:layout="@layout/fragment_auth">
+        <action
+            android:id="@+id/action_fragment_auth_to_fragment_signin"
+            app:destination="@id/fragment_signin" />
+        <action
+            android:id="@+id/action_fragment_auth_to_fragment_signup"
+            app:destination="@id/fragment_signup" />
+    </fragment>
+
+    <fragment
+        android:id="@id/fragment_signin"
+        android:name="com.kshitijpatil.tazabazar.ui.auth.SignInFragment"
+        android:label="SignInFragment"
+        tools:layout="@layout/fragment_signin" />
+
+    <fragment
+        android:id="@id/fragment_signup"
+        android:name="com.kshitijpatil.tazabazar.ui.auth.SignUpFragment"
+        android:label="SignUpFragment"
+        tools:layout="@layout/fragment_signup" />
+</navigation>

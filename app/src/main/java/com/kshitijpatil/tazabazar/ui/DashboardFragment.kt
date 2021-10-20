@@ -13,10 +13,12 @@ import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentDashboardBinding
-import com.kshitijpatil.tazabazar.di.ViewModelFactory
+import com.kshitijpatil.tazabazar.di.DashboardViewModelFactory
+import com.kshitijpatil.tazabazar.di.HomeViewModelFactory
 import com.kshitijpatil.tazabazar.ui.home.HomeViewModel
 import com.kshitijpatil.tazabazar.ui.home.ProductFilterFragment
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
+import com.kshitijpatil.tazabazar.util.tazabazarApplication
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -25,10 +27,10 @@ class DashboardFragment : Fragment() {
     private var _binding: FragmentDashboardBinding? = null
     private val binding: FragmentDashboardBinding get() = _binding!!
     private val homeViewModel: HomeViewModel by activityViewModels {
-        ViewModelFactory(requireActivity(), requireContext().applicationContext, arguments)
+        HomeViewModelFactory(requireActivity(), requireContext().applicationContext, arguments)
     }
     private val dashboardViewModel: DashboardViewModel by viewModels {
-        DashboardViewModelFactory(requireContext().applicationContext)
+        DashboardViewModelFactory(tazabazarApplication)
     }
     private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var cartItemCountBadge: BadgeDrawable

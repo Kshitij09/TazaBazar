@@ -36,7 +36,7 @@ jobs:
         run: ./gradlew assembleDebug --stacktrace
 
       - name: Run Unit tests
-        run: ./gradlew test
+        run: ./gradlew test -Pprod --stacktrace
 
       - name: Upload build outputs (APKs)
         uses: actions/upload-artifact@v2

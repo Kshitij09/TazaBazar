@@ -3,6 +3,9 @@
     <!-- Fragments -->
     <id name="fragment_splash" />
     <id name="fragment_dashboard" />
+    <id name="fragment_auth" />
+    <id name="fragment_signin" />
+    <id name="fragment_signup" />
     <id name="fragment_favorite_products" />
     <id name="bottom_sheet_favorite_options" />
 
