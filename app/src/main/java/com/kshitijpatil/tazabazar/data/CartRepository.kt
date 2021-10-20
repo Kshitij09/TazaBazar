@@ -26,6 +26,8 @@ interface CartRepository {
     suspend fun getCartConfiguration(): CartConfiguration
 
     fun observeCartItemCount(): Flow<Int>
+
+    suspend fun clearCart()
 }
 
 class CartRepositoryImpl(
@@ -60,6 +62,10 @@ class CartRepositoryImpl(
 
     override fun observeCartItemCount(): Flow<Int> {
         return cartItemDao.observeCartItemCount()
+    }
+
+    override suspend fun clearCart() {
+        cartItemDao.deleteAll()
     }
 
 }
