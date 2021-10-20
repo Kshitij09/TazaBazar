@@ -34,8 +34,14 @@ class ProfileViewModel(
 
     private suspend fun observeSessionForLoggedInUser() {
         observeSessionStateUseCase()
-            .map { if (it is SessionState.LoggedIn) it.user else null }
-            .collect { setState { copy(loggedInUser = it) } }
+            .map {
+                Timber.d("Session State was $it")
+                if (it is SessionState.LoggedIn) it.user else null
+            }
+            .collect {
+                Timber.d("Updating LoggedInUser to $it")
+                setState { copy(loggedInUser = it) }
+            }
     }
 
     private fun setState(mutator: ProfileViewState.() -> ProfileViewState) {

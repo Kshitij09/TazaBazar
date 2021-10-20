@@ -5,11 +5,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.kshitijpatil.tazabazar.R
-import com.kshitijpatil.tazabazar.databinding.CartCostViewBinding
+import com.kshitijpatil.tazabazar.databinding.CartFooterViewBinding
 import com.kshitijpatil.tazabazar.databinding.CartItemViewBinding
 import com.kshitijpatil.tazabazar.model.CartCost
 import com.kshitijpatil.tazabazar.model.CartItem
 import com.kshitijpatil.tazabazar.ui.common.LoadImageDelegate
+import com.kshitijpatil.tazabazar.util.UiState
+import com.kshitijpatil.tazabazar.util.enableActionButton
 
 class CartItemViewHolder(
     private val binding: CartItemViewBinding,
@@ -49,15 +51,19 @@ class CartItemViewHolder(
     }
 }
 
-class CartCostViewHolder(
-    private val binding: CartCostViewBinding
+class CartFooterViewHolder(
+    private val binding: CartFooterViewBinding,
+    var onPlaceOrderCallback: OnPlaceOrderCallback? = null
 ) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(costing: CartCost) {
+    fun bind(costing: CartCost, placeOrderState: UiState<Unit>) {
         val context = binding.root.context
         binding.tvSubtotal.text = getCostString(context, costing.subTotal)
         binding.tvDelivery.text = getCostString(context, costing.delivery)
         binding.tvDiscount.text = getCostString(context, costing.discount)
         binding.tvTotal.text = getCostString(context, costing.total)
+        binding.btnPlaceOrder.isEnabled = placeOrderState.enableActionButton
+        binding.btnPlaceOrder.setOnClickListener { onPlaceOrderCallback?.placeOrder() }
+
     }
 
     private fun getCostString(context: Context, price: Float): String {
@@ -65,10 +71,17 @@ class CartCostViewHolder(
     }
 
     companion object {
-        fun create(parent: ViewGroup): CartCostViewHolder {
+        fun create(
+            parent: ViewGroup,
+            onPlaceOrderCallback: OnPlaceOrderCallback? = null
+        ): CartFooterViewHolder {
             val inflater = LayoutInflater.from(parent.context)
-            val binding = CartCostViewBinding.inflate(inflater, parent, false)
-            return CartCostViewHolder(binding)
+            val binding = CartFooterViewBinding.inflate(inflater, parent, false)
+            return CartFooterViewHolder(binding, onPlaceOrderCallback)
         }
+    }
+
+    fun interface OnPlaceOrderCallback {
+        fun placeOrder()
     }
 }

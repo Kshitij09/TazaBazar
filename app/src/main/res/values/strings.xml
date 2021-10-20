@@ -56,4 +56,7 @@
     <string name="label_phone_number">Phone Number</string>
     <string name="error_email_exists">An account with this email address already exists</string>
     <string name="error_phone_exists">An account with this phone number already exists</string>
+    <string name="action_place_order">Place Order</string>
+    <string name="error_failed_to_place_order">Failed to place your order!</string>
+    <string name="action_retry">Retry</string>
 </resources>

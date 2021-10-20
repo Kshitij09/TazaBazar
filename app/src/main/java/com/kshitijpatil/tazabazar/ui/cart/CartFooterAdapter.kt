@@ -3,8 +3,11 @@ package com.kshitijpatil.tazabazar.ui.cart
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.kshitijpatil.tazabazar.model.CartCost
+import com.kshitijpatil.tazabazar.util.UiState
 
-class CartCostFooterAdapter : RecyclerView.Adapter<CartCostViewHolder>() {
+class CartFooterAdapter(
+    var onPlaceOrderCallback: CartFooterViewHolder.OnPlaceOrderCallback? = null
+) : RecyclerView.Adapter<CartFooterViewHolder>() {
     /**
      * Cost details to present in the Adapter
      * Changing this property will immediately notify the adapter to change
@@ -15,6 +18,14 @@ class CartCostFooterAdapter : RecyclerView.Adapter<CartCostViewHolder>() {
             if (field != newCost) {
                 notifyItemChanged(0)
                 field = newCost
+            }
+        }
+
+    var placeOrderState: UiState<Unit> = UiState.Idle
+        set(newState) {
+            if (field != newState) {
+                notifyItemChanged(0)
+                field = newState
             }
         }
 
@@ -40,12 +51,12 @@ class CartCostFooterAdapter : RecyclerView.Adapter<CartCostViewHolder>() {
             field = value
         }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CartCostViewHolder {
-        return CartCostViewHolder.create(parent)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CartFooterViewHolder {
+        return CartFooterViewHolder.create(parent, onPlaceOrderCallback)
     }
 
-    override fun onBindViewHolder(holder: CartCostViewHolder, position: Int) {
-        holder.bind(costing)
+    override fun onBindViewHolder(holder: CartFooterViewHolder, position: Int) {
+        holder.bind(costing, placeOrderState)
     }
 
     override fun getItemCount(): Int = if (isVisible) 1 else 0

@@ -3,12 +3,18 @@ package com.kshitijpatil.tazabazar.ui.cart
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kshitijpatil.tazabazar.data.CartRepository
+import com.kshitijpatil.tazabazar.domain.PlaceOrderUseCase
+import com.kshitijpatil.tazabazar.domain.succeeded
 import com.kshitijpatil.tazabazar.model.CartConfiguration
 import com.kshitijpatil.tazabazar.model.CartItem
+import com.kshitijpatil.tazabazar.util.UiState
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class CartViewModel(private val cartRepository: CartRepository) : ViewModel() {
+class CartViewModel(
+    private val cartRepository: CartRepository,
+    private val placeOrderUseCase: PlaceOrderUseCase
+) : ViewModel() {
     private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
     val cartItems: StateFlow<List<CartItem>>
         get() = _cartItems.asStateFlow()
@@ -16,6 +22,10 @@ class CartViewModel(private val cartRepository: CartRepository) : ViewModel() {
         emit(CartConfiguration()) // default
         emit(cartRepository.getCartConfiguration())
     }
+
+    private val _placeOrderUiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
+    val placeOrderUiState: StateFlow<UiState<Unit>>
+        get() = _placeOrderUiState.asStateFlow()
 
     init {
         reloadCartItems()
@@ -43,6 +53,20 @@ class CartViewModel(private val cartRepository: CartRepository) : ViewModel() {
                 cartRepository.removeFromCart(item.inventoryId)
             }
             reloadCartItems()
+        }
+    }
+
+    fun placeOrder() {
+        viewModelScope.launch {
+            _placeOrderUiState.emit(UiState.Loading())
+            val result = placeOrderUseCase(_cartItems.value)
+            if (result.succeeded) {
+                cartRepository.clearCart()
+                reloadCartItems()
+                _placeOrderUiState.emit(UiState.Success(Unit))
+            } else {
+                _placeOrderUiState.emit(UiState.Error)
+            }
         }
     }
 }

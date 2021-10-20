@@ -15,12 +15,16 @@ import com.kshitijpatil.tazabazar.di.CartViewModelFactory
 import com.kshitijpatil.tazabazar.model.CartConfiguration
 import com.kshitijpatil.tazabazar.model.CartItem
 import com.kshitijpatil.tazabazar.ui.common.CoilProductLoadImageDelegate
+import com.kshitijpatil.tazabazar.util.UiState
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
+import com.kshitijpatil.tazabazar.util.tazabazarApplication
 import com.kshitijpatil.tazabazar.widget.FadingSnackbar
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
-class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
+class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback,
+    CartFooterViewHolder.OnPlaceOrderCallback {
     companion object {
         /** Result Key to notify cart items changed */
         const val CART_CHANGED_RESULT = "com.kshitijpatil.tazabazar.ui.cart.cart-changed-result"
@@ -30,10 +34,10 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
     private val binding: FragmentCartBinding get() = _binding!!
     private val loadImageDelegate = CoilProductLoadImageDelegate()
     private val cartItemListAdapter = CartItemListAdapter(loadImageDelegate)
-    private val cartCostFooterAdapter = CartCostFooterAdapter()
+    private val cartFooterAdapter = CartFooterAdapter()
     private val viewModel: CartViewModel by viewModels(
         ownerProducer = { requireParentFragment() },
-        factoryProducer = { CartViewModelFactory(requireContext().applicationContext) }
+        factoryProducer = { CartViewModelFactory(tazabazarApplication) }
     )
     private lateinit var cartConfiguration: CartConfiguration
     private lateinit var snackbar: FadingSnackbar
@@ -50,7 +54,7 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
     ): View? {
         _binding = FragmentCartBinding.inflate(inflater, container, false)
         binding.rvCartItems.apply {
-            adapter = ConcatAdapter(cartItemListAdapter, cartCostFooterAdapter)
+            adapter = ConcatAdapter(cartItemListAdapter, cartFooterAdapter)
             (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }
         return binding.root
@@ -59,16 +63,42 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         cartItemListAdapter.itemActionCallback = this
+        cartFooterAdapter.onPlaceOrderCallback = this
         launchAndRepeatWithViewLifecycle {
             launch {
                 viewModel.cartConfiguration.collect {
                     cartConfiguration = it
-                    cartCostFooterAdapter.updateDeliveryCharges(it.deliveryCharges)
+                    cartFooterAdapter.updateDeliveryCharges(it.deliveryCharges)
                 }
             }
             launch { observeCartItems() }
+            launch { observePlaceOrderState() }
         }
         snackbar = view.findViewById(R.id.snackbar)
+    }
+
+    private suspend fun observePlaceOrderState() {
+        viewModel.placeOrderUiState.collect {
+            cartFooterAdapter.placeOrderState = it
+            when (it) {
+                UiState.Error -> showPlaceOrderFailed()
+                is UiState.Success -> navigateToSuccessFragment()
+                else -> {
+                }
+            }
+        }
+    }
+
+    private fun navigateToSuccessFragment() {
+        snackbar.show(messageText = "Order Placed Successfully !")
+    }
+
+    private fun showPlaceOrderFailed() {
+        snackbar.show(
+            R.string.error_failed_to_place_order,
+            actionId = R.string.action_retry,
+            actionClick = { viewModel.placeOrder() }
+        )
     }
 
     override fun onStop() {
@@ -89,14 +119,15 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
 
     private suspend fun observeCartItems() {
         viewModel.cartItems.collect { cartItems ->
+            Timber.d("Cart Items Changed")
             cartItemListAdapter.submitList(cartItems)
             if (cartItems.isNotEmpty()) {
-                cartCostFooterAdapter.isVisible = true
+                cartFooterAdapter.isVisible = true
                 val subTotal =
                     cartItems.fold(0f) { acc, item -> acc + (item.price * item.quantity) }
-                cartCostFooterAdapter.updateSubTotal(subTotal)
+                cartFooterAdapter.updateSubTotal(subTotal)
             } else {
-                cartCostFooterAdapter.isVisible = false
+                cartFooterAdapter.isVisible = false
             }
         }
     }
@@ -115,5 +146,9 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback {
 
     override fun onQuantityDecrement(item: CartItem) {
         viewModel.decrementQuantity(item)
+    }
+
+    override fun placeOrder() {
+        viewModel.placeOrder()
     }
 }
