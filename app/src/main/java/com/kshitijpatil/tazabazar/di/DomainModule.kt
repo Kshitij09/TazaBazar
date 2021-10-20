@@ -1,11 +1,16 @@
 package com.kshitijpatil.tazabazar.di
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import com.kshitijpatil.tazabazar.domain.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 
 object DomainModule {
+    @Volatile
+    var observeSessionStateUseCase: ObserveSessionStateUseCase? = null
+        @VisibleForTesting set
+
     fun provideAddToCartUseCase(
         context: Context,
         dispatcher: CoroutineDispatcher
@@ -43,7 +48,22 @@ object DomainModule {
         applicationScope: CoroutineScope,
         context: Context
     ): ObserveSessionStateUseCase {
+        return observeSessionStateUseCase
+            ?: createObserveSessionStateUseCase(
+                dispatcher,
+                applicationScope,
+                context
+            )
+    }
+
+    fun createObserveSessionStateUseCase(
+        dispatcher: CoroutineDispatcher,
+        applicationScope: CoroutineScope,
+        context: Context
+    ): ObserveSessionStateUseCase {
         val repo = RepositoryModule.provideAuthRepository(context)
-        return ObserveSessionStateUseCase(applicationScope, dispatcher, repo)
+        val useCaseInstance = ObserveSessionStateUseCase(applicationScope, dispatcher, repo)
+        observeSessionStateUseCase = useCaseInstance
+        return useCaseInstance
     }
 }
