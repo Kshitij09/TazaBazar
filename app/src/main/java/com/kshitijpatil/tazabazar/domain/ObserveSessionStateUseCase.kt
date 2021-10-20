@@ -95,8 +95,7 @@ class ObserveSessionStateUseCase(
     }
 
     override fun createObservable(): Flow<SessionState> {
-        return downstreamFlow
-            .shareIn(externalScope, SharingStarted.Eagerly, replay = 1)
+        return downstreamFlow.asStateFlow()
     }
 
     companion object {
