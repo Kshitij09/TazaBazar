@@ -62,8 +62,8 @@ class AuthRepositoryImpl(
                 val token = authPreferenceStore.getRefreshToken().bind()
                 val accessToken = authRemoteDataSource.refreshToken(token).bind()
                 val now = LocalDateTime.now()
-                authPreferenceStore.storeAccessToken(accessToken).bind()
                 authPreferenceStore.updateLoggedInAt(now)
+                authPreferenceStore.storeAccessToken(accessToken).bind()
                 accessToken
             }.handleError {
                 if (it is ApiException && it.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
