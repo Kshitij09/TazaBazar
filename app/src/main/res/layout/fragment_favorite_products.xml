@@ -74,14 +74,14 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_add_all"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
+            android:layout_height="@dimen/button_height_large"
             android:layout_alignParentBottom="true"
             android:layout_marginHorizontal="12dp"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             app:backgroundTint="@color/tzb_orange"
             android:text="@string/label_add_all_items_to_cart"
-            app:cornerRadius="12dp" />
+            app:cornerRadius="@dimen/corner_radius_medium" />
     </RelativeLayout>
 
 </LinearLayout>
