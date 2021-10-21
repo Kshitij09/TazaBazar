@@ -90,12 +90,12 @@ class FavoriteProductsViewModelFactory(
 }
 
 class ProfileViewModelFactory(application: TazaBazarApplication) : ViewModelProvider.Factory {
-    private val ioDispatcher = AppModule.provideIoDispatcher()
+    private val dispatchers = AppModule.provideAppCoroutineDispatchers()
     private val observeSessionStateUseCase = DomainModule.provideObserveSessionStateUseCase(
-        ioDispatcher, application.coroutineScope, application.applicationContext
+        dispatchers, application.coroutineScope, application.applicationContext
     )
     private val logoutUseCase = DomainModule.provideLogoutUseCase(
-        ioDispatcher,
+        dispatchers.io,
         application.applicationContext
     )
 
@@ -114,10 +114,10 @@ class DashboardViewModelFactory(application: TazaBazarApplication) : ViewModelPr
         application.applicationContext,
         null // should be decided later
     )
-    private val ioDispatcher = AppModule.provideIoDispatcher()
+    private val dispatchers = AppModule.provideAppCoroutineDispatchers()
 
     private val observeSessionStateUseCase = DomainModule.provideObserveSessionStateUseCase(
-        ioDispatcher, application.coroutineScope, application.applicationContext
+        dispatchers, application.coroutineScope, application.applicationContext
     )
     private val contextRef = WeakReference(application.applicationContext)
 

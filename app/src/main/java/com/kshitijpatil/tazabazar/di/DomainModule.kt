@@ -3,6 +3,7 @@ package com.kshitijpatil.tazabazar.di
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.kshitijpatil.tazabazar.domain.*
+import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 
