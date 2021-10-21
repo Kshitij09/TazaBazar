@@ -134,6 +134,7 @@ class ObserveSessionStateUseCaseTest {
                 assertThat(expectedState).isInstanceOf(SessionState.LoggedIn::class.java)
                 expectedState as SessionState.LoggedIn
                 assertThat(expectedState.user).isEqualTo(FakeSession.user)
+                advanceUntilIdle()
                 assertThat(awaitItem()).isInstanceOf(SessionState.SessionExpired::class.java)
             }
         }
