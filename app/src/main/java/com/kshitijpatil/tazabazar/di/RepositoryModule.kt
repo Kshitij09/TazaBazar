@@ -96,7 +96,8 @@ object RepositoryModule {
     private fun createCartRepository(context: Context): CartRepository {
         val appDatabase = database ?: createDatabase(context)
         val mapper = MapperModule.cartItemDetailViewToCartItem
-        val repo = CartRepositoryImpl(appDatabase.cartItemDao, mapper)
+        val dispatchers = AppModule.provideAppCoroutineDispatchers()
+        val repo = CartRepositoryImpl(appDatabase.cartItemDao, dispatchers, mapper)
         cartRepository = repo
         return repo
     }
