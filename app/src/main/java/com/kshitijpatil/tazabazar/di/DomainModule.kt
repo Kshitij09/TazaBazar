@@ -44,25 +44,25 @@ object DomainModule {
     }
 
     fun provideObserveSessionStateUseCase(
-        dispatcher: CoroutineDispatcher,
+        dispatchers: AppCoroutineDispatchers,
         applicationScope: CoroutineScope,
         context: Context
     ): ObserveSessionStateUseCase {
         return observeSessionStateUseCase
             ?: createObserveSessionStateUseCase(
-                dispatcher,
+                dispatchers,
                 applicationScope,
                 context
             )
     }
 
     fun createObserveSessionStateUseCase(
-        dispatcher: CoroutineDispatcher,
+        dispatchers: AppCoroutineDispatchers,
         applicationScope: CoroutineScope,
         context: Context
     ): ObserveSessionStateUseCase {
         val repo = RepositoryModule.provideAuthRepository(context)
-        val useCaseInstance = ObserveSessionStateUseCase(applicationScope, dispatcher, repo)
+        val useCaseInstance = ObserveSessionStateUseCase(applicationScope, dispatchers, repo)
         observeSessionStateUseCase = useCaseInstance
         return useCaseInstance
     }
