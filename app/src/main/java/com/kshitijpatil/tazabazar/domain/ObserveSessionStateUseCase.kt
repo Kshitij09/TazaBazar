@@ -25,18 +25,23 @@ sealed class SessionState {
 class ObserveSessionStateUseCase(
     private val externalScope: CoroutineScope,
     private val dispatchers: AppCoroutineDispatchers,
-    private val authRepository: AuthRepository,
+    private val authRepository: AuthRepository
 ) : FlowProducerUseCase<SessionState>(dispatchers.io) {
     private val downstreamFlow = MutableStateFlow<SessionState>(SessionState.Undefined)
     private var sessionExpiredEmitter: Job? = null
     private val authConfiguration = MutableStateFlow<AuthConfiguration?>(null)
 
     init {
+        externalScope.launch { logSessionStateChanges() }
+
         externalScope.launch {
             loadAuthConfigurationWithExponentialBackoff()
         }
-
         externalScope.launch(dispatchers.computation) { updateSessionStateOnDependantsChange() }
+    }
+
+    private suspend fun logSessionStateChanges() {
+        downstreamFlow.collect { Timber.d("SessionState: State Changed to $it") }
     }
 
     private suspend fun loadAuthConfigurationWithExponentialBackoff() {
@@ -66,7 +71,6 @@ class ObserveSessionStateUseCase(
             .flowOn(dispatchers.io)
             .combine(configNonNullFlow, ::Pair)
             .collect { (loggedInAt, config) ->
-                Timber.d("Logged-in time changed to $loggedInAt")
                 val sessionState = when (loggedInAt) {
                     is Either.Left -> getSessionStateFor(loggedInAt.value)
                     is Either.Right -> {
@@ -110,7 +114,6 @@ class ObserveSessionStateUseCase(
     private fun launchSessionExpiredEmitterWithDelay(delayMinutes: Long) {
         sessionExpiredEmitter?.cancel()
         sessionExpiredEmitter = externalScope.launch {
-            Timber.d("Session Expired Emitter was launched")
             delay(delayMinutes * 60 * 1000)
             downstreamFlow.emit(SessionState.SessionExpired)
         }
