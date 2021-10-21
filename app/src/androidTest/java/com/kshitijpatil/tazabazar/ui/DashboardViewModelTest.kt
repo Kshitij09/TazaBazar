@@ -46,8 +46,49 @@ class DashboardViewModelTest {
 
         downstreamFlow.value = SessionState.SessionExpired
         val workInfos = wmRule.workManager.getWorkInfosForUniqueWork(REFRESH_TOKEN_WORK).get()
+        assertThat(workInfos).hasSize(1)
+        assertThat(workInfos[0].state).isAtLeast(WorkInfo.State.ENQUEUED)
+    }
+
+    @Test
+    fun whenStateChangesToLoggedOut_RefreshTokenWorkShouldBeCancelled() {
+        val workInfosBeforeExpiration =
+            wmRule.workManager.getWorkInfosForUniqueWork(REFRESH_TOKEN_WORK).get()
+        assertThat(workInfosBeforeExpiration).isEmpty()
+
+        downstreamFlow.value = SessionState.SessionExpired
+        val workInfos = getRefreshTokenWorkInfos()
         assertThat(workInfos).isNotNull()
         assertThat(workInfos).hasSize(1)
         assertThat(workInfos[0].state).isAtLeast(WorkInfo.State.ENQUEUED)
+
+        downstreamFlow.value = SessionState.LoggedOut
+        val workInfosAfterLogout = getRefreshTokenWorkInfos()
+        assertThat(workInfosAfterLogout).hasSize(1)
+        assertThat(workInfosAfterLogout[0].state).isAtLeast(WorkInfo.State.CANCELLED)
+
+    }
+
+    @Test
+    fun whenStateChangesToUndefined_RefreshTokenWorkShouldBeCancelled() {
+        val workInfosBeforeExpiration =
+            wmRule.workManager.getWorkInfosForUniqueWork(REFRESH_TOKEN_WORK).get()
+        assertThat(workInfosBeforeExpiration).isEmpty()
+
+        downstreamFlow.value = SessionState.SessionExpired
+        val workInfos = getRefreshTokenWorkInfos()
+        assertThat(workInfos).isNotNull()
+        assertThat(workInfos).hasSize(1)
+        assertThat(workInfos[0].state).isAtLeast(WorkInfo.State.ENQUEUED)
+
+        downstreamFlow.value = SessionState.Undefined
+        val workInfosAfterUndefined = getRefreshTokenWorkInfos()
+        assertThat(workInfosAfterUndefined).hasSize(1)
+        assertThat(workInfosAfterUndefined[0].state).isAtLeast(WorkInfo.State.CANCELLED)
+
+    }
+
+    private fun getRefreshTokenWorkInfos(): List<WorkInfo> {
+        return wmRule.workManager.getWorkInfosForUniqueWork(REFRESH_TOKEN_WORK).get()
     }
 }

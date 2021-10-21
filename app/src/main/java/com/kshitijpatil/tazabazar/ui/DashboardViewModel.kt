@@ -10,7 +10,6 @@ import com.kshitijpatil.tazabazar.domain.SessionState
 import com.kshitijpatil.tazabazar.worker.RefreshTokenWorker
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 class DashboardViewModel(
@@ -41,8 +40,18 @@ class DashboardViewModel(
 
     private suspend fun observeSessionExpired() {
         observeSessionStateUseCase()
-            .filter { it is SessionState.SessionExpired }
-            .collect { scheduleRefreshTokenWork() }
+            .collect {
+                when (it) {
+                    SessionState.LoggedOut, SessionState.Undefined -> cancelScheduledRefreshTokenWork()
+                    SessionState.SessionExpired -> scheduleRefreshTokenWork()
+                    is SessionState.LoggedIn -> { /* Nothing to do */
+                    }
+                }
+            }
+    }
+
+    private fun cancelScheduledRefreshTokenWork() {
+        workManager.cancelUniqueWork(REFRESH_TOKEN_WORK)
     }
 
 
