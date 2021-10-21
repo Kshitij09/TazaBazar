@@ -4,6 +4,7 @@ import arrow.core.Either
 import arrow.core.computations.either
 import arrow.core.flatten
 import arrow.core.leftIfNull
+import arrow.core.rightIfNotNull
 import com.kshitijpatil.tazabazar.data.DataSourceException
 import com.kshitijpatil.tazabazar.data.NoDataFoundException
 import com.kshitijpatil.tazabazar.data.PreferenceStorageException
@@ -13,6 +14,7 @@ import com.kshitijpatil.tazabazar.model.LoggedInUser
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.threeten.bp.LocalDateTime
 import timber.log.Timber
@@ -32,6 +34,7 @@ interface AuthPreferenceStore {
     suspend fun clearRefreshToken()
     suspend fun clearUserDetails()
     fun observeAccessToken(): Flow<String?>
+    fun observeLoggedInAt(): Flow<Either<DataSourceException, LocalDateTime>>
     suspend fun getAccessToken(): Either<DataSourceException, String>
     suspend fun getLoggedInUser(): Either<DataSourceException, LoggedInUser>
     suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit>
@@ -122,6 +125,15 @@ class AuthPreferenceStoreImpl(
     }
 
     override fun observeAccessToken() = preferenceStorage.accessToken
+    override fun observeLoggedInAt(): Flow<Either<DataSourceException, LocalDateTime>> {
+        return preferenceStorage.loggedInAt
+            .map { loginTimeRaw ->
+                loginTimeRaw
+                    .rightIfNotNull { NoDataFoundException }
+                    .map { localDateTimeSerializer.deserialize(it) }
+                    .flatten()
+            }
+    }
 
     override suspend fun storeAccessToken(token: String): Either<DataSourceException, Unit> {
         return storeCatching { setAccessToken(token) }
