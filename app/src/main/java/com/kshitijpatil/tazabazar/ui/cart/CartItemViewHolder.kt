@@ -3,15 +3,13 @@ package com.kshitijpatil.tazabazar.ui.cart
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.CartFooterViewBinding
 import com.kshitijpatil.tazabazar.databinding.CartItemViewBinding
-import com.kshitijpatil.tazabazar.model.CartCost
 import com.kshitijpatil.tazabazar.model.CartItem
 import com.kshitijpatil.tazabazar.ui.common.LoadImageDelegate
-import com.kshitijpatil.tazabazar.util.UiState
-import com.kshitijpatil.tazabazar.util.enableActionButton
 
 class CartItemViewHolder(
     private val binding: CartItemViewBinding,
@@ -55,13 +53,15 @@ class CartFooterViewHolder(
     private val binding: CartFooterViewBinding,
     var onPlaceOrderCallback: OnPlaceOrderCallback? = null
 ) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(costing: CartCost, placeOrderState: UiState<Unit>) {
+    fun bind(footerViewData: FooterViewData) {
         val context = binding.root.context
+        val costing = footerViewData.costing
         binding.tvSubtotal.text = getCostString(context, costing.subTotal)
         binding.tvDelivery.text = getCostString(context, costing.delivery)
         binding.tvDiscount.text = getCostString(context, costing.discount)
         binding.tvTotal.text = getCostString(context, costing.total)
-        binding.btnPlaceOrder.isEnabled = placeOrderState.enableActionButton
+        binding.btnPlaceOrder.isVisible = footerViewData.placeOrderVisible
+        binding.btnPlaceOrder.isEnabled = footerViewData.placeOrderEnabled
         binding.btnPlaceOrder.setOnClickListener { onPlaceOrderCallback?.placeOrder() }
 
     }
