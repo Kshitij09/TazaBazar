@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
@@ -96,23 +97,20 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback,
             cartFooterAdapter.setPlaceOrderEnabled(it.enableActionButton)
             when (it) {
                 UiState.Error -> showPlaceOrderFailed()
-                is UiState.Success -> showPlaceOrderSucceeded()
+                is UiState.Success -> navigateToOrderSuccessFragment()
                 else -> {
                 }
             }
         }
     }
 
-    private fun showPlaceOrderSucceeded() {
-        snackbar.show(R.string.info_order_successful)
-
-        // awaiting reply on: https://stackoverflow.com/q/69681326/6738702
-        /*val userFullName = viewModel.loggedInUser.value?.fullName
+    private fun navigateToOrderSuccessFragment() {
+        val userFullName = viewModel.loggedInUser.value?.fullName
         if (userFullName != null) {
             activityNavController.navigate("app.tazabazar://orders/successful/$userFullName".toUri())
         } else {
             Timber.d("nav-to-success-fragment: LoggedInUser was not set, can't perform this action")
-        }*/
+        }
     }
 
     private fun showPlaceOrderFailed() {

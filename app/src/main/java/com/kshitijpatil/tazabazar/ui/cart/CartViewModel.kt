@@ -11,6 +11,7 @@ import com.kshitijpatil.tazabazar.model.CartConfiguration
 import com.kshitijpatil.tazabazar.model.CartItem
 import com.kshitijpatil.tazabazar.model.LoggedInUser
 import com.kshitijpatil.tazabazar.util.UiState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -79,6 +80,8 @@ class CartViewModel(
                 cartRepository.clearCart()
                 reloadCartItems()
                 _placeOrderUiState.emit(UiState.Success(Unit))
+                delay(500)
+                _placeOrderUiState.emit(UiState.Idle)
             } else {
                 _placeOrderUiState.emit(UiState.Error)
             }
