@@ -26,8 +26,8 @@ interface FooterViewDataDelegate {
         setFooterViewDataIfChanged(value)
     }
 
-    fun setPlaceOrderVisible(isVisible: Boolean) {
-        val value = footerViewData.copy(placeOrderVisible = isVisible)
+    fun setUserLoggedIn(loggedIn: Boolean) {
+        val value = footerViewData.copy(userLoggedIn = loggedIn)
         setFooterViewDataIfChanged(value)
     }
 

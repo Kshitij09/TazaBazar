@@ -4,7 +4,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 class CartFooterAdapter(
-    var onPlaceOrderCallback: CartFooterViewHolder.OnPlaceOrderCallback? = null
+    var onFooterActionCallback: CartFooterViewHolder.OnFooterActionCallback? = null
 ) : RecyclerView.Adapter<CartFooterViewHolder>(), FooterViewDataDelegate {
     override var footerViewData: FooterViewData = FooterViewData()
 
@@ -23,7 +23,7 @@ class CartFooterAdapter(
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CartFooterViewHolder {
-        return CartFooterViewHolder.create(parent, onPlaceOrderCallback)
+        return CartFooterViewHolder.create(parent, onFooterActionCallback)
     }
 
     override fun onBindViewHolder(holder: CartFooterViewHolder, position: Int) {

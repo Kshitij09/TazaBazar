@@ -23,11 +23,12 @@ import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
 import com.kshitijpatil.tazabazar.util.tazabazarApplication
 import com.kshitijpatil.tazabazar.widget.FadingSnackbar
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback,
-    CartFooterViewHolder.OnPlaceOrderCallback {
+    CartFooterViewHolder.OnFooterActionCallback {
     companion object {
         /** Result Key to notify cart items changed */
         const val CART_CHANGED_RESULT = "com.kshitijpatil.tazabazar.ui.cart.cart-changed-result"
@@ -69,7 +70,7 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback,
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         cartItemListAdapter.itemActionCallback = this
-        cartFooterAdapter.onPlaceOrderCallback = this
+        cartFooterAdapter.onFooterActionCallback = this
         launchAndRepeatWithViewLifecycle {
             launch {
                 viewModel.cartConfiguration.collect {
@@ -85,10 +86,9 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback,
     }
 
     private suspend fun observeLoggedInUserState() {
-        viewModel.loggedInUser.collect {
-            val placeOrderVisible = it != null
-            cartFooterAdapter.setPlaceOrderVisible(placeOrderVisible)
-        }
+        viewModel.loggedInUser
+            .map { it != null }
+            .collect { loggedIn -> cartFooterAdapter.setUserLoggedIn(loggedIn) }
     }
 
     private suspend fun observePlaceOrderState() {
@@ -172,5 +172,9 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback,
 
     override fun placeOrder() {
         viewModel.placeOrder()
+    }
+
+    override fun onLoginClicked() {
+        activityNavController.navigate(R.id.action_fragment_dashboard_to_navigation_auth)
     }
 }

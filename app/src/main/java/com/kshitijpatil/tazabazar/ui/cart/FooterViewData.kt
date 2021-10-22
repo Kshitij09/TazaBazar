@@ -12,5 +12,5 @@ data class CartCost(
 data class FooterViewData(
     val costing: CartCost = CartCost(),
     val placeOrderEnabled: Boolean = false,
-    val placeOrderVisible: Boolean = false
+    val userLoggedIn: Boolean = false
 )
