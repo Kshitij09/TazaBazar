@@ -89,6 +89,11 @@
         <item name="cornerSizeTopRight">24dp</item>
     </style>
 
+    <style name="ShapeAppearanceOverlay.App.CardView.TopCorners.Small" parent="">
+        <item name="cornerSizeTopLeft">12dp</item>
+        <item name="cornerSizeTopRight">12dp</item>
+    </style>
+
     <style name="Widget.App.TextInputLayout.Filled.White" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="boxBackgroundColor">@color/white</item>
         <item name="boxCornerRadiusTopStart">@dimen/product_search_input_corner_radius</item>

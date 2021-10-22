@@ -13,5 +13,6 @@
     <dimen name="cart_quantity_button_size">28dp</dimen>
     <dimen name="margin_small">8dp</dimen>
     <dimen name="button_height_large">70dp</dimen>
+    <dimen name="button_height_medium">56dp</dimen>
     <dimen name="corner_radius_medium">12dp</dimen>
 </resources>

@@ -24,4 +24,15 @@
             app:destination="@id/navigation_auth" />
     </fragment>
     <include app:graph="@navigation/navigation_auth" />
+    <fragment
+        android:id="@id/fragment_order_success"
+        android:name="com.kshitijpatil.tazabazar.ui.orders.OrderSuccessFragment"
+        android:label="OrderSuccessFragment">
+        <argument
+            android:name="user_full_name"
+            app:argType="string" />
+        <deepLink
+            android:id="@+id/deepLink"
+            app:uri="app.tazabazar://orders/successful/{user_full_name}" />
+    </fragment>
 </navigation>

@@ -59,4 +59,10 @@
     <string name="action_place_order">Place Order</string>
     <string name="error_failed_to_place_order">Failed to place your order!</string>
     <string name="action_retry">Retry</string>
+    <string name="title_preparing_your_order">Preparing your order</string>
+    <string name="info_preparing_order">Your order will be prepared and will come soon</string>
+    <string name="action_track_my_order">Track My Order</string>
+    <string name="info_check_order_status_to_know_more">Check your order status to know more about next steps information</string>
+    <string name="info_order_success_affirmation_template">%1$s, your order has been successful</string>
+    <string name="info_order_successful">Your order has been successful</string>
 </resources>
