@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.kshitijpatil.tazabazar.R
@@ -16,6 +18,7 @@ import com.kshitijpatil.tazabazar.model.CartConfiguration
 import com.kshitijpatil.tazabazar.model.CartItem
 import com.kshitijpatil.tazabazar.ui.common.CoilProductLoadImageDelegate
 import com.kshitijpatil.tazabazar.util.UiState
+import com.kshitijpatil.tazabazar.util.enableActionButton
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
 import com.kshitijpatil.tazabazar.util.tazabazarApplication
 import com.kshitijpatil.tazabazar.widget.FadingSnackbar
@@ -41,6 +44,9 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback,
     )
     private lateinit var cartConfiguration: CartConfiguration
     private lateinit var snackbar: FadingSnackbar
+    private val activityNavController: NavController by lazy {
+        requireActivity().findNavController(R.id.main_activity_nav_host_fragment)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,24 +79,40 @@ class CartFragment : Fragment(), CartItemViewHolder.OnItemActionCallback,
             }
             launch { observeCartItems() }
             launch { observePlaceOrderState() }
+            launch { observeLoggedInUserState() }
         }
         snackbar = view.findViewById(R.id.snackbar)
     }
 
+    private suspend fun observeLoggedInUserState() {
+        viewModel.loggedInUser.collect {
+            val placeOrderVisible = it != null
+            cartFooterAdapter.setPlaceOrderVisible(placeOrderVisible)
+        }
+    }
+
     private suspend fun observePlaceOrderState() {
         viewModel.placeOrderUiState.collect {
-            cartFooterAdapter.placeOrderState = it
+            cartFooterAdapter.setPlaceOrderEnabled(it.enableActionButton)
             when (it) {
                 UiState.Error -> showPlaceOrderFailed()
-                is UiState.Success -> navigateToSuccessFragment()
+                is UiState.Success -> showPlaceOrderSucceeded()
                 else -> {
                 }
             }
         }
     }
 
-    private fun navigateToSuccessFragment() {
-        snackbar.show(messageText = "Order Placed Successfully !")
+    private fun showPlaceOrderSucceeded() {
+        snackbar.show(R.string.info_order_successful)
+
+        // awaiting reply on: https://stackoverflow.com/q/69681326/6738702
+        /*val userFullName = viewModel.loggedInUser.value?.fullName
+        if (userFullName != null) {
+            activityNavController.navigate("app.tazabazar://orders/successful/$userFullName".toUri())
+        } else {
+            Timber.d("nav-to-success-fragment: LoggedInUser was not set, can't perform this action")
+        }*/
     }
 
     private fun showPlaceOrderFailed() {

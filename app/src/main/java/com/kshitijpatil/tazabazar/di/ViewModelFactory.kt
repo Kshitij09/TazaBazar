@@ -66,11 +66,14 @@ class CartViewModelFactory(application: TazaBazarApplication) : ViewModelProvide
         application.coroutineScope,
         dispatchers
     )
+    private val observeSessionStateUseCase = DomainModule.provideObserveSessionStateUseCase(
+        dispatchers, application.coroutineScope, application.applicationContext
+    )
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CartViewModel::class.java)) {
-            return CartViewModel(cartRepository, placeOrderUseCase) as T
+            return CartViewModel(cartRepository, placeOrderUseCase, observeSessionStateUseCase) as T
         }
         throw IllegalArgumentException("ViewModel not found")
     }
