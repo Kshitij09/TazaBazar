@@ -204,15 +204,21 @@ object RepositoryModule {
         val client = OkhttpModule.provideOkHttpClient(context)
         val orderApiFactory = provideOrderApiFactory(client)
         val authPreferenceStore = provideAuthPreferenceStore(context)
+        val database = provideAppDatabase(context)
         val repo = OrderRepositoryImpl(
             externalScope,
             dispatchers,
             orderApiFactory,
             MapperModule.orderMapper,
+            database.inventoryDao,
             authPreferenceStore
         )
         orderRepository = repo
         return repo
+    }
+
+    fun provideAppDatabase(context: Context): AppDatabase {
+        return database ?: createDatabase(context)
     }
 
     fun provideOrderApiFactory(client: OkHttpClient): OrderApiFactory {

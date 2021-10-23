@@ -16,4 +16,5 @@ data class Order(
     val orderId: String,
     val orderLines: List<OrderLine>,
     val status: OrderStatus,
+    val total: Float = 0f
 )

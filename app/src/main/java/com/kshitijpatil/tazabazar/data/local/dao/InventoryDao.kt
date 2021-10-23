@@ -12,6 +12,9 @@ interface InventoryDao : ReplacingDao<InventoryEntity> {
     @Query("SELECT * FROM inventory WHERE id = :id")
     suspend fun getInventoryById(id: Int): InventoryEntity?
 
+    @Query("SELECT * FROM inventory WHERE id IN (:inventoryIds)")
+    suspend fun getInventoriesByIds(inventoryIds: List<Int>): List<InventoryEntity>
+
     @Query("SELECT * FROM inventory")
     suspend fun getAllInventories(): List<InventoryEntity>
 
