@@ -23,4 +23,6 @@ object MapperModule {
 
     val cartItemDetailViewToCartItem = CartItemDetailViewToCartItem()
     val loggedInUserMapper = LoginResponseUserToLoggedInUser()
+    val orderLineMapper = OrderLineDtoToOrderLine()
+    val orderMapper = OrderResponseToOrderMapper(orderLineMapper)
 }
