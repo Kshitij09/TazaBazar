@@ -66,4 +66,19 @@
     <string name="info_order_success_affirmation_template">%1$s, your order has been successful</string>
     <string name="info_order_successful">Your order has been successful</string>
     <string name="info_to_place_order_now">to place your order now!</string>
+    <string name="info_to_view_order_history">to view your order history</string>
+    <string name="info_order_id_template">Order: %1$s</string>
+    <string name="error_order_details_not_found">Order details not found</string>
+    <string name="action_details">Details</string>
+    <string name="title_order_details">Order Details</string>
+    <string name="label_ordered">Ordered</string>
+    <string name="label_order_id">Order ID</string>
+    <string name="label_status">Status</string>
+    <string name="title_order_history">Order History</string>
+    <string name="label_order_status_accepted">Accepted</string>
+    <string name="label_order_status_pending">Pending</string>
+    <string name="label_order_status_dispatched">Dispatched</string>
+    <string name="label_order_status_delivered">Delivered</string>
+    <string name="label_order_status_canceled">Canceled</string>
+    <string name="info_no_previous_orders">No Previous orders</string>
 </resources>
