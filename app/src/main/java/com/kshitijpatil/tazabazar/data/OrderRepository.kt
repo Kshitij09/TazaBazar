@@ -74,8 +74,10 @@ class OrderRepositoryImpl(
         val loggedInUser = authPreferenceStore.getLoggedInUser().orNull()
         checkNotNull(loggedInUser) { "LoggedInUser must not be null to fetch orders" }
         val api = checkNotNull(orderApi) { "OrderApi was null, make sure user is Logged-In" }
-        val fetchedOrders =
-            withContext(dispatchers.io) { api.getOrdersByUsername(loggedInUser.email) }
+        val fetchedOrders = withContext(dispatchers.io) {
+            api.getOrdersByUsername(loggedInUser.email)
+        }
+        Timber.d("Received ${fetchedOrders.size} orders for the current user")
         val computedOrders = withContext(dispatchers.computation) {
             fetchedOrders.map(orderMapper::map)
                 .map { associateWithInventories(it) }
