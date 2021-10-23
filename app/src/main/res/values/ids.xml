@@ -9,6 +9,7 @@
     <id name="fragment_favorite_products" />
     <id name="fragment_order_success" />
     <id name="bottom_sheet_favorite_options" />
+    <id name="bottom_sheet_order_details" />
 
     <!-- Navbar fragments -->
     <id name="navigation_home" />
