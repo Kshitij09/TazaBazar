@@ -11,7 +11,7 @@ data class OrderResponse(
     @Json(name = "id")
     val id: String,
     @Json(name = "order_lines")
-    val orderLines: List<OrderLine> = emptyList(),
+    val orderLines: List<OrderLineDto> = emptyList(),
     @Json(name = "status")
     val status: String,
     @Json(name = "username")

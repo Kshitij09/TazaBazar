@@ -2,7 +2,7 @@ package com.kshitijpatil.tazabazar.data
 
 import com.kshitijpatil.tazabazar.api.ApiModule
 import com.kshitijpatil.tazabazar.api.OrderApi
-import com.kshitijpatil.tazabazar.api.dto.OrderLine
+import com.kshitijpatil.tazabazar.api.dto.OrderLineDto
 import com.kshitijpatil.tazabazar.data.local.prefs.AuthPreferenceStore
 import com.kshitijpatil.tazabazar.model.CartItem
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
@@ -55,8 +55,8 @@ class OrderRepositoryImpl(
     }
 }
 
-private fun CartItem.makeOrderLine(): OrderLine {
-    return OrderLine(
+private fun CartItem.makeOrderLine(): OrderLineDto {
+    return OrderLineDto(
         inventoryId = inventoryId,
         quantity = quantity
     )

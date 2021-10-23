@@ -4,7 +4,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class OrderLine(
+data class OrderLineDto(
     @Json(name = "inventoryId")
     val inventoryId: Int,
     @Json(name = "quantity")

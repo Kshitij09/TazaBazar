@@ -2,7 +2,7 @@ package com.kshitijpatil.tazabazar.api
 
 import com.google.common.truth.Truth.assertThat
 import com.kshitijpatil.tazabazar.api.dto.LoginRequest
-import com.kshitijpatil.tazabazar.api.dto.OrderLine
+import com.kshitijpatil.tazabazar.api.dto.OrderLineDto
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.Test
@@ -16,7 +16,7 @@ class TestOrderApi {
     private lateinit var api: OrderApi
     private val authApi = ApiModule.provideAuthApi(client)
     private val testLoginCredentials = LoginRequest("john.doe@test.com", "1234")
-    private val testOrderLines = listOf(OrderLine(1, 3), OrderLine(2, 3))
+    private val testOrderLines = listOf(OrderLineDto(1, 3), OrderLineDto(2, 3))
 
     @Test
     fun test_placeOrder() = runBlocking {
