@@ -202,15 +202,21 @@ object RepositoryModule {
         dispatchers: AppCoroutineDispatchers
     ): OrderRepository {
         val client = OkhttpModule.provideOkHttpClient(context)
+        val orderApiFactory = provideOrderApiFactory(client)
         val authPreferenceStore = provideAuthPreferenceStore(context)
         val repo = OrderRepositoryImpl(
             externalScope,
             dispatchers,
-            client,
+            orderApiFactory,
+            MapperModule.orderMapper,
             authPreferenceStore
         )
         orderRepository = repo
         return repo
+    }
+
+    fun provideOrderApiFactory(client: OkHttpClient): OrderApiFactory {
+        return DefaultOrderApiFactory(client)
     }
 
     fun provideAuthRemoteDataSource(client: OkHttpClient): AuthRemoteDataSource {
