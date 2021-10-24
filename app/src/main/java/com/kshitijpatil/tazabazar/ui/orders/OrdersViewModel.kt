@@ -8,12 +8,9 @@ import com.kshitijpatil.tazabazar.domain.Result
 import com.kshitijpatil.tazabazar.domain.SessionState
 import com.kshitijpatil.tazabazar.model.Order
 import com.kshitijpatil.tazabazar.util.UiState
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class OrdersViewModel(
     private val getUserOrdersUseCase: GetUserOrdersUseCase,
@@ -24,8 +21,9 @@ class OrdersViewModel(
         get() = _userOrdersState.asStateFlow()
     private val _isLoggedIn = MutableStateFlow(false)
 
-    val isLoggedIn: StateFlow<Boolean>
-        get() = _isLoggedIn.asStateFlow()
+    val isLoggedIn: StateFlow<Boolean> = observeSessionStateUseCase()
+        .map { it is SessionState.LoggedIn }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     private var _selectedOrder: Order? = null
 
@@ -33,13 +31,18 @@ class OrdersViewModel(
     val selectedOrder: Order get() = _selectedOrder!!
 
     init {
-        viewModelScope.launch { loadUserOrders() }
-        viewModelScope.launch { observeSessionForLoggedInUser() }
+        viewModelScope.launch { observeLoggedInState() }
     }
 
-    private suspend fun observeSessionForLoggedInUser() {
-        observeSessionStateUseCase().collect {
-            _isLoggedIn.value = it is SessionState.LoggedIn
+    private suspend fun observeLoggedInState() {
+        isLoggedIn.collect { loggedIn ->
+            // if the user isn't logged-in anymore and there were fetched
+            // orders for that user, clear them
+            if (!loggedIn && userOrdersState.value is UiState.Success) {
+                _userOrdersState.emit(UiState.Idle)
+            }
+            // load/reload user orders when state changes to logged-in
+            if (loggedIn) loadUserOrders()
         }
     }
 
@@ -57,6 +60,7 @@ class OrdersViewModel(
     }
 
     private suspend fun loadUserOrders() {
+        Timber.d("called")
         _userOrdersState.emit(UiState.Loading())
         val userOrdersState = when (val result = getUserOrdersUseCase(Unit)) {
             is Result.Error -> UiState.Error
@@ -66,8 +70,8 @@ class OrdersViewModel(
         _userOrdersState.emit(userOrdersState)
     }
 
-    fun refreshOrdersList(): Job {
-        return viewModelScope.launch {
+    fun refreshOrdersList() {
+        viewModelScope.launch {
             loadUserOrders()
         }
     }
