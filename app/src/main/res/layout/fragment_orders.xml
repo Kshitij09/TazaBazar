@@ -24,7 +24,7 @@
         android:text="@string/info_no_previous_orders"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
         android:textSize="20sp"
-        tools:text="No previous orders" />
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"

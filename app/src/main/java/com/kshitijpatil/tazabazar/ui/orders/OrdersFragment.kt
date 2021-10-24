@@ -1,10 +1,10 @@
 package com.kshitijpatil.tazabazar.ui.orders
 
 import android.os.Bundle
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
@@ -13,11 +13,12 @@ import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.databinding.FragmentOrdersBinding
 import com.kshitijpatil.tazabazar.di.OrdersViewModelFactory
 import com.kshitijpatil.tazabazar.util.UiState
-import com.kshitijpatil.tazabazar.util.getLoginToPerformActionSpannableString
 import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
+import com.kshitijpatil.tazabazar.util.setLoginToPerformActionPrompt
 import com.kshitijpatil.tazabazar.util.tazabazarApplication
 import com.kshitijpatil.tazabazar.widget.FadingSnackbar
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class OrdersFragment : Fragment(), OrderHistoryItemViewHolder.OnDetailsClickedListener {
@@ -36,13 +37,11 @@ class OrdersFragment : Fragment(), OrderHistoryItemViewHolder.OnDetailsClickedLi
     ): View? {
         _binding = FragmentOrdersBinding.inflate(inflater, container, false)
         binding.rvOrdersHistory.adapter = orderHistoryAdapter
-        binding.txtPromptLogin.apply {
-            text = requireContext().getLoginToPerformActionSpannableString(
-                promptStringResId = R.string.info_to_view_order_history,
-                onLoginClicked = { onLoginClicked() }
-            )
-            movementMethod = LinkMovementMethod.getInstance()
-        }
+        binding.txtPromptLogin.setLoginToPerformActionPrompt(
+            promptStringResId = R.string.info_to_view_order_history,
+            loginTextModifier = { textSize = 48f },
+            onLogin = { onLoginClicked() }
+        )
         snackbar = binding.snackbar
         return binding.root
     }
@@ -50,37 +49,29 @@ class OrdersFragment : Fragment(), OrderHistoryItemViewHolder.OnDetailsClickedLi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         launchAndRepeatWithViewLifecycle {
-            launch { updateVisibilityForLoggedInState() }
-            launch { updateVisibilityForUserOrdersState() }
+            launch { updateVisibilityForStateChanges() }
         }
         binding.swipeRefreshOrdersHistory.setOnRefreshListener {
-            viewModel.refreshOrdersList().invokeOnCompletion {
-                binding.swipeRefreshOrdersHistory.isRefreshing = false
-            }
+            viewModel.refreshOrdersList()
         }
     }
 
-    private suspend fun updateVisibilityForUserOrdersState() {
-        viewModel.userOrdersState.collect { userOrdersState ->
-            binding.swipeRefreshOrdersHistory.isRefreshing = userOrdersState is UiState.Loading
-            val ordersListVisibleState =
-                userOrdersState is UiState.Success || userOrdersState is UiState.Error
-            val userLoggedIn = viewModel.isLoggedIn.value
-            if (userOrdersState is UiState.Success) {
-                orderHistoryAdapter.submitList(userOrdersState.value)
-                binding.rvOrdersHistory.isVisible = ordersListVisibleState
-                        && userLoggedIn
-                        && userOrdersState.value.isNotEmpty()
-                binding.txtOrderHistoryEmpty.isVisible = userOrdersState.value.isEmpty()
+    private suspend fun updateVisibilityForStateChanges() {
+        combine(viewModel.isLoggedIn, viewModel.userOrdersState, ::Pair)
+            .collect { (loggedIn, ordersState) ->
+                binding.swipeRefreshOrdersHistory.isRefreshing =
+                    loggedIn && ordersState is UiState.Loading
+                val ordersListVisibleState = ordersState is UiState.Success
+                if (ordersState is UiState.Success) {
+                    orderHistoryAdapter.submitList(ordersState.value)
+                    binding.txtOrderHistoryEmpty.isVisible = ordersState.value.isEmpty()
+                    binding.rvOrdersHistory.isVisible = ordersListVisibleState
+                            && loggedIn
+                            && ordersState.value.isNotEmpty()
+                }
+                binding.txtPromptLogin.isVisible = !loggedIn
+                binding.swipeRefreshOrdersHistory.isVisible = loggedIn
             }
-        }
-    }
-
-    private suspend fun updateVisibilityForLoggedInState() {
-        viewModel.isLoggedIn.collect { loggedIn ->
-            binding.txtPromptLogin.isVisible = !loggedIn
-            binding.rvOrdersHistory.isVisible = loggedIn
-        }
     }
 
     override fun onStart() {
