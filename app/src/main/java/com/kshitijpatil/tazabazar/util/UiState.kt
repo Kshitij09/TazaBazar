@@ -8,3 +8,5 @@ sealed class UiState<out S> {
     object Error : UiState<Nothing>()
     data class Loading(@StringRes val msgResId: Int? = null) : UiState<Nothing>()
 }
+
+val UiState<*>.enableActionButton get() = this is UiState.Error || this is UiState.Idle

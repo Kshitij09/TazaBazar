@@ -1,10 +1,18 @@
 package com.kshitijpatil.tazabazar.util
 
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.view.View
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.textfield.TextInputLayout
+import com.kshitijpatil.tazabazar.R
 import com.kshitijpatil.tazabazar.TazaBazarApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -73,3 +81,37 @@ inline fun CoroutineScope.launchTextInputLayoutObservers(
 }
 
 val Fragment.tazabazarApplication get() = requireActivity().application as TazaBazarApplication
+
+/**
+ * Will set a Spannable String on TextView in the following format
+ *      Login <your prompt>
+ *      for instance, 'Login to place your Order'
+ * Where the word 'Login' will be clickable and invoke the [onLogin] callback
+ * @param promptStringResId String Resource Id of your prompt
+ * @param loginTextModifier Define your customization for Login's Text Appearance here
+ * @param onLogin A callback method to be invoked when 'Login' gets clicked
+ */
+internal fun TextView.setLoginToPerformActionPrompt(
+    promptStringResId: Int,
+    loginTextModifier: TextPaint.() -> Unit = {},
+    onLogin: () -> Unit
+) {
+    val loginTextSpan = object : ClickableSpan() {
+        override fun onClick(view: View) {
+            onLogin()
+        }
+
+        override fun updateDrawState(ds: TextPaint) {
+            super.updateDrawState(ds)
+            ds.apply(loginTextModifier)
+        }
+    }
+    val loginText = context.getString(R.string.label_login)
+    val promptText = context.getString(promptStringResId)
+    val loginStart = 0
+    val targetSpannableString = SpannableString("$loginText $promptText").apply {
+        setSpan(loginTextSpan, loginStart, loginText.length, Spanned.SPAN_POINT_MARK)
+    }
+    text = targetSpannableString
+    movementMethod = LinkMovementMethod.getInstance()
+}

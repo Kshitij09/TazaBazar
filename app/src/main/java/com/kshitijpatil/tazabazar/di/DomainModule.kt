@@ -67,4 +67,22 @@ object DomainModule {
         observeSessionStateUseCase = useCaseInstance
         return useCaseInstance
     }
+
+    fun providePlaceOrderUseCase(
+        context: Context,
+        externalScope: CoroutineScope,
+        dispatchers: AppCoroutineDispatchers
+    ): PlaceOrderUseCase {
+        val repo = RepositoryModule.provideOrderRepository(context, externalScope, dispatchers)
+        return PlaceOrderUseCase(dispatchers.io, repo)
+    }
+
+    fun provideGetUseOrdersUseCase(
+        applicationScope: CoroutineScope,
+        dispatchers: AppCoroutineDispatchers,
+        context: Context
+    ): GetUserOrdersUseCase {
+        val repo = RepositoryModule.provideOrderRepository(context, applicationScope, dispatchers)
+        return GetUserOrdersUseCase(dispatchers.io, repo)
+    }
 }

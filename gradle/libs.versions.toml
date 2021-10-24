@@ -1,6 +1,6 @@
 [versions]
-androidx-fragment = "1.4.0-alpha07"
-androidx-navigation = "2.4.0-alpha07"
+androidx-fragment = "1.4.0-alpha10"
+androidx-navigation = "2.4.0-alpha10"
 androidx-lifecycle = "2.4.0-beta01"
 androidx-test = "1.4.0"
 androidx-datastore = "1.0.0"

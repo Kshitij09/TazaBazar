@@ -14,6 +14,7 @@ import com.kshitijpatil.tazabazar.ui.auth.AuthViewModel
 import com.kshitijpatil.tazabazar.ui.cart.CartViewModel
 import com.kshitijpatil.tazabazar.ui.favorite.FavoriteProductsViewModel
 import com.kshitijpatil.tazabazar.ui.home.HomeViewModel
+import com.kshitijpatil.tazabazar.ui.orders.OrdersViewModel
 import com.kshitijpatil.tazabazar.ui.profile.ProfileViewModel
 import java.lang.ref.WeakReference
 
@@ -57,13 +58,23 @@ class AuthViewModelFactory(
     }
 }
 
-class CartViewModelFactory(appContext: Context) : ViewModelProvider.Factory {
-    private val cartRepository = RepositoryModule.provideCartItemRepository(appContext)
+class CartViewModelFactory(application: TazaBazarApplication) : ViewModelProvider.Factory {
+    private val cartRepository =
+        RepositoryModule.provideCartItemRepository(application.applicationContext)
+    val dispatchers = AppModule.provideAppCoroutineDispatchers()
+    private val placeOrderUseCase = DomainModule.providePlaceOrderUseCase(
+        application.applicationContext,
+        application.coroutineScope,
+        dispatchers
+    )
+    private val observeSessionStateUseCase = DomainModule.provideObserveSessionStateUseCase(
+        dispatchers, application.coroutineScope, application.applicationContext
+    )
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CartViewModel::class.java)) {
-            return CartViewModel(cartRepository) as T
+            return CartViewModel(cartRepository, placeOrderUseCase, observeSessionStateUseCase) as T
         }
         throw IllegalArgumentException("ViewModel not found")
     }
@@ -134,6 +145,22 @@ class DashboardViewModelFactory(application: TazaBazarApplication) : ViewModelPr
             ) as T
         }
         throw IllegalArgumentException("ViewModel not found")
+    }
+
+}
+
+class OrdersViewModelFactory(application: TazaBazarApplication) : ViewModelProvider.Factory {
+    private val dispatchers = AppModule.provideAppCoroutineDispatchers()
+    private val getUserOrdersUseCase = DomainModule.provideGetUseOrdersUseCase(
+        application.coroutineScope, dispatchers, application.applicationContext
+    )
+    private val observeSessionStateUseCase = DomainModule.provideObserveSessionStateUseCase(
+        dispatchers, application.coroutineScope, application.applicationContext
+    )
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        return OrdersViewModel(getUserOrdersUseCase, observeSessionStateUseCase) as T
     }
 
 }

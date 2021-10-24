@@ -13,6 +13,7 @@ test {
     if (project.hasProperty('prod')) {
         filter {
             excludeTestsMatching "com.kshitijpatil.tazabazar.api.TestAuthApi.register*"
+            excludeTestsMatching "com.kshitijpatil.tazabazar.api.TestOrderApi.*"
         }
     }
 }
