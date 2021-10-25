@@ -138,13 +138,10 @@ class ProductRepositoryImpl(
         forceRefresh: Boolean
     ): List<Product> {
         if (forceRefresh) {
-            val remoteProducts = runCatchingRemoteSource { getProductsBy(category, query) }
-            if (remoteProducts != null) {
-                selectiveSyncProductAndInventories(remoteProducts)
-                return remoteProducts
-            } else {
-                Timber.d("Failed retrieving products from the remote source, defaulting to local source")
-            }
+            //val remoteProducts = runCatchingRemoteSource { getProductsBy(category, query) }
+            val remoteProducts = productRemoteSource.getProductsBy(category, query)
+            selectiveSyncProductAndInventories(remoteProducts)
+            return remoteProducts
         }
         return withContext(dispatchers.io) {
             Timber.d("Retrieving products for category: $category , query: $query")
@@ -173,34 +170,28 @@ class ProductRepositoryImpl(
     private suspend fun refreshProductCategories() {
         withContext(dispatchers.io) {
             Timber.d("Synchronising Product Categories")
-            val remoteCategories = runCatchingRemoteSource { getProductCategories() }
-            if (remoteCategories != null) {
-                Timber.d("Received ${remoteCategories.size} categories from the remote source")
-                val localCategories = appDatabase.productCategoryDao.getAllCategories()
-                productCategorySyncer.sync(
-                    localCategories,
-                    remoteCategories,
-                    removeNotMatched = true
-                )
-            } else {
-                Timber.d("Failed retrieving product categories from the remote source, skipping the sync operation")
-            }
+            //val remoteCategories = runCatchingRemoteSource { getProductCategories() }
+            val remoteCategories = productRemoteSource.getProductCategories()
+            Timber.d("Received ${remoteCategories.size} categories from the remote source")
+            val localCategories = appDatabase.productCategoryDao.getAllCategories()
+            productCategorySyncer.sync(
+                localCategories,
+                remoteCategories,
+                removeNotMatched = true
+            )
         }
     }
 
     private suspend fun refreshProducts() {
         withContext(dispatchers.io) {
             Timber.d("Synchronising Products")
-            val remoteProducts = runCatchingRemoteSource { getAllProducts() }
-            if (remoteProducts != null) {
-                Timber.d("Received ${remoteProducts.size} products from the remote source")
-                val localProducts = productDao.getAllProducts()
-                productSyncer.sync(localProducts, remoteProducts, removeNotMatched = true)
-                val remoteInventories = remoteProducts.map { it.inventories }.flatten()
-                refreshInventories(remoteInventories)
-            } else {
-                Timber.d("Failed retrieving products from the remote source, skipping the sync operation")
-            }
+            //val remoteProducts = runCatchingRemoteSource { getAllProducts() }
+            val remoteProducts = productRemoteSource.getAllProducts()
+            Timber.d("Received ${remoteProducts.size} products from the remote source")
+            val localProducts = productDao.getAllProducts()
+            productSyncer.sync(localProducts, remoteProducts, removeNotMatched = true)
+            val remoteInventories = remoteProducts.map { it.inventories }.flatten()
+            refreshInventories(remoteInventories)
         }
     }
 
