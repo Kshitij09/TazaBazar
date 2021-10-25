@@ -27,6 +27,8 @@ class HomeViewModelFactory(
         RepositoryModule.provideProductRepository(appContext)
     private val ioDispatcher = AppModule.provideIoDispatcher()
     private val addToCartUseCase = DomainModule.provideAddToCartUseCase(appContext, ioDispatcher)
+    private val searchProductsUseCase =
+        DomainModule.provideSearchProductsUseCase(ioDispatcher, appContext)
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(
@@ -35,7 +37,12 @@ class HomeViewModelFactory(
         handle: SavedStateHandle
     ): T {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
-            return HomeViewModel(handle, productRepository, addToCartUseCase) as T
+            return HomeViewModel(
+                savedStateHandle = handle,
+                productRepository = productRepository,
+                searchProductsUseCase = searchProductsUseCase,
+                addOrUpdateCartItemUseCase = addToCartUseCase
+            ) as T
         }
         throw IllegalArgumentException()
     }
