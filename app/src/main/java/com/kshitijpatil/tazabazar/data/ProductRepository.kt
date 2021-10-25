@@ -1,7 +1,7 @@
 package com.kshitijpatil.tazabazar.data
 
-import androidx.room.withTransaction
-import com.kshitijpatil.tazabazar.data.local.AppDatabase
+import com.kshitijpatil.tazabazar.data.local.TazaBazarDatabase
+import com.kshitijpatil.tazabazar.data.local.TransactionRunner
 import com.kshitijpatil.tazabazar.data.local.entity.*
 import com.kshitijpatil.tazabazar.data.mapper.InventoryToInventoryEntity
 import com.kshitijpatil.tazabazar.data.mapper.ProductCategoryToProductCategoryEntity
@@ -40,7 +40,8 @@ interface ProductRepository {
 class ProductRepositoryImpl(
     private val productRemoteSource: ProductDataSource,
     private val productLocalDataSource: ProductDataSource,
-    private val appDatabase: AppDatabase,
+    private val appDatabase: TazaBazarDatabase,
+    private val transactionRunner: TransactionRunner,
     private val dispatchers: AppCoroutineDispatchers,
     private val productEntityMapper: ProductToProductWithInventories,
     private val productMapper: ProductWithInventoriesToProduct,
@@ -162,7 +163,7 @@ class ProductRepositoryImpl(
             // REPLACE strategy will make sure to delete the
             // the inventories of changed products due to CASCADE
             // behaviour on the InventoryEntity
-            appDatabase.withTransaction {
+            transactionRunner {
                 appDatabase.productDao.insertAll(mappedProductWithInventories.map { it.product })
                 appDatabase.inventoryDao.insertAll(allInventories)
             }
@@ -220,7 +221,7 @@ class ProductRepositoryImpl(
     override suspend fun updateFavorites(productSku: String, favoriteChoices: Set<FavoriteType>) {
         Timber.d("Updating favorites for productSku=$productSku to $favoriteChoices")
         withContext(dispatchers.io) {
-            appDatabase.withTransaction {
+            transactionRunner {
                 appDatabase.favoriteDao.deleteFavoritesBySku(productSku)
                 val favoriteEntities = favoriteChoices.map { FavoriteEntity(it, productSku) }
                 appDatabase.favoriteDao.insertAll(favoriteEntities)

@@ -7,17 +7,17 @@ import java.util.concurrent.Executor
 object TestInject {
     // In case transaction tests start causing issue with runBlockingTest
     // setTransactionExecutor(Executors.newSingleThreadExecutor())
-    fun appDatabase(context: Context): AppDatabase {
+    fun appDatabase(context: Context): TazaBazarRoomDatabase {
         return Room.inMemoryDatabaseBuilder(
             context,
-            AppDatabase::class.java
+            TazaBazarRoomDatabase::class.java
         ).allowMainThreadQueries().build()
     }
 
-    fun appDatabase(context: Context, transactionExecutor: Executor): AppDatabase {
+    fun appDatabase(context: Context, transactionExecutor: Executor): TazaBazarRoomDatabase {
         return Room.inMemoryDatabaseBuilder(
             context,
-            AppDatabase::class.java
+            TazaBazarRoomDatabase::class.java
         )
             .allowMainThreadQueries()
             .setTransactionExecutor(transactionExecutor)

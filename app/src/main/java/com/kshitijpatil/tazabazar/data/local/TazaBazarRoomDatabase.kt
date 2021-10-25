@@ -4,7 +4,6 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.kshitijpatil.tazabazar.data.local.dao.*
 import com.kshitijpatil.tazabazar.data.local.entity.*
 
 @Database(
@@ -27,13 +26,7 @@ import com.kshitijpatil.tazabazar.data.local.entity.*
     ]
 )
 @TypeConverters(TazaBazarTypeConverters::class)
-abstract class AppDatabase : RoomDatabase() {
-
-    abstract val productDao: ProductDao
-    abstract val inventoryDao: InventoryDao
-    abstract val productCategoryDao: ProductCategoryDao
-    abstract val favoriteDao: FavoriteDao
-    abstract val cartItemDao: CartItemDao
+abstract class TazaBazarRoomDatabase : RoomDatabase(), TazaBazarDatabase {
 
     companion object {
         const val databaseName = "tazabazaar-db"

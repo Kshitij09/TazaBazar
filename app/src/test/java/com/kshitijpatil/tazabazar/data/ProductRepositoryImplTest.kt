@@ -5,7 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.kshitijpatil.tazabazar.data.local.AppDatabase
+import com.kshitijpatil.tazabazar.data.local.TazaBazarRoomDatabase
 import com.kshitijpatil.tazabazar.data.local.TestInject
 import com.kshitijpatil.tazabazar.di.MapperModule
 import com.kshitijpatil.tazabazar.di.RepositoryModule
@@ -24,8 +24,7 @@ import java.io.IOException
 import java.util.concurrent.Executors
 
 /**
- * We can't use 'Fake' Database since the repository is using
- * transactional operations of the database
+ * TODO: Use Fake Database to run these tests without instrumentation
  */
 @RunWith(AndroidJUnit4::class)
 class ProductRepositoryImplTest {
@@ -37,6 +36,7 @@ class ProductRepositoryImplTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var repo: ProductRepository
     private val testDispatcher = coroutineRule.testDispatcher
     private val testAppDispatchers =
@@ -209,12 +209,13 @@ class ProductRepositoryImplTest {
     private fun provideProductRepoImpl(
         remoteSource: ProductDataSource,
         localSource: ProductDataSource,
-        appDatabase: AppDatabase
+        appDatabase: TazaBazarRoomDatabase
     ): ProductRepositoryImpl {
         return ProductRepositoryImpl(
             remoteSource,
             localSource,
             appDatabase,
+            RepositoryModule.provideRoomTransactionRunner(context),
             testAppDispatchers,
             MapperModule.productToProductWithInventories,
             MapperModule.productWithInventoriesToProduct,
@@ -224,8 +225,7 @@ class ProductRepositoryImplTest {
     }
 
     private val transactionExecutor = Executors.newSingleThreadExecutor()
-    private fun provideAppDatabase(withTransactionExecutor: Boolean = false): AppDatabase {
-        val context = ApplicationProvider.getApplicationContext<Context>()
+    private fun provideAppDatabase(withTransactionExecutor: Boolean = false): TazaBazarRoomDatabase {
         return if (withTransactionExecutor)
             TestInject.appDatabase(context, transactionExecutor)
         else
