@@ -138,14 +138,27 @@ class ProductRepositoryImpl(
         forceRefresh: Boolean
     ): List<Product> {
         if (forceRefresh) {
-            //val remoteProducts = runCatchingRemoteSource { getProductsBy(category, query) }
             val remoteProducts = productRemoteSource.getProductsBy(category, query)
             selectiveSyncProductAndInventories(remoteProducts)
-            return remoteProducts
+            return mapFavoritesFor(remoteProducts)
         }
         return withContext(dispatchers.io) {
             Timber.d("Retrieving products for category: $category , query: $query")
             productLocalDataSource.getProductsBy(category, query)
+        }
+    }
+
+    private suspend fun mapFavoritesFor(remoteProducts: List<Product>): List<Product> {
+        return withContext(dispatchers.computation) {
+            val allFavorites = appDatabase.favoriteDao.getAllFavorites()
+            val favoritesMap = allFavorites
+                .groupBy { it.productSku }
+            remoteProducts.map { product ->
+                val productFavorites = favoritesMap[product.sku]?.map { it.type }?.toSet()
+                if (productFavorites != null) {
+                    product.copy(favorites = productFavorites)
+                } else product
+            }
         }
     }
 
