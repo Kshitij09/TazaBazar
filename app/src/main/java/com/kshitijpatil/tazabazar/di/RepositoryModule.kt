@@ -76,11 +76,11 @@ object RepositoryModule {
         val newRepo = ProductRepositoryImpl(
             provideRemoteDataSource(api),
             provideLocalDataSource(appDatabase),
-            networkUtils,
             appDatabase,
             appDispatchers,
             MapperModule.productToProductWithInventories,
             MapperModule.productWithInventoriesToProduct,
+            MapperModule.inventoryToInventoryEntity,
             MapperModule.productCategoryToProductCategoryEntity
         )
         productRepository = newRepo

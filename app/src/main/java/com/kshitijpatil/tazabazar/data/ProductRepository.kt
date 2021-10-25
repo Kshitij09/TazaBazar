@@ -2,15 +2,15 @@ package com.kshitijpatil.tazabazar.data
 
 import androidx.room.withTransaction
 import com.kshitijpatil.tazabazar.data.local.AppDatabase
-import com.kshitijpatil.tazabazar.data.local.entity.FavoriteEntity
-import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
+import com.kshitijpatil.tazabazar.data.local.entity.*
+import com.kshitijpatil.tazabazar.data.mapper.InventoryToInventoryEntity
 import com.kshitijpatil.tazabazar.data.mapper.ProductCategoryToProductCategoryEntity
 import com.kshitijpatil.tazabazar.data.mapper.ProductToProductWithInventories
 import com.kshitijpatil.tazabazar.data.mapper.ProductWithInventoriesToProduct
+import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.model.ProductCategory
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
-import com.kshitijpatil.tazabazar.util.NetworkUtils
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
@@ -38,24 +38,55 @@ interface ProductRepository {
 }
 
 class ProductRepositoryImpl(
-    private val productRemoteDataSource: ProductDataSource,
+    private val productRemoteSource: ProductDataSource,
     private val productLocalDataSource: ProductDataSource,
-    private val networkUtils: NetworkUtils,
     private val appDatabase: AppDatabase,
     private val dispatchers: AppCoroutineDispatchers,
     private val productEntityMapper: ProductToProductWithInventories,
     private val productMapper: ProductWithInventoriesToProduct,
+    private val inventoryEntityMapper: InventoryToInventoryEntity,
     private val categoryEntityMapper: ProductCategoryToProductCategoryEntity
 ) : ProductRepository {
+    private val productDao = appDatabase.productDao
+    private val productCategoryDao = appDatabase.productCategoryDao
+    private val inventoryDao = appDatabase.inventoryDao
+
+    private val productSyncer = ItemSyncer<ProductEntity, Product, String>(
+        insertEntity = productDao::insert,
+        updateEntity = productDao::update,
+        deleteEntity = productDao::delete,
+        localEntityToKey = { it.sku },
+        networkEntityToKey = { it.sku },
+        networkEntityToLocalEntity = { entity, _ -> productEntityMapper.map(entity).product }
+    )
+
+    private val productCategorySyncer = ItemSyncer<ProductCategoryEntity, ProductCategory, String>(
+        insertEntity = productCategoryDao::insert,
+        updateEntity = productCategoryDao::update,
+        deleteEntity = productCategoryDao::delete,
+        localEntityToKey = { it.label },
+        networkEntityToKey = { it.label },
+        networkEntityToLocalEntity = { entity, _ -> categoryEntityMapper.map(entity) }
+    )
+
+    private val inventorySyncer = ItemSyncer<InventoryEntity, Inventory, Int>(
+        insertEntity = inventoryDao::insert,
+        updateEntity = inventoryDao::update,
+        deleteEntity = inventoryDao::delete,
+        localEntityToKey = { it.id },
+        networkEntityToKey = { it.id },
+        networkEntityToLocalEntity = { entity, _ -> inventoryEntityMapper.map(entity) }
+    )
+
     override suspend fun getProductCategories(forceRefresh: Boolean): List<ProductCategory> {
-        if (forceRefresh) refreshProductData()
+        if (forceRefresh) refreshProductCategories()
         return withContext(dispatchers.io) {
             productLocalDataSource.getProductCategories()
         }
     }
 
     override suspend fun getAllProducts(forceRefresh: Boolean): List<Product> {
-        if (forceRefresh) refreshProductData()
+        if (forceRefresh) refreshProducts()
         return withContext(dispatchers.io) {
             productLocalDataSource.getAllProducts()
         }
@@ -94,46 +125,96 @@ class ProductRepositoryImpl(
             }
     }
 
+    private suspend fun <T> runCatchingRemoteSource(getRemoteData: suspend ProductDataSource.() -> T): T? {
+        return withContext(dispatchers.io) {
+            runCatching { getRemoteData(productRemoteSource) }
+        }.getOrNull()
+    }
+
     override suspend fun getProductListBy(
         category: String?,
         query: String?,
         forceRefresh: Boolean
     ): List<Product> {
-        if (forceRefresh) refreshProductData()
+        if (forceRefresh) {
+            val remoteProducts = runCatchingRemoteSource { getProductsBy(category, query) }
+            if (remoteProducts != null) {
+                selectiveSyncProductAndInventories(remoteProducts)
+                return remoteProducts
+            } else {
+                Timber.d("Failed retrieving products from the remote source, defaulting to local source")
+            }
+        }
         return withContext(dispatchers.io) {
             Timber.d("Retrieving products for category: $category , query: $query")
             productLocalDataSource.getProductsBy(category, query)
         }
     }
 
-    override suspend fun refreshProductData() {
+    private suspend fun selectiveSyncProductAndInventories(remoteProducts: List<Product>) {
         withContext(dispatchers.io) {
-            if (!networkUtils.hasNetworkConnection()) {
-                Timber.d("Failed to refresh! No internet connection")
-                return@withContext
-            }
-            Timber.d("Synchronising Product Categories")
-            val remoteData = productRemoteDataSource.getProductCategories()
-                .map(categoryEntityMapper::map)
-            Timber.d("Received ${remoteData.size} categories from the remote source")
-
-            Timber.d("Synchronising Product and Inventories")
-            val remoteProducts = productRemoteDataSource.getAllProducts()
-                .map(productEntityMapper::map)
-            Timber.d("Received ${remoteProducts.size} products from the remote source")
-            val allInventories = remoteProducts
+            val mappedProductWithInventories = remoteProducts.map(productEntityMapper::map)
+            val allInventories = mappedProductWithInventories
                 .map { it.inventories }
                 .flatten()
                 .toList()
+
+            // REPLACE strategy will make sure to delete the
+            // the inventories of changed products due to CASCADE
+            // behaviour on the InventoryEntity
             appDatabase.withTransaction {
-                // NOTE: Cascading
-                appDatabase.productCategoryDao.deleteAll() // To avoid any inconsistencies
-                appDatabase.productCategoryDao.insertAll(remoteData)
-                // NO for insert in for-loop
-                appDatabase.productDao.insertAll(remoteProducts.map { it.product })
+                appDatabase.productDao.insertAll(mappedProductWithInventories.map { it.product })
                 appDatabase.inventoryDao.insertAll(allInventories)
             }
         }
+    }
+
+    private suspend fun refreshProductCategories() {
+        withContext(dispatchers.io) {
+            Timber.d("Synchronising Product Categories")
+            val remoteCategories = runCatchingRemoteSource { getProductCategories() }
+            if (remoteCategories != null) {
+                Timber.d("Received ${remoteCategories.size} categories from the remote source")
+                val localCategories = appDatabase.productCategoryDao.getAllCategories()
+                productCategorySyncer.sync(
+                    localCategories,
+                    remoteCategories,
+                    removeNotMatched = true
+                )
+            } else {
+                Timber.d("Failed retrieving product categories from the remote source, skipping the sync operation")
+            }
+        }
+    }
+
+    private suspend fun refreshProducts() {
+        withContext(dispatchers.io) {
+            Timber.d("Synchronising Products")
+            val remoteProducts = runCatchingRemoteSource { getAllProducts() }
+            if (remoteProducts != null) {
+                Timber.d("Received ${remoteProducts.size} products from the remote source")
+                val localProducts = productDao.getAllProducts()
+                productSyncer.sync(localProducts, remoteProducts, removeNotMatched = true)
+                val remoteInventories = remoteProducts.map { it.inventories }.flatten()
+                refreshInventories(remoteInventories)
+            } else {
+                Timber.d("Failed retrieving products from the remote source, skipping the sync operation")
+            }
+        }
+    }
+
+    private suspend fun refreshInventories(remoteInventories: List<Inventory>) {
+        withContext(dispatchers.io) {
+            Timber.d("Synchronising Product Inventories")
+            val localInventories = appDatabase.inventoryDao.getAllInventories()
+            Timber.d("Received ${remoteInventories.size} inventories from the remote source")
+            inventorySyncer.sync(localInventories, remoteInventories, removeNotMatched = true)
+        }
+    }
+
+    override suspend fun refreshProductData() {
+        refreshProductCategories()
+        refreshProducts()
     }
 
     override suspend fun updateFavorites(productSku: String, favoriteChoices: Set<FavoriteType>) {
