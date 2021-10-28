@@ -167,39 +167,17 @@ class ProductRepositoryImplTest {
         }
     }
 
-    @Test
-    fun whenForceRefresh_andNotConnected_shouldFallbackToLocalSource() {
-        // given local and remote sources with distinct data
+    @Test(expected = IOException::class)
+    fun whenForceRefresh_andNotConnected_shouldThrowIOException() {
         val appDatabase = provideAppDatabase()
-        val productMapper = MapperModule.productWithInventoriesToProduct
-        val categoryMapper = MapperModule.productCategoryEntityToProductCategory
         val remoteSource = FakeRemoteDataSource(null, null)
-        val localCategories = listOf(fruits)
-        val localProducts = listOf(sitafalProductWithInventories)
-        runBlocking {
-            appDatabase.productCategoryDao.insertAll(localCategories)
-            localProducts.forEach {
-                appDatabase.productDao.insertProductAndInventories(it.product, it.inventories)
-            }
-        }
         val localSource = RepositoryModule.provideLocalDataSource(appDatabase)
-        // and network not connected
-        val repo =
-            provideProductRepoImpl(remoteSource, localSource, appDatabase)
-        coroutineRule.runBlockingTest {
-            // when forced to refresh
-            val actualProducts = repo.getAllProducts(forceRefresh = true)
-            // should fallback to local store
-            assertThat(actualProducts).containsExactlyElementsIn(localProducts.map(productMapper::map))
-            // when forced to refresh
-            val actualCategories = repo.getProductCategories(forceRefresh = true)
-            // should fallback to local store
-            assertThat(actualCategories).containsExactlyElementsIn(
-                localCategories.map(
-                    categoryMapper::map
-                )
-            )
-        }
+        val repo = provideProductRepoImpl(
+            remoteSource,
+            localSource,
+            appDatabase
+        )
+        runBlocking { repo.getAllProducts(forceRefresh = true) }
     }
 
     /**
