@@ -16,7 +16,6 @@ import com.kshitijpatil.tazabazar.util.launchAndRepeatWithViewLifecycle
 import com.kshitijpatil.tazabazar.util.textChanges
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -47,17 +46,26 @@ class ProductFilterFragment : Fragment() {
         launchAndRepeatWithViewLifecycle {
             launch { observeSearchQuery() }
             launch { observeCategoryFilters() }
-            launch { observeClearFiltersEvent() }
+            launch { observeUiEvents() }
         }
     }
 
-    private suspend fun observeClearFiltersEvent() {
+    private suspend fun observeUiEvents() {
         viewModel.uiEvents
-            .filter { it is HomeViewModel.UiEvent.ClearFilters }
             .collect {
-                Timber.d("product-filters: ClearFilters Event received")
-                binding.cgProductCategories.clearCheck()
-                binding.textFieldSearch.editText?.setText("")
+                when (it) {
+                    HomeViewModel.UiEvent.ClearFilters -> {
+                        Timber.d("product-filters: ClearFilters Event received")
+                        binding.cgProductCategories.clearCheck()
+                        binding.textFieldSearch.editText?.setText("")
+                    }
+                    is HomeViewModel.UiEvent.FetchCompleted -> {
+                        binding.progressCategories.isVisible = false
+                    }
+                    HomeViewModel.UiEvent.FetchingProducts -> {
+                        binding.progressCategories.isVisible = true
+                    }
+                }
             }
     }
 

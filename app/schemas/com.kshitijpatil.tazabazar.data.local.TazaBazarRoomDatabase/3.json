@@ -1,0 +1,212 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "35b9a3acca87c439cedd1d1c2477e19d",
+    "entities": [
+      {
+        "tableName": "product",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sku` TEXT NOT NULL, `name` TEXT NOT NULL, `category` TEXT NOT NULL, `image_uri` TEXT NOT NULL, PRIMARY KEY(`sku`), FOREIGN KEY(`category`) REFERENCES `product_category`(`label`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "sku",
+            "columnName": "sku",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imageUri",
+            "columnName": "image_uri",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "sku"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_product_category",
+            "unique": false,
+            "columnNames": [
+              "category"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_product_category` ON `${TABLE_NAME}` (`category`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "product_category",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "category"
+            ],
+            "referencedColumns": [
+              "label"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "inventory",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `product_sku` TEXT NOT NULL, `price` REAL NOT NULL, `quantity_label` TEXT NOT NULL, `stock_available` INTEGER NOT NULL, `updated_at` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`product_sku`) REFERENCES `product`(`sku`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productSku",
+            "columnName": "product_sku",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "price",
+            "columnName": "price",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "quantityLabel",
+            "columnName": "quantity_label",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stockAvailable",
+            "columnName": "stock_available",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_inventory_product_sku",
+            "unique": false,
+            "columnNames": [
+              "product_sku"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_inventory_product_sku` ON `${TABLE_NAME}` (`product_sku`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "product",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "product_sku"
+            ],
+            "referencedColumns": [
+              "sku"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "product_category",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`label` TEXT NOT NULL, `name` TEXT NOT NULL, `sku_prefix` TEXT NOT NULL, PRIMARY KEY(`label`))",
+        "fields": [
+          {
+            "fieldPath": "label",
+            "columnName": "label",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "skuPrefix",
+            "columnName": "sku_prefix",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "label"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "favorite",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`type` TEXT NOT NULL, `product_sku` TEXT NOT NULL, PRIMARY KEY(`type`, `product_sku`))",
+        "fields": [
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "productSku",
+            "columnName": "product_sku",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "type",
+            "product_sku"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [
+      {
+        "viewName": "weekly_favorite",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT product_sku FROM favorite WHERE type = 'WEEKLY'"
+      },
+      {
+        "viewName": "monthly_favorite",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT product_sku FROM favorite WHERE type = 'MONTHLY'"
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '35b9a3acca87c439cedd1d1c2477e19d')"
+    ]
+  }
+}

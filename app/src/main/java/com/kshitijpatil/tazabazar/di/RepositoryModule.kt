@@ -7,8 +7,7 @@ import com.kshitijpatil.tazabazar.api.ApiModule
 import com.kshitijpatil.tazabazar.api.ProductApi
 import com.kshitijpatil.tazabazar.api.dto.ApiError
 import com.kshitijpatil.tazabazar.data.*
-import com.kshitijpatil.tazabazar.data.local.AppDatabase
-import com.kshitijpatil.tazabazar.data.local.ProductLocalDataSource
+import com.kshitijpatil.tazabazar.data.local.*
 import com.kshitijpatil.tazabazar.data.local.prefs.AuthPreferenceStore
 import com.kshitijpatil.tazabazar.data.local.prefs.AuthPreferenceStoreImpl
 import com.kshitijpatil.tazabazar.data.mapper.EitherStringSerializer
@@ -30,7 +29,7 @@ object RepositoryModule {
     private val appDispatchers = AppModule.provideAppCoroutineDispatchers()
     private val moshi = Moshi.Builder().build()
     private val lock = Any()
-    private var database: AppDatabase? = null
+    private var database: TazaBazarRoomDatabase? = null
     private val apiErrorMapper by lazy {
         ErrorBodyDecoder(moshi.adapter(ApiError::class.java))
     }
@@ -69,18 +68,19 @@ object RepositoryModule {
     }
 
     private fun createProductRepository(context: Context): ProductRepository {
-        val appDatabase = database ?: createDatabase(context)
+        val tazaBazarDatabase = provideTazaBazarDatabase(context)
         val client = OkhttpModule.provideOkHttpClient(context)
         val api = ApiModule.provideProductApi(client)
-        val networkUtils = provideNetworkUtils(context)
+        val transactionRunner = provideRoomTransactionRunner(context)
         val newRepo = ProductRepositoryImpl(
             provideRemoteDataSource(api),
-            provideLocalDataSource(appDatabase),
-            networkUtils,
-            appDatabase,
+            provideLocalDataSource(tazaBazarDatabase),
+            tazaBazarDatabase,
+            transactionRunner,
             appDispatchers,
             MapperModule.productToProductWithInventories,
             MapperModule.productWithInventoriesToProduct,
+            MapperModule.inventoryToInventoryEntity,
             MapperModule.productCategoryToProductCategoryEntity
         )
         productRepository = newRepo
@@ -94,19 +94,19 @@ object RepositoryModule {
     }
 
     private fun createCartRepository(context: Context): CartRepository {
-        val appDatabase = database ?: createDatabase(context)
+        val tazaBazarDatabase = provideTazaBazarDatabase(context)
         val mapper = MapperModule.cartItemDetailViewToCartItem
         val dispatchers = AppModule.provideAppCoroutineDispatchers()
-        val repo = CartRepositoryImpl(appDatabase.cartItemDao, dispatchers, mapper)
+        val repo = CartRepositoryImpl(tazaBazarDatabase.cartItemDao, dispatchers, mapper)
         cartRepository = repo
         return repo
     }
 
-    fun provideLocalDataSource(appDatabase: AppDatabase): ProductDataSource {
+    fun provideLocalDataSource(tazaBazarDatabase: TazaBazarDatabase): ProductDataSource {
         return ProductLocalDataSource(
-            favoriteDao = appDatabase.favoriteDao,
+            favoriteDao = tazaBazarDatabase.favoriteDao,
             productMapper = MapperModule.productWithInventoriesAndFavoritesToProduct,
-            productCategoryDao = appDatabase.productCategoryDao
+            productCategoryDao = tazaBazarDatabase.productCategoryDao
         )
     }
 
@@ -118,9 +118,13 @@ object RepositoryModule {
         )
     }
 
-    private fun createDatabase(context: Context): AppDatabase {
+    private fun createRoomDatabase(context: Context): TazaBazarRoomDatabase {
         val result =
-            Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.databaseName)
+            Room.databaseBuilder(
+                context,
+                TazaBazarRoomDatabase::class.java,
+                TazaBazarRoomDatabase.databaseName
+            )
                 .fallbackToDestructiveMigration()
                 .build()
         database = result
@@ -204,7 +208,7 @@ object RepositoryModule {
         val client = OkhttpModule.provideOkHttpClient(context)
         val orderApiFactory = provideOrderApiFactory(client)
         val authPreferenceStore = provideAuthPreferenceStore(context)
-        val database = provideAppDatabase(context)
+        val database = provideTazaBazarDatabase(context)
         val repo = OrderRepositoryImpl(
             externalScope,
             dispatchers,
@@ -217,8 +221,12 @@ object RepositoryModule {
         return repo
     }
 
-    fun provideAppDatabase(context: Context): AppDatabase {
-        return database ?: createDatabase(context)
+    fun provideTazaBazarDatabase(context: Context): TazaBazarDatabase {
+        return database ?: createRoomDatabase(context)
+    }
+
+    fun provideTazaBazarRoomDatabase(context: Context): TazaBazarRoomDatabase {
+        return database ?: createRoomDatabase(context)
     }
 
     fun provideOrderApiFactory(client: OkHttpClient): OrderApiFactory {
@@ -244,5 +252,10 @@ object RepositoryModule {
 
     fun provideLoggedInUserSerializer(): EitherStringSerializer<LoggedInUser> {
         return LoggedInUserSerializer(loggedInUserJsonAdapter)
+    }
+
+    fun provideRoomTransactionRunner(context: Context): TransactionRunner {
+        val db = provideTazaBazarRoomDatabase(context)
+        return RoomTransactionRunner(db)
     }
 }

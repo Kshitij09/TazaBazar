@@ -5,7 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.kshitijpatil.tazabazar.data.local.AppDatabase
+import com.kshitijpatil.tazabazar.data.local.TazaBazarRoomDatabase
 import com.kshitijpatil.tazabazar.data.local.TestInject
 import com.kshitijpatil.tazabazar.di.MapperModule
 import com.kshitijpatil.tazabazar.di.RepositoryModule
@@ -15,17 +15,16 @@ import com.kshitijpatil.tazabazar.model.ProductCategory
 import com.kshitijpatil.tazabazar.test.util.MainCoroutineRule
 import com.kshitijpatil.tazabazar.test.util.runBlockingTest
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
-import com.kshitijpatil.tazabazar.util.NetworkUtils
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import java.io.IOException
 import java.util.concurrent.Executors
 
 /**
- * We can't use 'Fake' Database since the repository is using
- * transactional operations of the database
+ * TODO: Use Fake Database to run these tests without instrumentation
  */
 @RunWith(AndroidJUnit4::class)
 class ProductRepositoryImplTest {
@@ -37,6 +36,7 @@ class ProductRepositoryImplTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var repo: ProductRepository
     private val testDispatcher = coroutineRule.testDispatcher
     private val testAppDispatchers =
@@ -53,7 +53,7 @@ class ProductRepositoryImplTest {
             appDatabase.productDao.insertAll(dbProducts)
         }
         val localDataSource = RepositoryModule.provideLocalDataSource(appDatabase)
-        repo = provideProductRepoImpl(mock(), localDataSource, appDatabase, ConnectedNetworkUtils)
+        repo = provideProductRepoImpl(mock(), localDataSource, appDatabase)
 
         coroutineRule.runBlockingTest {
             // When asked for all products
@@ -85,8 +85,7 @@ class ProductRepositoryImplTest {
         repo = provideProductRepoImpl(
             remoteSource,
             localDataSource,
-            appDatabase,
-            ConnectedNetworkUtils
+            appDatabase
         )
 
         runBlocking {
@@ -108,7 +107,7 @@ class ProductRepositoryImplTest {
         val categoryMapper = MapperModule.productCategoryEntityToProductCategory
         runBlocking { appDatabase.productCategoryDao.insertAll(allCategoryEntities) }
         val localDataSource = RepositoryModule.provideLocalDataSource(appDatabase)
-        repo = provideProductRepoImpl(mock(), localDataSource, appDatabase, ConnectedNetworkUtils)
+        repo = provideProductRepoImpl(mock(), localDataSource, appDatabase)
 
         coroutineRule.runBlockingTest {
             val actual = repo.getProductCategories()
@@ -128,8 +127,7 @@ class ProductRepositoryImplTest {
         repo = provideProductRepoImpl(
             remoteSource,
             localDataSource,
-            appDatabase,
-            ConnectedNetworkUtils
+            appDatabase
         )
 
         runBlocking {
@@ -156,7 +154,7 @@ class ProductRepositoryImplTest {
         )
         val localSource = RepositoryModule.provideLocalDataSource(appDatabase)
         val repo =
-            provideProductRepoImpl(remoteSource, localSource, appDatabase, ConnectedNetworkUtils)
+            provideProductRepoImpl(remoteSource, localSource, appDatabase)
 
         runBlocking {
             // when called refresh data
@@ -169,44 +167,17 @@ class ProductRepositoryImplTest {
         }
     }
 
-    @Test
-    fun whenForceRefresh_andNotConnected_shouldFallbackToLocalSource() {
-        // given local and remote sources with distinct data
+    @Test(expected = IOException::class)
+    fun whenForceRefresh_andNotConnected_shouldThrowIOException() {
         val appDatabase = provideAppDatabase()
-        val productMapper = MapperModule.productWithInventoriesToProduct
-        val categoryMapper = MapperModule.productCategoryEntityToProductCategory
-        val remoteCategories = listOf(vegetables)
-        val remoteProducts = listOf(tomatoRedProductWithInventories)
-        val remoteSource = FakeRemoteDataSource(
-            remoteProducts.map(productMapper::map),
-            remoteCategories.map(categoryMapper::map)
-        )
-        val localCategories = listOf(fruits)
-        val localProducts = listOf(sitafalProductWithInventories)
-        runBlocking {
-            appDatabase.productCategoryDao.insertAll(localCategories)
-            localProducts.forEach {
-                appDatabase.productDao.insertProductAndInventories(it.product, it.inventories)
-            }
-        }
+        val remoteSource = FakeRemoteDataSource(null, null)
         val localSource = RepositoryModule.provideLocalDataSource(appDatabase)
-        // and network not connected
-        val repo =
-            provideProductRepoImpl(remoteSource, localSource, appDatabase, DisconnectedNetworkUtils)
-        coroutineRule.runBlockingTest {
-            // when forced to refresh
-            val actualProducts = repo.getAllProducts(forceRefresh = true)
-            // should fallback to local store
-            assertThat(actualProducts).containsExactlyElementsIn(localProducts.map(productMapper::map))
-            // when forced to refresh
-            val actualCategories = repo.getProductCategories(forceRefresh = true)
-            // should fallback to local store
-            assertThat(actualCategories).containsExactlyElementsIn(
-                localCategories.map(
-                    categoryMapper::map
-                )
-            )
-        }
+        val repo = provideProductRepoImpl(
+            remoteSource,
+            localSource,
+            appDatabase
+        )
+        runBlocking { repo.getAllProducts(forceRefresh = true) }
     }
 
     /**
@@ -216,24 +187,23 @@ class ProductRepositoryImplTest {
     private fun provideProductRepoImpl(
         remoteSource: ProductDataSource,
         localSource: ProductDataSource,
-        appDatabase: AppDatabase,
-        networkUtils: NetworkUtils
+        appDatabase: TazaBazarRoomDatabase
     ): ProductRepositoryImpl {
         return ProductRepositoryImpl(
             remoteSource,
             localSource,
-            networkUtils,
             appDatabase,
+            RepositoryModule.provideRoomTransactionRunner(context),
             testAppDispatchers,
             MapperModule.productToProductWithInventories,
             MapperModule.productWithInventoriesToProduct,
+            MapperModule.inventoryToInventoryEntity,
             MapperModule.productCategoryToProductCategoryEntity
         )
     }
 
     private val transactionExecutor = Executors.newSingleThreadExecutor()
-    private fun provideAppDatabase(withTransactionExecutor: Boolean = false): AppDatabase {
-        val context = ApplicationProvider.getApplicationContext<Context>()
+    private fun provideAppDatabase(withTransactionExecutor: Boolean = false): TazaBazarRoomDatabase {
         return if (withTransactionExecutor)
             TestInject.appDatabase(context, transactionExecutor)
         else
@@ -246,20 +216,18 @@ class ProductRepositoryImplTest {
  * when asked for all or filtered lists
  */
 class FakeRemoteDataSource(
-    private val products: List<Product>,
-    private val productCategories: List<ProductCategory>
+    private val products: List<Product>? = null,
+    private val productCategories: List<ProductCategory>? = null
 ) : ProductDataSource {
-    override suspend fun getProductCategories() = productCategories
+    override suspend fun getProductCategories(): List<ProductCategory> {
+        return productCategories ?: throw IOException()
+    }
 
-    override suspend fun getAllProducts() = products
+    override suspend fun getAllProducts(): List<Product> {
+        return products ?: throw IOException()
+    }
 
-    override suspend fun getProductsBy(category: String?, query: String?) = products
-}
-
-val ConnectedNetworkUtils = object : NetworkUtils(mock()) {
-    override fun hasNetworkConnection() = true
-}
-
-val DisconnectedNetworkUtils = object : NetworkUtils(mock()) {
-    override fun hasNetworkConnection() = false
+    override suspend fun getProductsBy(category: String?, query: String?): List<Product> {
+        return products ?: throw IOException()
+    }
 }

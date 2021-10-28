@@ -3,11 +3,14 @@ package com.kshitijpatil.tazabazar.domain
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.*
 
-abstract class FlowUseCase<P, R>(private val dispatcher: CoroutineDispatcher? = null) {
+abstract class FlowUseCase<P, R>(
+    private val dispatcher: CoroutineDispatcher? = null,
+    conflateParams: Boolean = true
+) {
     private val paramState = MutableSharedFlow<P>()
 
     private val flow: Flow<R> = paramState
-        .distinctUntilChanged()
+        .apply { if (conflateParams) distinctUntilChanged() }
         .flatMapLatest { createObservable(it) }
         .distinctUntilChanged()
         .apply { dispatcher?.let { flowOn(it) } }

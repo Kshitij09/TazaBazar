@@ -6,19 +6,20 @@ import androidx.lifecycle.viewModelScope
 import com.kshitijpatil.tazabazar.data.ProductRepository
 import com.kshitijpatil.tazabazar.data.local.entity.FavoriteType
 import com.kshitijpatil.tazabazar.domain.AddOrUpdateCartItemUseCase
+import com.kshitijpatil.tazabazar.domain.MediatorResult
 import com.kshitijpatil.tazabazar.domain.Result
+import com.kshitijpatil.tazabazar.domain.SearchProductsUseCase
 import com.kshitijpatil.tazabazar.model.Inventory
 import com.kshitijpatil.tazabazar.model.Product
 import com.kshitijpatil.tazabazar.model.ProductCategory
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class HomeViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val productRepository: ProductRepository,
+    private val searchProductsUseCase: SearchProductsUseCase,
     private val addOrUpdateCartItemUseCase: AddOrUpdateCartItemUseCase
 ) : ViewModel() {
     companion object {
@@ -55,10 +56,20 @@ class HomeViewModel(
 
     private val _uiEvents = MutableSharedFlow<UiEvent>()
     val uiEvents: SharedFlow<UiEvent>
-        get() = _uiEvents.asSharedFlow()
+        get() = _uiEvents.shareIn(viewModelScope, WhileSubscribed(5000))
 
     init {
-        var refreshJob: Job? = null
+        viewModelScope.launch { observeProductSearchResults() }
+        viewModelScope.launch { loadProductCategories(forceRefresh = true) }
+        viewModelScope.launch {
+            loadProducts(
+                query = null,
+                category = null,
+                forceRefresh = true
+            )
+        }
+        viewModelScope.launch { observeProductFilters() }
+        /*var refreshJob: Job? = null
         if (cacheExpired) {
             refreshJob = viewModelScope.launch { productRepository.refreshProductData() }
         }
@@ -73,6 +84,59 @@ class HomeViewModel(
                 Timber.d("Filter updated: $it")
                 updateProductList(it)
             }
+        }*/
+    }
+
+    private suspend fun observeProductFilters() {
+        _filter.collect {
+            val params = SearchProductsUseCase.Params(it.query, it.category)
+            searchProductsUseCase(params)
+        }
+    }
+
+    private suspend fun loadProducts(
+        query: String?,
+        category: String?,
+        forceRefresh: Boolean = false
+    ) {
+        // SearchProductsUseCase will take care of emitting
+        // local items first followed by remote items if succeed
+        val params = SearchProductsUseCase.Params(query, category, forceRefresh)
+        searchProductsUseCase(params)
+    }
+
+    private suspend fun loadProductWithCurrentFilters(forceRefresh: Boolean = false) {
+        val currentFilters = _filter.value
+        loadProducts(currentFilters.query, currentFilters.category, forceRefresh)
+    }
+
+    private suspend fun loadProductCategories(forceRefresh: Boolean) {
+        // get local first
+        _productCategories.emit(productRepository.getProductCategories())
+        // try remote
+        runCatching {
+            productRepository.getProductCategories(forceRefresh = forceRefresh)
+        }.onSuccess { _productCategories.emit(it) }
+    }
+
+    private suspend fun observeProductSearchResults() {
+        searchProductsUseCase.observe().collect {
+            when (it) {
+                is MediatorResult.Error -> {
+                    if (it.isRemoteOrigin()) {
+                        _uiEvents.emit(UiEvent.FetchCompleted.Failure)
+                    }
+                }
+                is MediatorResult.Loading -> {
+                    if (it.isRemoteOrigin())
+                        _uiEvents.emit(UiEvent.FetchingProducts)
+                }
+                is MediatorResult.Success -> {
+                    if (it.isRemoteOrigin())
+                        _uiEvents.emit(UiEvent.FetchCompleted.Success)
+                    _productList.emit(it.data)
+                }
+            }
         }
     }
 
@@ -82,11 +146,13 @@ class HomeViewModel(
      * @param forceRefresh whether to fetch data from the remote source
      */
     suspend fun reloadProductsData(forceRefresh: Boolean = false) {
-        if (forceRefresh) {
+        /*if (forceRefresh) {
             productRepository.refreshProductData()
-        }
-        _productCategories.emit(productRepository.getProductCategories())
-        updateProductList(_filter.value)
+        }*/
+        //_productCategories.emit(productRepository.getProductCategories())
+        loadProductCategories(forceRefresh)
+        loadProductWithCurrentFilters(forceRefresh)
+        //updateProductList(_filter.value)
     }
 
     private fun updateProductList(filterParams: FilterParams) {
@@ -123,7 +189,8 @@ class HomeViewModel(
     fun updateFavorites(productSku: String, favoriteChoices: Set<FavoriteType>) {
         viewModelScope.launch {
             productRepository.updateFavorites(productSku, favoriteChoices)
-            updateProductList(_filter.value)
+            //updateProductList(_filter.value)
+            loadProductWithCurrentFilters()
         }
     }
 
@@ -144,5 +211,10 @@ class HomeViewModel(
 
     sealed class UiEvent {
         object ClearFilters : UiEvent()
+        object FetchingProducts : UiEvent()
+        sealed class FetchCompleted : UiEvent() {
+            object Failure : FetchCompleted()
+            object Success : FetchCompleted()
+        }
     }
 }

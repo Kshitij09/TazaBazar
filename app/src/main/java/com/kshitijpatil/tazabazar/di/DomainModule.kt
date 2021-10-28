@@ -85,4 +85,13 @@ object DomainModule {
         val repo = RepositoryModule.provideOrderRepository(context, applicationScope, dispatchers)
         return GetUserOrdersUseCase(dispatchers.io, repo)
     }
+
+
+    fun provideSearchProductsUseCase(
+        ioDispatcher: CoroutineDispatcher,
+        context: Context
+    ): SearchProductsUseCase {
+        val repo = RepositoryModule.provideProductRepository(context)
+        return SearchProductsUseCase(ioDispatcher, repo)
+    }
 }

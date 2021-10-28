@@ -23,11 +23,6 @@ class ProductListAdapter(
         return ProductViewHolder(view, loadImageDelegate, onItemActionCallback)
     }
 
-    override fun onViewDetachedFromWindow(holder: ProductViewHolder) {
-        holder.onItemActionCallback = null
-        super.onViewDetachedFromWindow(holder)
-    }
-
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         val item = getItem(position)
         holder.bind(item)

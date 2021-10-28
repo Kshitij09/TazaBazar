@@ -7,7 +7,6 @@ import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.kshitijpatil.tazabazar.R
-import timber.log.Timber
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private val viewModel: MainActivityViewModel by viewModels()
@@ -20,7 +19,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     private fun clearFocusOnOutSideClick() {
-        Timber.d("Clearing focus")
         currentFocus?.apply {
             if (this is EditText)
                 clearFocus()
