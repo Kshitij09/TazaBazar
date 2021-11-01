@@ -5,6 +5,8 @@ plugins {
     id 'androidx.navigation.safeargs.kotlin'
 }
 
+def useReleaseKeystore = rootProject.file("signing/app-release.jks").exists()
+
 android {
     compileSdk buildConfig.compileSdk
 
@@ -13,7 +15,7 @@ android {
         minSdk buildConfig.minSdk
         targetSdk buildConfig.targetSdk
         versionCode 1
-        versionName "0.1"
+        versionName "1.0.0-rc01"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         // The following argument makes the Android Test Orchestrator run its
@@ -30,10 +32,40 @@ android {
             }
         }
     }
+    signingConfigs {
+        debug {
+            storeFile rootProject.file("signing/app-debug.jks")
+            storePassword "kotlin"
+            keyAlias "tazabazar-debug"
+            keyPassword "kotlin"
+        }
+
+        release {
+            if (useReleaseKeystore) {
+                storeFile rootProject.file("signing/app-release.jks")
+                storePassword propOrDef('TAZABAZAR_RELEASE_PWD', "")
+                keyAlias "tazabazar-release"
+                keyPassword propOrDef('TAZABAZAR_RELEASE_PWD', "")
+            }
+        }
+    }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+            versionNameSuffix "-dev"
+            applicationIdSuffix ".debug"
+        }
+
         release {
-            minifyEnabled false
+            if (useReleaseKeystore) {
+                signingConfig signingConfigs.release
+            } else {
+                // Otherwise just use the debug keystore (this is mainly for PR CI builds)
+                signingConfig signingConfigs.debug
+            }
+            shrinkResources true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
