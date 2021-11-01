@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    env:
+      ORG_GRADLE_PROJECT_TAZABAZAR_RELEASE_PWD: ${{ secrets.ORG_GRADLE_PROJECT_TAZABAZAR_RELEASE_PWD }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -20,6 +23,11 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+
+      - name: Decrypt Release Keystore
+        env:
+          ENCRYPT_KEY: ${{ secrets.ENCRYPT_KEY }}
+        run: ./scripts/decrypt_secrets.sh
 
       - name: Generate Cache key
         run: ./scripts/checksum.sh checksum.txt
@@ -33,10 +41,13 @@ jobs:
           key: gradle-${{ hashFiles('checksum.txt') }}
 
       - name: Build Project
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug assembleRelease --stacktrace
 
       - name: Run Unit tests
         run: ./gradlew test -Pprod --stacktrace
+
+      - name: Clean Secrets
+        run: ./scripts/clean_secrets.sh
 
       - name: Upload build outputs (APKs)
         uses: actions/upload-artifact@v2
@@ -50,3 +61,4 @@ jobs:
         with:
           name: build-reports
           path: app/build/reports
+
