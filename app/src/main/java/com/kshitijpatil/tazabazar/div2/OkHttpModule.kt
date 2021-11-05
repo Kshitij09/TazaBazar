@@ -1,4 +1,4 @@
-package com.kshitijpatil.tazabazar.di
+package com.kshitijpatil.tazabazar.div2
 
 import android.content.Context
 import com.kshitijpatil.tazabazar.base.SingletonHolder

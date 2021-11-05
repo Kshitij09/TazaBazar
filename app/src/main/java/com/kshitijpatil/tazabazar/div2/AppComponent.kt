@@ -2,9 +2,6 @@ package com.kshitijpatil.tazabazar.div2
 
 import android.content.Context
 import com.kshitijpatil.tazabazar.BuildConfig
-import com.kshitijpatil.tazabazar.di.DebugOkHttpClientModuleImpl
-import com.kshitijpatil.tazabazar.di.OkHttpModule
-import com.kshitijpatil.tazabazar.di.ProdOkhttpClientModuleImpl
 import com.kshitijpatil.tazabazar.util.AppCoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
