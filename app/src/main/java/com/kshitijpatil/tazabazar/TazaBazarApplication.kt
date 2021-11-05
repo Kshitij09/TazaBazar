@@ -6,8 +6,11 @@ import androidx.work.Configuration
 import androidx.work.DelegatingWorkerFactory
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.kshitijpatil.tazabazar.di.WorkerModule
+import com.kshitijpatil.tazabazar.div2.AppComponent
+import com.kshitijpatil.tazabazar.div2.AppComponentImpl
 import kotlinx.coroutines.MainScope
 import timber.log.Timber
+
 
 class TazaBazarApplication : Application(), Configuration.Provider {
     val coroutineScope = MainScope()
@@ -30,3 +33,6 @@ class TazaBazarApplication : Application(), Configuration.Provider {
             .build()
     }
 }
+
+internal val TazaBazarApplication.appComponent: AppComponent
+    get() = AppComponentImpl(applicationContext)
