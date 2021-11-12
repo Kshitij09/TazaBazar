@@ -10,7 +10,23 @@ TazaBazar is a Grocery App written mainly with a bottom-up test-driven approach.
 ## Download
 [![TazaBazar](https://img.shields.io/badge/TazaBazar-apk-green.svg?style=for-the-badge&logo=android)](https://github.com/Kshitij09/TazaBazar/releases/latest/download/app-release.apk)
 
-## Highlights:
+## API Server
+[TazaBazar-Backend](https://github.com/Kshitij09/TazaBazar-Backend)
+
+## Libraries used
+* [Room](https://developer.android.com/training/data-storage/room) - Data Persistence
+* [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore) - Managing Shared Preferences
+* [Navigation Component](https://developer.android.com/guide/navigation) - Managing navigation across fragments
+* [Retrofit2](https://square.github.io/retrofit/) & [OkHttp3](https://square.github.io/okhttp/) - Networking
+* [Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) - Asynchronous programming
+* [Kotlin Flow](https://kotlinlang.org/docs/flow.html) - Reactive streams
+* [ThreeTenAbp](https://github.com/JakeWharton/ThreeTenABP) - Managing Date Time
+* [Timber](https://github.com/JakeWharton/timber) - Logging
+* [tfcporciuncula/phonemoji](https://github.com/tfcporciuncula/phonemoji) - Internation Phone Number Input
+* [ArrowKt-Either](https://arrow-kt.io/docs/0.11/apidocs/arrow-core-data/arrow.core/-either/) - Functional Modelling of Exceptions
+* [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager) - Scheduling Background tasks
+
+## Highlights
 * **Refresh Token API Call optimization**
 
     TazaBazar Backend uses JWT based authentication, which requires you to refresh the access token every 15 minutes. Instead of scheduling a `PeriodicWorkRequest` for this task, the app defers refreshing access token till it comes in the foreground to save wasteful API calls made in the background. A use-case ([`ObserveSessionStateUseCase`](app/src/main/java/com/kshitijpatil/tazabazar/domain/ObserveSessionStateUseCase.kt)), acting as Single Source of Truth for Session State, exposes a `StateFlow` of `SessionState`. This flow is consumed by many UI components for producing dynamic UI, as well as by a ViewModel which simply enqueues a Unique `OneTimeWorkRequest` when a `SessionExpired` state is emitted.
