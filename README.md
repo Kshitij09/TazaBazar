@@ -8,7 +8,7 @@ TazaBazar is a Grocery App written mainly with a bottom-up test-driven approach.
 ![Screenshots](art/tazabazar-screenshots.png)
 
 ## Download
-[![TazaBazar](https://img.shields.io/badge/TazaBazar-apk-green.svg?style=for-the-badge&logo=android)](https://github.com/Kshitij09/TazaBazar/releases/latest/download/app-release.apk)
+<a href='https://play.google.com/store/apps/details?id=com.kshitijpatil.tazabazar&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=240 /></a>
 
 ## API Server
 [TazaBazar-Backend](https://github.com/Kshitij09/TazaBazar-Backend)
